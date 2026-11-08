@@ -5,7 +5,7 @@ If you find this repository useful, I would greatly appreciate it if you could g
 Using Telemavix Studio in your videos? A mention (e.g. in your YouTube video description) would make my day 💖
 Pull requests are welcome too - bug fixes, new widgets, support for other cameras, anything that makes the app better.
 
-![](.github/Telemavix_I0MRYO1Z.jpg)
+![](.github/Telemavix_92X0oT9A.jpg)
 
 ## Features
 - **Encoded like the original** - export settings are taken from the source to preserve its codec, 10-bit color, bitrate, keyframe interval and timecode. Burning in an overlay always means encoding the picture once more, but with the camera's own settings the difference is practically invisible.

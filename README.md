@@ -1,4 +1,4 @@
-# Telemavix Studio (formerly Telemavix) ✨
+# Telemavix Studio (formerly OsmoOverlay) ✨
 Add a modern telemetry HUD (speed, map, route, tilt and more) to DJI Osmo, GoPro and DJI drone footage using camera telemetry, DJI flight logs and optional external GPS tracks. Videos are re-encoded with the source's codec and settings to keep the result as close to the original as possible.
 
 If you find this repository useful, I would greatly appreciate it if you could give it a **star** ⭐. Thank you!

@@ -237,9 +237,9 @@ Packages for all platforms can be built on any system (Windows, Linux or macOS).
 
 ## Reviews and mentions
 - [Creative Content - Australian Videocamera Magazine](https://cre-8.com.au/2026/10/23/review-osmo-overlay)
-- [Quadricottero News](https://www.quadricottero.com/2026/10/Telemavix-arriva-il-software-gratuito.html)
-- [Mototour.pl](https://mototour.pl/infomoto/186-art/5919-Telemavix-darmowy-program-na-kamery-dji-do-telemetrii)
-- [VIDEOAKTIV](https://www.videoaktiv.tv/news/editing/Telemavix-telemetrie-einblendungen-fuer-dji-videos)
+- [Quadricottero News](https://www.quadricottero.com/2026/10/osmooverlay-arriva-il-software-gratuito.html)
+- [Mototour.pl](https://mototour.pl/infomoto/186-art/5919-osmooverlay-darmowy-program-na-kamery-dji-do-telemetrii)
+- [VIDEOAKTIV](https://www.videoaktiv.tv/news/editing/osmooverlay-telemetrie-einblendungen-fuer-dji-videos)
 
 ## License
 Telemavix Studio is free for non-commercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE), with source code on [GitHub](https://github.com/sefinek/telemavix-studio).

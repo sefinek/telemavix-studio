@@ -118,7 +118,7 @@
     <value>{0}: {1} kl./s. Ten etap ogranicza prędkość renderowania.</value>
   </data>
   <data name="Benchmark_BottleneckWithRender" xml:space="preserve">
-    <value>{0}: {1} kl./s. Krótki render osiągnął {2} kl./s, czyli {3}% tej prędkości. Podczas renderowania poszczególne etapy korzystają z tych samych zasobów CPU i GPU, co obniża wydajność.</value>
+    <value>{0}: {1} kl./s. Krótki render osiągnął {2} fps, czyli {3}% tej prędkości. Podczas renderowania poszczególne etapy korzystają z tych samych zasobów CPU i GPU, co obniża wydajność.</value>
   </data>
   <data name="Benchmark_ColumnNotes" xml:space="preserve">
     <value>Uwagi</value>
@@ -520,7 +520,7 @@ Zamknąć Telemavix Studio?</value>
     <value>orientacji z kamery</value>
   </data>
   <data name="ComparePlay_Info" xml:space="preserve">
-    <value>{0}x{1}, {2} kl./s</value>
+    <value>{0}x{1}, {2} fps</value>
   </data>
   <data name="ComparePlay_OpenFailedTitle" xml:space="preserve">
     <value>Nie można otworzyć filmu</value>
@@ -633,6 +633,21 @@ Zamknąć Telemavix Studio?</value>
   </data>
   <data name="CompareVideos_ShowOnlyDifferences" xml:space="preserve">
     <value>Pokaż tylko różnice</value>
+  </data>
+  <data name="ConfirmDialog_WindowSuccess" xml:space="preserve">
+    <value>Sukces</value>
+  </data>
+  <data name="ConfirmDialog_WindowError" xml:space="preserve">
+    <value>Błąd</value>
+  </data>
+  <data name="ConfirmDialog_WindowWarning" xml:space="preserve">
+    <value>Ostrzeżenie</value>
+  </data>
+  <data name="ConfirmDialog_WindowInfo" xml:space="preserve">
+    <value>Informacja</value>
+  </data>
+  <data name="ConfirmDialog_WindowConfirm" xml:space="preserve">
+    <value>Potwierdzenie</value>
   </data>
   <data name="ConfirmDialog_Confirm" xml:space="preserve">
     <value>Potwierdź</value>
@@ -2131,8 +2146,20 @@ Kontynuować renderowanie?</value>
   <data name="Render_CpuBusyGpuEncoderMessage" xml:space="preserve">
     <value>Obciążenie procesora wynosi {0}. Film koduje karta graficzna, ale nakładkę przygotowuje procesor. Przy obecnym obciążeniu renderowanie potrwa dłużej.</value>
   </data>
+  <data name="Render_DoneIntro" xml:space="preserve">
+    <value>Zapisano jako:</value>
+  </data>
   <data name="Render_DoneSummary" xml:space="preserve">
-    <value>Czas: {0} · Rozmiar: {1}</value>
+    <value>Renderowanie trwało {0} · Rozmiar pliku: {1}</value>
+  </data>
+  <data name="Render_DoneFolder" xml:space="preserve">
+    <value>Folder: {0}</value>
+  </data>
+  <data name="Render_DoneVideo" xml:space="preserve">
+    <value>Film: {0} · {1} · {2} fps</value>
+  </data>
+  <data name="Render_DoneCodec" xml:space="preserve">
+    <value>Kodek: {0} · {1} Mbps · enkoder: {2}</value>
   </data>
   <data name="Render_EnterOutputPath" xml:space="preserve">
     <value>Podaj ścieżkę pliku wyjściowego</value>
@@ -3848,7 +3875,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Prędkość odtwarzania: {0}x; oczekiwana płynność: {1} kl./s</value>
   </data>
   <data name="PreviewBenchmark_Result" xml:space="preserve">
-    <value>Wyświetlono: {0} klatek w {1} s; średnio {2} kl./s</value>
+    <value>Wyświetlono: {0} klatek w {1} s; średnio {2} fps</value>
   </data>
   <data name="PreviewBenchmark_ShortSample" xml:space="preserve">
     <value>Krótka próbka: odtwarzanie zakończyło się przed upływem 20 sekund pomiaru.</value>
@@ -4172,7 +4199,6 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Właśnie podałeś swój klucz API DJI. Telemavix Studio będzie go używać do pobierania kluczy potrzebnych do odczytania zaszyfrowanych dzienników lotu.
 
 Zanim skorzystasz z tej funkcji, poznaj najważniejsze zasady. Korzystanie z API oznacza akceptację warunków DJI:
-
 - Używaj własnego klucza i nie udostępniaj go innym.
 - Korzystaj z API zgodnie z prawem i prawami innych osób.
 - DJI może zmienić API lub cofnąć dostęp; nie gwarantuje działania ani wsparcia.

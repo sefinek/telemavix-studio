@@ -1,4 +1,5 @@
 using Telemavix.Core;
+using Telemavix.Core.Ffmpeg;
 using Telemavix.Core.Logging;
 using Telemavix.Core.Overlay;
 using Telemavix.Gui.Native;
@@ -61,8 +62,18 @@ public partial class MainWindow
 			string elapsedText = result.Elapsed.ToString(@"hh\:mm\:ss");
 			string sizeText = File.Exists(outputPath) ? FormatHelper.FormatBytes(new FileInfo(outputPath).Length) : Strings.Common_Unknown;
 			AppendLog(string.Format(Strings.Render_LogDone, outputPath, elapsedText, sizeText));
+			SourceInfo? measured = null;
+			try
+			{
+				measured = await Task.Run(() => SourceProbe.Probe(outputPath));
+			}
+			catch (Exception ex)
+			{
+				AppendLog(string.Format(Strings.Summary_LogVerifyFailed, ex.Message));
+			}
+
 			TaskbarProgress.SetState(this, TaskbarProgress.State.NoProgress);
-			await NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, Path.GetFileName(outputPath) + "\n" + string.Format(Strings.Render_DoneSummary, elapsedText, sizeText),
+			await NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, RenderDoneMessage(outputPath, elapsedText, sizeText, measured, _detectedEncoder),
 				DialogKind.Success, outputPath);
 		}
 		else if (cts.Token.IsCancellationRequested)

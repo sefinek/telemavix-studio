@@ -67,7 +67,9 @@ public partial class ConfirmDialog : Window
 			DialogKind.Danger => UiSound.Error,
 			_ => UiSound.Question
 		};
-		Title = windowTitle ?? title;
+		Title = windowTitle ?? WindowTitleFor(kind, alert);
+		TitleText.Text = title;
+		TitleText.IsVisible = !string.IsNullOrWhiteSpace(title);
 		MessageText.Text = Links.SetMessage(message);
 		ConfirmButton.Content = confirmText;
 		ConfirmButton.Classes.Add(ButtonClassFor(kind));
@@ -159,6 +161,19 @@ public partial class ConfirmDialog : Window
 		art.IsVisible = true;
 		KindArt.IsVisible = true;
 		KindDot.IsVisible = false;
+	}
+
+	private static string WindowTitleFor(DialogKind kind, bool alert)
+	{
+		return kind switch
+		{
+			DialogKind.Success => Strings.ConfirmDialog_WindowSuccess,
+			DialogKind.Warning => Strings.ConfirmDialog_WindowWarning,
+			DialogKind.Danger when alert => Strings.ConfirmDialog_WindowError,
+			DialogKind.Info when alert => Strings.ConfirmDialog_WindowInfo,
+			DialogKind.Neutral when alert => Strings.ConfirmDialog_WindowInfo,
+			_ => Strings.ConfirmDialog_WindowConfirm
+		};
 	}
 
 	private static string ButtonClassFor(DialogKind kind)

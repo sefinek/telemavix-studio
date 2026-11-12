@@ -333,7 +333,7 @@
 		</Style>
 		<Style Selector="Window.contentDialog">
 			<Setter Property="SizeToContent" Value="WidthAndHeight" />
-			<Setter Property="MinWidth" Value="640" />
+			<Setter Property="MinWidth" Value="680" />
 			<Setter Property="FontSize" Value="14" />
 		</Style>
 		<Style Selector="Window.contentDialog Grid.dialogLayout">

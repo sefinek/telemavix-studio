@@ -135,14 +135,14 @@ public partial class MainWindow
 			// "Matches the source" doesn't mean anything for a green-screen render - there's no source
 			// video in it to match (synthetic background, no audio) - so the Output card keeps showing
 			// whatever it already had (the plan, or an earlier normal render's measured results).
-			if (!greenScreen && alpha is null && _summary is not null) await PopulateMeasuredOutputInfoAsync(outputPath, _summary);
+			SourceInfo? measured = !greenScreen && alpha is null && _summary is not null ? await PopulateMeasuredOutputInfoAsync(outputPath, _summary) : null;
 
 			TaskbarProgress.SetState(this, TaskbarProgress.State.NoProgress);
 
 			// User-facing surfaces (dialog, balloon) show just the filename - the full path is only
 			// useful for the log line above, where it's there to be pasted/searched, not read at a glance.
-			string summary = Path.GetFileName(outputPath) + "\n" + string.Format(Strings.Render_DoneSummary, elapsedText, sizeText);
-			await NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, summary, DialogKind.Success, outputPath);
+			await NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, RenderDoneMessage(outputPath, elapsedText, sizeText, measured, alpha is { } cpuAlpha ? AlphaOverlay.EncoderName(cpuAlpha) : _detectedEncoder),
+				DialogKind.Success, outputPath);
 		}
 		else if (cts.Token.IsCancellationRequested)
 		{
@@ -316,6 +316,26 @@ public partial class MainWindow
 			BalloonNotifier.Show(this, title, string.Format(Strings.Render_LowDiskBalloon, FormatHelper.FormatBytes(available), FormatHelper.FormatBytes(required)));
 
 		return await ConfirmDialog.AskAsync(this, title, message, Strings.Render_Anyway, DialogKind.Warning);
+	}
+
+	internal static string RenderDoneMessage(string outputPath, string elapsedText, string sizeText, SourceInfo? output, string encoder)
+	{
+		var lines = new List<string> { Strings.Render_DoneIntro, Path.GetFileName(outputPath) };
+		string? folder = Path.GetDirectoryName(outputPath);
+		if (!string.IsNullOrEmpty(folder)) lines.Add(string.Format(Strings.Render_DoneFolder, folder));
+		lines.Add("");
+		if (output is not null)
+		{
+			VideoInfo video = output.Video;
+			lines.Add(string.Format(Strings.Render_DoneVideo, TimeSpan.FromSeconds(output.DurationSeconds).ToString(@"hh\:mm\:ss"),
+				$"{video.Width}x{video.Height}", FormatFps(video.Fps)));
+			string codec = string.IsNullOrEmpty(video.Profile) ? video.CodecName : $"{video.CodecName} ({video.Profile})";
+			lines.Add(string.Format(Strings.Render_DoneCodec, codec, (video.BitRate / 1_000_000.0).ToString("0.#", CultureInfo.CurrentCulture), encoder));
+			lines.Add("");
+		}
+
+		lines.Add(string.Format(Strings.Render_DoneSummary, elapsedText, sizeText));
+		return string.Join("\n", lines);
 	}
 
 	internal async Task NotifyRenderFinishedAsync(string title, string message, DialogKind kind, string? outputPath = null)

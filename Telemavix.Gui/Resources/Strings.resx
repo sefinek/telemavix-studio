@@ -634,6 +634,21 @@ Close Telemavix Studio?</value>
   <data name="CompareVideos_ShowOnlyDifferences" xml:space="preserve">
     <value>Show only differences</value>
   </data>
+  <data name="ConfirmDialog_WindowSuccess" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="ConfirmDialog_WindowError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ConfirmDialog_WindowWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="ConfirmDialog_WindowInfo" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="ConfirmDialog_WindowConfirm" xml:space="preserve">
+    <value>Confirmation</value>
+  </data>
   <data name="ConfirmDialog_Confirm" xml:space="preserve">
     <value>Confirm</value>
   </data>
@@ -2131,8 +2146,20 @@ Continue rendering?</value>
   <data name="Render_CpuBusyGpuEncoderMessage" xml:space="preserve">
     <value>CPU usage is {0}. The graphics card encodes the video, but the CPU draws the overlay. Rendering will take longer under the current load.</value>
   </data>
+  <data name="Render_DoneIntro" xml:space="preserve">
+    <value>Saved as:</value>
+  </data>
   <data name="Render_DoneSummary" xml:space="preserve">
-    <value>Time: {0} · Size: {1}</value>
+    <value>Rendering took {0} · File size: {1}</value>
+  </data>
+  <data name="Render_DoneFolder" xml:space="preserve">
+    <value>Folder: {0}</value>
+  </data>
+  <data name="Render_DoneVideo" xml:space="preserve">
+    <value>Video: {0} · {1} · {2} fps</value>
+  </data>
+  <data name="Render_DoneCodec" xml:space="preserve">
+    <value>Codec: {0} · {1} Mbps · encoder: {2}</value>
   </data>
   <data name="Render_EnterOutputPath" xml:space="preserve">
     <value>Enter an output file path</value>
@@ -4172,7 +4199,6 @@ Note: Telemavix Studio is provided free of charge. If someone asks you to pay fo
     <value>You have just entered your DJI API key. Telemavix Studio will use it to obtain the keys needed to read encrypted flight logs.
 
 Before using this feature, take a moment to review the key terms. Using the API means accepting DJI&apos;s terms:
-
 - Use your own key and do not share it.
 - Use the API lawfully and respect others&apos; rights.
 - DJI may change the API or revoke access; operation and support are not guaranteed.

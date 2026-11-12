@@ -567,7 +567,7 @@ public partial class MainWindow
 	///     Replaces the pre-render plan with what ffprobe actually measured from the exported file, so
 	///     "matches the source" is a verified fact rather than an assumption baked into the UI text.
 	/// </summary>
-	private async Task PopulateMeasuredOutputInfoAsync(string outputPath, FileSummary inputSummary)
+	private async Task<SourceInfo?> PopulateMeasuredOutputInfoAsync(string outputPath, FileSummary inputSummary)
 	{
 		SourceInfo output;
 		try
@@ -577,7 +577,7 @@ public partial class MainWindow
 		catch (Exception ex)
 		{
 			AppendLog(string.Format(Strings.Summary_LogVerifyFailed, ex.Message));
-			return;
+			return null;
 		}
 
 		OutPlanText.IsVisible = false;
@@ -614,6 +614,7 @@ public partial class MainWindow
 
 		OutMeasuredDuration.Text = TimeSpan.FromSeconds(output.DurationSeconds).ToString(@"hh\:mm\:ss");
 		OutMeasuredFileSize.Text = FormatHelper.FormatBytes(new FileInfo(outputPath).Length);
+		return output;
 	}
 
 	private static void SetMatchCheck(IconView icon, bool matches)

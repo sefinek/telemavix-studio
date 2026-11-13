@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Text;
+using Telemavix.Tracks;
 
 namespace Telemavix.Core.Telemetry.External;
 
@@ -246,20 +247,20 @@ public static class FitReader
 			bool big = definition.BigEndian;
 			switch (name)
 			{
-				case "satellites": satellites = Number(bytes, 0x02, big); break;
-				case "pressure": pressure = Number(bytes, 0x86, big) is { } pascals ? pascals / 100.0 : null; break;
-				case "battery_temperature": batteryTemperature = Float(bytes, big); break;
-				case "charging": charging = Number(bytes, 0x02, big); break;
-				case "accel_x": accelX = Float(bytes, big); break;
-				case "accel_y": accelY = Float(bytes, big); break;
-				case "accel_z": accelZ = Float(bytes, big); break;
-				case "gyro_x": gyroX = Float(bytes, big); break;
-				case "gyro_y": gyroY = Float(bytes, big); break;
-				case "gyro_z": gyroZ = Float(bytes, big); break;
-				case "light": light = Float(bytes, big); break;
-				case "bearing": bearing = Float(bytes, big); break;
-				case "cell_level": cellLevel = Number(bytes, 0x02, big); break;
-				case "cell_dbm": cellDbm = Number(bytes, 0x01, big); break;
+				case TrackFields.Fit.Satellites: satellites = Number(bytes, 0x02, big); break;
+				case TrackFields.Fit.Pressure: pressure = Number(bytes, 0x86, big) is { } pascals ? pascals / 100.0 : null; break;
+				case TrackFields.Fit.BatteryTemperature: batteryTemperature = Float(bytes, big); break;
+				case TrackFields.Fit.Charging: charging = Number(bytes, 0x02, big); break;
+				case TrackFields.Fit.AccelX: accelX = Float(bytes, big); break;
+				case TrackFields.Fit.AccelY: accelY = Float(bytes, big); break;
+				case TrackFields.Fit.AccelZ: accelZ = Float(bytes, big); break;
+				case TrackFields.Fit.GyroX: gyroX = Float(bytes, big); break;
+				case TrackFields.Fit.GyroY: gyroY = Float(bytes, big); break;
+				case TrackFields.Fit.GyroZ: gyroZ = Float(bytes, big); break;
+				case TrackFields.Fit.Light: light = Float(bytes, big); break;
+				case TrackFields.Fit.Bearing: bearing = Float(bytes, big); break;
+				case TrackFields.Fit.CellLevel: cellLevel = Number(bytes, 0x02, big); break;
+				case TrackFields.Fit.CellDbm: cellDbm = Number(bytes, 0x01, big); break;
 			}
 		}
 

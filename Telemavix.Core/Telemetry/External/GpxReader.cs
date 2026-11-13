@@ -1,12 +1,13 @@
 using System.Globalization;
 using System.Xml;
 using Telemavix.Core.Localization;
+using Telemavix.Tracks;
 
 namespace Telemavix.Core.Telemetry.External;
 
 /// <summary>
 ///     The track points of a GPX file (trkpt, in every segment of every track): position, elevation and time, and where a point has them the satellite count (sat),
-///     Garmin's TrackPointExtension (atemp, hr) and Telemavix GPS's own readings (TelemetryNamespace). GPX has no
+///     Garmin's TrackPointExtension (atemp, hr) and Telemavix GPS's own readings (<see cref="TrackFields.Gpx.Namespace" />). GPX has no
 ///     timer events; speed is derived from consecutive fixes. Gaps have unknown motion.
 ///     Points without a time can't be put on the video's clock and are dropped.
 ///     The XML is read without resolving DTDs or external entities.
@@ -14,7 +15,6 @@ namespace Telemavix.Core.Telemetry.External;
 public static class GpxReader
 {
 	private const string TrackPointExtensionNamespace = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1";
-	private const string TelemetryNamespace = "urn:telemavix:gps:telemetry:v1";
 
 	public static ExternalTrack Read(string path)
 	{
@@ -63,18 +63,18 @@ public static class GpxReader
 			point.Read();
 			while (!point.EOF)
 			{
-				if (point.NodeType == XmlNodeType.Element && point.NamespaceURI == TelemetryNamespace)
+				if (point.NodeType == XmlNodeType.Element && point.NamespaceURI == TrackFields.Gpx.Namespace)
 				{
 					switch (point.LocalName)
 					{
-						case "Telemetry":
+						case TrackFields.Gpx.Telemetry:
 							point.Read();
 							break;
-						case "accel":
+						case TrackFields.Gpx.Acceleration:
 							acceleration = ReadVector(point);
 							point.Skip();
 							break;
-						case "gyro":
+						case TrackFields.Gpx.AngularVelocity:
 							angularVelocity = ReadVector(point);
 							point.Skip();
 							break;
@@ -131,16 +131,16 @@ public static class GpxReader
 		if (time is not { } at) return null;
 
 		var phone = new PhoneReading(
-			Reading(readings, "accuracy") is >= 0 and var accuracy ? accuracy : null,
-			Reading(readings, "bearing") is >= 0 and <= 360 and var bearing ? bearing : null,
-			Reading(readings, "pressure") is > 0 and var pressure ? pressure : null,
-			Reading(readings, "batteryTemp"),
-			readings.TryGetValue("charging", out string? charging) && bool.TryParse(charging, out bool isCharging) ? isCharging : null,
+			Reading(readings, TrackFields.Gpx.Accuracy) is >= 0 and var accuracy ? accuracy : null,
+			Reading(readings, TrackFields.Gpx.Bearing) is >= 0 and <= 360 and var bearing ? bearing : null,
+			Reading(readings, TrackFields.Gpx.Pressure) is > 0 and var pressure ? pressure : null,
+			Reading(readings, TrackFields.Gpx.BatteryTemperature),
+			readings.TryGetValue(TrackFields.Gpx.Charging, out string? charging) && bool.TryParse(charging, out bool isCharging) ? isCharging : null,
 			acceleration,
 			angularVelocity,
-			Reading(readings, "light") is >= 0 and var light ? light : null,
-			Reading(readings, "cellLevel") is >= 0 and <= 4 and var level ? (int)level : null,
-			Reading(readings, "cellDbm") is <= 0 and >= -140 and var dbm ? (int)dbm : null,
+			Reading(readings, TrackFields.Gpx.Light) is >= 0 and var light ? light : null,
+			Reading(readings, TrackFields.Gpx.CellLevel) is >= 0 and <= 4 and var level ? (int)level : null,
+			Reading(readings, TrackFields.Gpx.CellDbm) is <= 0 and >= -140 and var dbm ? (int)dbm : null,
 			satellites);
 		return new ExternalTrackPoint(at, lat, lon, elevation, TemperatureCelsius: temperature, Satellites: satellites, HeartRateBpm: heartRate, Phone: phone.IsEmpty ? null : phone);
 	}

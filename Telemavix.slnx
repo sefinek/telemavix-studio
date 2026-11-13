@@ -2,6 +2,7 @@
   <Configurations>
     <Platform Name="Any CPU" />
   </Configurations>
+  <Project Path="Telemavix.Tracks/Telemavix.Tracks.csproj" />
   <Project Path="Telemavix.Core/Telemavix.Core.csproj" />
   <Project Path="Telemavix.Cameras.Dji/Telemavix.Cameras.Dji.csproj" />
   <Project Path="Telemavix.Drones.Dji/Telemavix.Drones.Dji.csproj" />

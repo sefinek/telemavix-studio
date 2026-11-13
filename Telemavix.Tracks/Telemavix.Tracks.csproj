@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Telemavix.Tracks</AssemblyName>
+    <RootNamespace>Telemavix.Tracks</RootNamespace>
+    <Description>GPS track model and GPX/FIT writers shared by Telemavix GPS and Telemavix Studio.</Description>
+  </PropertyGroup>
+
+</Project>

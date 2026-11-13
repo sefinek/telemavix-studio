@@ -38,6 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Telemavix.Tracks\Telemavix.Tracks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" />
     <PackageReference Include="NLog" />
     <PackageReference Include="NuGet.Versioning" />

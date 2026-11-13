@@ -33,7 +33,7 @@ internal sealed class OverlayCompositor : IDisposable
 	private IReadOnlyList<DerivedFrame> _frames;
 
 	/// <summary>For telemetry sparser than the picture (a GPS track's): the overlay is drawn from a frame between two (FrameInterpolation), not the nearest.</summary>
-	public bool InterpolateFrames { get; init; }
+	private bool InterpolateFrames { get; init; }
 	private OutputTimeline? _timeline;
 	private bool _showOverlay;
 	private VideoFrame? _still;

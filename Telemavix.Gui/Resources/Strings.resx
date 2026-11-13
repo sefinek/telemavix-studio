@@ -1999,13 +1999,13 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Active preset</value>
   </data>
   <data name="SettingsPresets_ActiveHint" xml:space="preserve">
-    <value>The Rendering, Speed and Route intro tabs edit the active preset. To change another preset's settings (such as its speed calibration), pick it here and open that tab.</value>
+    <value>Choose a preset first, then edit its settings in the Rendering, Privacy, Telemetry, Speed or Route intro tabs.</value>
   </data>
   <data name="SettingsPresets_CopyName" xml:space="preserve">
     <value>{0} - copy</value>
   </data>
   <data name="SettingsPresets_Covers" xml:space="preserve">
-    <value>A preset covers: speed calibration, orientation and GPS smoothing, the route intro and the render settings (quality, codec, resolution, sound, metadata). The interface, the program's behavior, hardware decoding, shadows and map keys are shared by all presets.</value>
+    <value>Each preset saves speed calibration, the camera orientation source, GPS smoothing, the route intro and export settings (quality, codec, resolution, sound and metadata). The interface, app behavior, hardware decoding, shadows and map keys are shared across all presets.</value>
   </data>
   <data name="SettingsPresets_DeleteMessage" xml:space="preserve">
     <value>Are you sure you want to delete the settings preset "{0}"? Widget layouts will remain unchanged. This can't be undone.</value>
@@ -2023,7 +2023,7 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Export</value>
   </data>
   <data name="SettingsPresets_ExportTip" xml:space="preserve">
-    <value>Save the active preset to a file you can send to someone</value>
+    <value>Save the active preset to a file to share it or keep a copy</value>
   </data>
   <data name="SettingsPresets_ExportTitle" xml:space="preserve">
     <value>Export settings preset</value>
@@ -2041,7 +2041,7 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Failed to import a settings preset from {0} - see the log for details</value>
   </data>
   <data name="SettingsPresets_ImportTip" xml:space="preserve">
-    <value>Load a preset from a file someone sent you</value>
+    <value>Load a settings preset from a file</value>
   </data>
   <data name="SettingsPresets_ImportTitle" xml:space="preserve">
     <value>Import settings preset</value>
@@ -2053,7 +2053,7 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Widget layout</value>
   </data>
   <data name="SettingsPresets_LayoutHint" xml:space="preserve">
-    <value>The overlay preset that turns on with this preset. Changing the layout in the main window doesn't change this choice.</value>
+    <value>The widget layout activated when you select this settings preset. Changing the layout in the main window does not change this assignment.</value>
   </data>
   <data name="SettingsPresets_LayoutKeep" xml:space="preserve">
     <value>Don't change the layout</value>
@@ -2077,7 +2077,7 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Keep current</value>
   </data>
   <data name="SettingsPresets_PickNew" xml:space="preserve">
-    <value>Which settings preset should the new project use? It sets speed calibration, render settings, the route intro and widget layout.</value>
+    <value>Choose a settings preset for the new project. It sets speed calibration, export settings and the route intro. It can also activate its assigned widget layout.</value>
   </data>
   <data name="SettingsPresets_PickProject" xml:space="preserve">
     <value>This project has no settings preset saved (or it was deleted). Which one should it use?</value>
@@ -2089,7 +2089,7 @@ The cuts, view settings and overlay will be applied once these files are located
     <value>Choose a settings preset</value>
   </data>
   <data name="SettingsPresets_Subtitle" xml:space="preserve">
-    <value>Settings for different uses, such as bicycle or motorcycle rides. Each preset has its own speed calibration, render settings, route intro and widget layout.</value>
+    <value>Settings for different uses, such as bicycle or motorcycle rides. Each preset saves its own speed calibration, export settings and route intro. You can also assign a widget layout to it.</value>
   </data>
   <data name="SettingsPresets_ThisPreset" xml:space="preserve">
     <value>THIS PRESET</value>
@@ -2247,7 +2247,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>About</value>
   </data>
   <data name="Settings_ACameraSGpsTends" xml:space="preserve">
-    <value>Correction increases speed readings on the overlay in the preview and render. Calculate it from two readings or check it on a recording. The setting applies to all recordings and is saved when you close this window.</value>
+    <value>Correction increases speed readings on the overlay in the preview and exported video. Calculate it by comparing the GPS reading with a reference speed, or check its effect on a recording. It is saved in the active preset and applies to recordings using that preset&apos;s settings.</value>
   </data>
   <data name="Settings_AFullscreenCardForThe" xml:space="preserve">
     <value>Shows a card with the route map and statistics for the retained parts of the recording during the first seconds of the video. It does not extend the video. GPS data is required. An internet connection is needed to download the map.</value>
@@ -2358,7 +2358,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Date</value>
   </data>
   <data name="Settings_DecodeTheSourceOnThe" xml:space="preserve">
-    <value>Decode the source on the GPU</value>
+    <value>Decode video on the graphics card</value>
   </data>
   <data name="Settings_Dependencies" xml:space="preserve">
     <value>DEPENDENCIES</value>
@@ -2472,7 +2472,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>P4 - fast encoding</value>
   </data>
   <data name="Settings_NvencP5" xml:space="preserve">
-    <value>P5 - faster</value>
+    <value>P5 - balance of quality and speed</value>
   </data>
   <data name="Settings_NvencP7" xml:space="preserve">
     <value>P7 - best quality (default)</value>
@@ -2652,7 +2652,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>The monitor used for full-screen preview when you press F11. Press Esc to return to the main window.</value>
   </data>
   <data name="Settings_TheProjectLastSavedOr" xml:space="preserve">
-    <value>The project you last saved or opened. A project you start the app with (by double-clicking it) takes priority.</value>
+    <value>Opens the last saved or opened project at startup. If you start the app by double-clicking a project file, it opens that project instead.</value>
   </data>
   <data name="Settings_ThumbnailsAndRecordingInfo" xml:space="preserve">
     <value>Thumbnails and recording info</value>
@@ -3115,7 +3115,7 @@ Details: {0}</value>
     <value>Close</value>
   </data>
   <data name="Tools_Compare" xml:space="preserve">
-    <value>Compare...</value>
+    <value>Compare video properties...</value>
   </data>
   <data name="Tools_CompareFiles" xml:space="preserve">
     <value>Compare files</value>
@@ -5545,21 +5545,21 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Privacy</value>
   </data>
   <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
-    <value>What a render carries over from the camera&apos;s file, and what it says about itself.</value>
+    <value>Metadata and information saved in the exported video.</value>
   </data>
   <data name="SettingsPage_Telemetry" xml:space="preserve">
     <value>Telemetry</value>
   </data>
   <data name="SettingsPage_TelemetrySubtitle" xml:space="preserve">
-    <value>How GPS and sensor readings become what the overlay shows.</value>
+    <value>Settings for GPS and sensor readings on the overlay.</value>
   </data>
   <data name="SettingsPage_Preview" xml:space="preserve">
     <value>Preview</value>
   </data>
   <data name="SettingsPage_PreviewSubtitle" xml:space="preserve">
-    <value>Playback in the editor, shadows and the screens the preview can move to.</value>
+    <value>Playback, shadows and monitor selection for the preview.</value>
   </data>
   <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
-    <value>Flight logs of DJI drones need a key from DJI.</value>
+    <value>DJI API key for reading encrypted flight logs.</value>
   </data>
 </root>

@@ -60,7 +60,7 @@ public sealed class CompareTile : IDisposable
 
 	public TimeSpan Duration => Video.Duration;
 
-	internal FrameBufferPool Pool { get; }
+	private FrameBufferPool Pool { get; }
 
 	internal LibavVideoSource Video { get; }
 

@@ -1999,13 +1999,13 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Aktywny preset</value>
   </data>
   <data name="SettingsPresets_ActiveHint" xml:space="preserve">
-    <value>Zakładki Renderowanie, Prędkość i Wstęp z trasą edytują aktywny preset. Żeby zmienić ustawienia innego presetu (np. kalibrację prędkości), wybierz go tutaj i otwórz daną zakładkę.</value>
+    <value>Najpierw wybierz preset, a następnie zmień jego ustawienia w zakładkach Renderowanie, Prywatność, Telemetria, Prędkość lub Wstęp z trasą.</value>
   </data>
   <data name="SettingsPresets_CopyName" xml:space="preserve">
     <value>{0} - kopia</value>
   </data>
   <data name="SettingsPresets_Covers" xml:space="preserve">
-    <value>Preset obejmuje: kalibrację prędkości, orientację i płynność GPS, wstęp z trasą oraz ustawienia renderu (jakość, kodek, rozdzielczość, dźwięk, metadane). Interfejs, zachowanie programu, dekodowanie sprzętowe, cienie i klucze map są wspólne dla wszystkich presetów.</value>
+    <value>Każdy preset zapisuje kalibrację prędkości, źródło orientacji kamery, wygładzanie wskazań GPS, wstęp z trasą i ustawienia eksportu (jakość, kodek, rozdzielczość, dźwięk i metadane). Interfejs, zachowanie programu, dekodowanie sprzętowe, cienie i klucze map są wspólne dla wszystkich presetów.</value>
   </data>
   <data name="SettingsPresets_DeleteMessage" xml:space="preserve">
     <value>Czy na pewno chcesz usunąć preset ustawień „{0}”? Układy widżetów pozostaną bez zmian. Tej operacji nie da się cofnąć.</value>
@@ -2023,7 +2023,7 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Eksportuj</value>
   </data>
   <data name="SettingsPresets_ExportTip" xml:space="preserve">
-    <value>Zapisz aktywny preset do pliku, który można komuś wysłać</value>
+    <value>Zapisz aktywny preset do pliku, aby go udostępnić lub zachować kopię</value>
   </data>
   <data name="SettingsPresets_ExportTitle" xml:space="preserve">
     <value>Eksportuj preset ustawień</value>
@@ -2041,7 +2041,7 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Nie udało się zaimportować presetu ustawień z {0} - szczegóły w logu</value>
   </data>
   <data name="SettingsPresets_ImportTip" xml:space="preserve">
-    <value>Wczytaj preset z pliku od kogoś innego</value>
+    <value>Wczytaj preset ustawień z pliku</value>
   </data>
   <data name="SettingsPresets_ImportTitle" xml:space="preserve">
     <value>Importuj preset ustawień</value>
@@ -2053,7 +2053,7 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Układ widżetów</value>
   </data>
   <data name="SettingsPresets_LayoutHint" xml:space="preserve">
-    <value>Preset nakładki, który włącza się razem z tym presetem. Zmiana układu w głównym oknie nie zmienia tego wyboru.</value>
+    <value>Układ widżetów włączany po wybraniu tego presetu ustawień. Zmiana układu w oknie głównym nie zmienia tego przypisania.</value>
   </data>
   <data name="SettingsPresets_LayoutKeep" xml:space="preserve">
     <value>Nie zmieniaj układu</value>
@@ -2077,7 +2077,7 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Zostaw bieżący</value>
   </data>
   <data name="SettingsPresets_PickNew" xml:space="preserve">
-    <value>Którego presetu ustawień użyć w nowym projekcie? Określa on kalibrację prędkości, ustawienia renderowania, wstęp z trasą i układ widżetów.</value>
+    <value>Wybierz preset ustawień dla nowego projektu. Określa on kalibrację prędkości, ustawienia eksportu i wstęp z trasą. Może też włączyć przypisany układ widżetów.</value>
   </data>
   <data name="SettingsPresets_PickProject" xml:space="preserve">
     <value>Ten projekt nie ma zapisanego presetu ustawień (albo został usunięty). Którego użyć?</value>
@@ -2089,7 +2089,7 @@ Cięcia, ustawienia widoku i nakładka zostaną zastosowane po odnalezieniu tych
     <value>Wybierz preset ustawień</value>
   </data>
   <data name="SettingsPresets_Subtitle" xml:space="preserve">
-    <value>Zestawy ustawień do różnych zastosowań, np. jazdy rowerem lub motocyklem. Każdy ma własną kalibrację prędkości, ustawienia renderowania, wstęp z trasą i układ widżetów.</value>
+    <value>Zestawy ustawień do różnych zastosowań, np. jazdy rowerem lub motocyklem. Każdy zapisuje własną kalibrację prędkości, ustawienia eksportu i wstęp z trasą. Możesz też przypisać mu układ widżetów.</value>
   </data>
   <data name="SettingsPresets_ThisPreset" xml:space="preserve">
     <value>TEN PRESET</value>
@@ -2247,7 +2247,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>O programie</value>
   </data>
   <data name="Settings_ACameraSGpsTends" xml:space="preserve">
-    <value>Korekta zwiększa odczyty prędkości na nakładce w podglądzie i renderze. Możesz obliczyć ją z porównywanych odczytów lub sprawdzić na nagraniu. Ustawienie dotyczy wszystkich nagrań i zapisuje się po zamknięciu tego okna.</value>
+    <value>Korekta zwiększa wskazania prędkości na nakładce w podglądzie i eksportowanym filmie. Oblicz ją, porównując odczyt GPS z prędkością odniesienia, lub sprawdź jej efekt na nagraniu. Jest zapisywana w aktywnym presecie i dotyczy nagrań korzystających z jego ustawień.</value>
   </data>
   <data name="Settings_AFullscreenCardForThe" xml:space="preserve">
     <value>Przez pierwsze sekundy filmu pokazuje planszę z mapą i statystykami zachowanej części nagrania. Nie wydłuża filmu. Wymaga danych GPS. Do pobrania mapy potrzebne jest połączenie z internetem.</value>
@@ -2358,7 +2358,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Data</value>
   </data>
   <data name="Settings_DecodeTheSourceOnThe" xml:space="preserve">
-    <value>Dekoduj źródło na GPU</value>
+    <value>Dekoduj wideo na karcie graficznej</value>
   </data>
   <data name="Settings_Dependencies" xml:space="preserve">
     <value>ZALEŻNOŚCI</value>
@@ -2472,7 +2472,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>P4 - szybkie kodowanie</value>
   </data>
   <data name="Settings_NvencP5" xml:space="preserve">
-    <value>P5 - szybszy</value>
+    <value>P5 - równowaga jakości i szybkości</value>
   </data>
   <data name="Settings_NvencP7" xml:space="preserve">
     <value>P7 - najlepsza jakość (domyślne)</value>
@@ -2652,7 +2652,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Monitor, na którym po naciśnięciu F11 otworzy się podgląd pełnoekranowy. Naciśnij Esc, aby wrócić do okna głównego.</value>
   </data>
   <data name="Settings_TheProjectLastSavedOr" xml:space="preserve">
-    <value>Ostatnio zapisany lub otwarty projekt. Pierwszeństwo ma projekt, z którym uruchomisz aplikację (dwuklikiem).</value>
+    <value>Przy uruchomieniu otwiera ostatnio zapisany lub otwarty projekt. Jeśli uruchomisz aplikację przez dwukrotne kliknięcie pliku projektu, otworzy się wskazany projekt.</value>
   </data>
   <data name="Settings_ThumbnailsAndRecordingInfo" xml:space="preserve">
     <value>Miniatury i informacje o nagraniu</value>
@@ -3115,7 +3115,7 @@ Szczegóły: {0}</value>
     <value>Zamknij</value>
   </data>
   <data name="Tools_Compare" xml:space="preserve">
-    <value>Porównaj...</value>
+    <value>Porównaj parametry filmów...</value>
   </data>
   <data name="Tools_CompareFiles" xml:space="preserve">
     <value>Porównaj pliki</value>
@@ -5545,21 +5545,21 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Prywatność</value>
   </data>
   <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
-    <value>Co render przejmuje z pliku kamery i co mówi o sobie.</value>
+    <value>Metadane i informacje zapisywane w eksportowanym filmie.</value>
   </data>
   <data name="SettingsPage_Telemetry" xml:space="preserve">
     <value>Telemetria</value>
   </data>
   <data name="SettingsPage_TelemetrySubtitle" xml:space="preserve">
-    <value>Jak odczyty GPS i czujników zamieniają się w to, co pokazuje nakładka.</value>
+    <value>Ustawienia wskazań GPS i czujników na nakładce.</value>
   </data>
   <data name="SettingsPage_Preview" xml:space="preserve">
     <value>Podgląd</value>
   </data>
   <data name="SettingsPage_PreviewSubtitle" xml:space="preserve">
-    <value>Odtwarzanie w edytorze, cienie i ekrany, na które można przenieść podgląd.</value>
+    <value>Odtwarzanie, cienie i wybór monitora do wyświetlania podglądu.</value>
   </data>
   <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
-    <value>Dzienniki lotów dronów DJI wymagają klucza od DJI.</value>
+    <value>Klucz API DJI do odczytu zaszyfrowanych dzienników lotu.</value>
   </data>
 </root>

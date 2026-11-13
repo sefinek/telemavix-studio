@@ -178,7 +178,9 @@ public sealed class SensorWidgetTests
 		Assert.IsTrue(withTemperature.Bottom > plain.Bottom);
 		SKRect iconPlain = OverlayElementBounds.GetBounds(OverlayElementType.DeviceBattery, 0, 0, 1, element: new DeviceBatteryElement { X = 0, Y = 0, ShowIcon = true });
 		SKRect iconWithTemperature = OverlayElementBounds.GetBounds(OverlayElementType.DeviceBattery, 0, 0, 1, element: new DeviceBatteryElement { X = 0, Y = 0, ShowIcon = true, ShowTemperature = true });
-		Assert.IsTrue(iconWithTemperature.Bottom > iconPlain.Bottom);
+		// The note sits inside the icon's height, so the box grows only where the font's descent reaches past the icon: it must hold the note, not necessarily be taller.
+		Assert.IsTrue(iconWithTemperature.Bottom >= iconPlain.Bottom);
+		Assert.IsTrue(iconWithTemperature.Bottom > OverlayElementBounds.DroneBatteryLineBaseline);
 
 		SKRect gps = OverlayElementBounds.GetBounds(OverlayElementType.Satellites, 0, 0, 1, element: new SatellitesElement { X = 0, Y = 0 });
 		SKRect gpsWithAccuracy = OverlayElementBounds.GetBounds(OverlayElementType.Satellites, 0, 0, 1, element: new SatellitesElement { X = 0, Y = 0, ShowAccuracy = true });

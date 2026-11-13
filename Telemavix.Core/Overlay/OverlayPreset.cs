@@ -56,6 +56,7 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 						or TripProgressBarElement => e with { Visible = false },
 					CompassElement compass => compass with { Visible = false, DotWhenNotFacingTravel = true },
 					WatermarkElement => e with { DisappearAtSeconds = DroneWatermarkSeconds },
+					SpeedGaugeElement speed => speed with { Theme = SpeedGaugeTheme.Modern },
 					ProfileChartElement chart => chart with { Y = chartY, AppearAtSeconds = DroneWatermarkSeconds, Visible = true, Series = ProfileSeries.Height, Axis = ProfileAxis.Time, AutoHeight = true },
 					MapWidgetElement map => map with { MapZoom = 17, MapDynamicZoom = true, MapDynamicZoomMaxFactor = 3, ShowEsriLabels = false, RotateWithHeading = true, DotWhenNotFacingTravel = true },
 					DroneBatteryElement battery => battery with { X = m, Y = top, Visible = true, ShowIcon = true, ColorByCharge = true, ShowVoltage = true, ShowTemperature = false, ShowCurrent = true, CurrentBesideVoltage = true, ShowCells = false },
@@ -138,7 +139,8 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 						MapWidgetElement map => map with { MapZoom = 17, MapDynamicZoom = true, MapDynamicZoomMaxFactor = 3, ShowEsriLabels = false, RotateWithHeading = true, DotWhenNotFacingTravel = true },
 						CompassElement compass => compass with { Visible = false, DotWhenNotFacingTravel = true },
 						WatermarkElement => e with { DisappearAtSeconds = DroneWatermarkSeconds, Y = bottom - dial * 2 - OverlayElementBounds.WatermarkNoticeGap - FpvWatermarkAboveDials },
-						SpeedGaugeElement or MapAttributionElement => e,
+						SpeedGaugeElement speed => speed with { Theme = SpeedGaugeTheme.Modern },
+						MapAttributionElement => e,
 						_ => e with { Visible = false }
 					};
 					return placed switch

@@ -1,5 +1,4 @@
 using Telemavix.Core.Ffmpeg;
-using Telemavix.Core.Mapping;
 using Telemavix.Core.Overlay;
 using Telemavix.Core.Reframe;
 using Telemavix.Core.Telemetry;
@@ -105,10 +104,7 @@ public sealed class CompareTile : IDisposable
 		OverlayCompositor? compositor = null;
 		try
 		{
-			compositor = new OverlayCompositor(f => new OverlayRenderer(summary.Video.Width, summary.Video.Height, f[0].Raw.AltitudeMeters, layout, f,
-					TelemetryProcessor.Summarize(f).MaxSpeedKmh, false, summary.CameraModel, summary.ContainerRecordingStartUtc, MapSources.From(settings),
-					RouteIntroSettings.Disabled) { DrawShadows = settings.PreviewDrawsShadows },
-				frames, summary.TotalFrameCount / fps, availability, null, true, pool, settings.SpeedCorrectionPercent) { SnapshotShadows = !settings.DisableShadows };
+			compositor = OverlayCompositor.Create(summary, frames, layout, availability, settings, pool, RouteIntroSettings.Disabled, null, true, false);
 			return new CompareTile(summary.InputPaths[0], null, 0, fps, width, height, pool, video, new CompareFrameFeed(clockSeconds), null, compositor, smoothed);
 		}
 		catch

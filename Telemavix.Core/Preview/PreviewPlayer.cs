@@ -131,7 +131,7 @@ public sealed class PreviewPlayer : IDisposable
 		OverlaySettings settings = settingsOverride ?? OverlaySettingsStore.Load();
 		ICameraFormat? camera = trackPlayback is null ? summary.CameraFormat : null;
 		IReadOnlyList<DerivedFrame> recordingFrames = trackPlayback?.DerivedFrames ?? processedFrames ?? await Task.Run(() =>
-			TelemetryProcessor.Process(rawFrames, camera, settings.SmoothGpsMotion, settings.SpeedCorrectionPercent, settings.OrientationSource));
+			TelemetryProcessor.Process(rawFrames, camera, settings));
 		if (generation != _openGeneration) return;
 		long telemetryMs = openingTime.ElapsedMilliseconds;
 		var availability = OverlayAvailability.Of(rawFrames, summary.ContainerRecordingStartUtc is not null, camera);
@@ -181,8 +181,7 @@ public sealed class PreviewPlayer : IDisposable
 		}
 		else if (!plain)
 		{
-			(List<OverlayPreset> presets, string activeId) = OverlayPresetStore.Load();
-			layout = availability.Apply(presets.First(p => p.Id == activeId).Elements);
+			layout = availability.Apply(OverlayPresetStore.LoadActive().Elements);
 		}
 
 		RouteIntroSettings routeIntro = trackPlayback is null ? RouteIntroSettings.ForRecording(settings, availability.GpsFix, camera) : RouteIntroSettings.Disabled;
@@ -192,18 +191,8 @@ public sealed class PreviewPlayer : IDisposable
 		OverlayCompositor compositor;
 		try
 		{
-			compositor = await Task.Run(() => new OverlayCompositor(frames => new OverlayRenderer(width, height, frames[0].Raw.AltitudeMeters, layout, frames,
-					TelemetryProcessor.Summarize(frames).MaxSpeedKmh, showWatermark && !plain && trackPlayback is null or { IsTrackOnly: true }, trackPlayback?.Track.DeviceName ?? summary.CameraModel,
-					summary.ContainerRecordingStartUtc, MapSources.From(settings), RouteIntroFor(routeIntro, outputTimeline))
-				{
-					DrawShadows = settings.PreviewDrawsShadows,
-					Backdrop = trackPlayback?.Backdrop?.Map
-				},
-				recordingFrames, trackPlayback?.DurationSeconds ?? summary.TotalFrameCount / summary.Video.Fps, availability, outputTimeline, showOverlay, pool, settings.SpeedCorrectionPercent)
-			{
-				SnapshotShadows = !settings.DisableShadows,
-				InterpolateFrames = trackPlayback is not null
-			});
+			compositor = await Task.Run(() => OverlayCompositor.Create(summary, recordingFrames, layout, availability, settings, pool,
+				RouteIntroFor(routeIntro, outputTimeline), outputTimeline, showOverlay, showWatermark && !plain && trackPlayback is null or { IsTrackOnly: true }, trackPlayback));
 		}
 		catch
 		{

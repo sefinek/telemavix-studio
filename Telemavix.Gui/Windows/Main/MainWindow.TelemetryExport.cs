@@ -35,8 +35,7 @@ public partial class MainWindow
 		{
 			await Task.Run(() =>
 			{
-				List<DerivedFrame> frames = TelemetryProcessor.Process(raw, summary.CameraFormat, settings.SmoothGpsMotion, settings.SpeedCorrectionPercent,
-					settings.OrientationSource);
+				List<DerivedFrame> frames = TelemetryProcessor.Process(raw, summary.CameraFormat, settings);
 				TelemetryExport.Write(path, frames, track ? 1 : 0, summary.ContainerRecordingStartUtc);
 			});
 		}

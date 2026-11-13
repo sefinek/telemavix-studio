@@ -191,7 +191,6 @@ public static class TrackRenderJob
 
 	private static IReadOnlyList<OverlayElement> ActiveLayout()
 	{
-		(List<OverlayPreset> presets, string activeId) = OverlayPresetStore.Load();
-		return presets.First(p => p.Id == activeId).Elements;
+		return OverlayPresetStore.LoadActive().Elements;
 	}
 }

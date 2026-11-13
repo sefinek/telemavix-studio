@@ -120,8 +120,7 @@ public sealed class ComparePlayer : IDisposable
 
 		OverlaySettings settings = OverlaySettingsStore.Load() with { ShowRouteIntro = false };
 		var availability = OverlayAvailability.Of(raw, summary.ContainerRecordingStartUtc is not null, summary.CameraFormat);
-		(List<OverlayPreset> presets, string activeId) = OverlayPresetStore.Load();
-		IReadOnlyList<OverlayElement> layout = availability.Apply(presets.First(p => p.Id == activeId).Elements);
+		IReadOnlyList<OverlayElement> layout = availability.Apply(OverlayPresetStore.LoadActive().Elements);
 
 		var clock = new CompareClock();
 		var tiles = new List<CompareTile>(2);
@@ -130,7 +129,7 @@ public sealed class ComparePlayer : IDisposable
 			foreach (bool smoothed in new[] { false, true })
 			{
 				IReadOnlyList<DerivedFrame> frames = await Task.Run(() =>
-					TelemetryProcessor.Process(raw, summary.CameraFormat, smoothed, settings.SpeedCorrectionPercent, settings.OrientationSource), ct);
+					TelemetryProcessor.Process(raw, summary.CameraFormat, settings, smoothed), ct);
 				tiles.Add(await Task.Run(() => CompareTile.OpenRecording(summary, smoothed, frames, layout, availability, settings, tileWidth, () => clock.Position), ct));
 			}
 		}

@@ -166,10 +166,20 @@ public partial class ComparePlaybackWindow : Window
 		IReadOnlyList<CompareFailure> failures = [];
 		if (_recordingPath is { } recordingPath)
 		{
-			(FileSummary? summary, string? problem) = await Task.Run(() => FileSummaryReader.Read([recordingPath]));
-			string? error = problem;
+			FileSummary? summary = null;
+			string? error;
 			player = null;
-			if (summary is not null) (player, error) = await ComparePlayer.OpenSmoothingAsync(summary, TileDecodeWidth);
+			try
+			{
+				(summary, error) = await Task.Run(() => FileSummaryReader.Read([recordingPath]));
+				if (summary is not null) (player, error) = await ComparePlayer.OpenSmoothingAsync(summary, TileDecodeWidth);
+			}
+			catch (Exception ex)
+			{
+				AppLogger.Error(ex, "Opening the smoothing comparison failed.");
+				error = ex.Message;
+			}
+
 			if (generation == _generation && player is null)
 			{
 				OpeningText.IsVisible = false;

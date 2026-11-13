@@ -1,3 +1,5 @@
+using Telemavix.Core.Telemetry.External;
+using Telemavix.Core.Mapping;
 using System.Collections.Concurrent;
 using SkiaSharp;
 using Telemavix.Core.Overlay;
@@ -62,6 +64,29 @@ internal sealed class OverlayCompositor : IDisposable
 		_initialTrailSpeedPercentileKmh = Renderer.TrailSpeedPercentileKmh;
 		Renderer.OutputDurationSeconds = OutputDuration(timeline);
 		Renderer.CutCaptions = timeline?.Captions ?? [];
+	}
+
+	/// <summary>
+	///     The compositor of a recording (or of a GPS track's picture): its renderer at the recording's own size, drawn from the
+	///     given telemetry. Everything a preview shows the overlay with is decided here, so the preview and the comparison can't differ.
+	/// </summary>
+	/// <param name="routeIntro">The route card as it applies to the timeline - already resolved by the caller.</param>
+	public static OverlayCompositor Create(FileSummary summary, IReadOnlyList<DerivedFrame> frames, IReadOnlyList<OverlayElement> layout,
+		OverlayAvailability availability, OverlaySettings settings, FrameBufferPool pool, RouteIntroSettings routeIntro, OutputTimeline? timeline,
+		bool showOverlay, bool showWatermark, ExternalTrackPlayback? track = null)
+	{
+		return new OverlayCompositor(f => new OverlayRenderer(summary.Video.Width, summary.Video.Height, f[0].Raw.AltitudeMeters, layout, f,
+				TelemetryProcessor.Summarize(f).MaxSpeedKmh, showWatermark, track?.Track.DeviceName ?? summary.CameraModel,
+				summary.ContainerRecordingStartUtc, MapSources.From(settings), routeIntro)
+			{
+				DrawShadows = settings.PreviewDrawsShadows,
+				Backdrop = track?.Backdrop?.Map
+			},
+			frames, track?.DurationSeconds ?? summary.TotalFrameCount / summary.Video.Fps, availability, timeline, showOverlay, pool, settings.SpeedCorrectionPercent)
+		{
+			SnapshotShadows = !settings.DisableShadows,
+			InterpolateFrames = track is not null
+		};
 	}
 
 	/// <summary>

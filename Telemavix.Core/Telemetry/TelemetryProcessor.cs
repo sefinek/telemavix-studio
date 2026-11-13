@@ -1,3 +1,4 @@
+using Telemavix.Core.Overlay;
 using Telemavix.Core.Cameras;
 using Telemavix.Core.Reframe;
 
@@ -38,6 +39,12 @@ public static class TelemetryProcessor
 	// Below this the receiver's own speed says the camera stands still - a step's position change is then the fix wandering,
 	// not travel. Well under walking pace, so a slow climb still counts.
 	internal const double StandstillKmh = 1.0;
+
+	/// <summary>The same, with the smoothing, speed correction and orientation source the settings ask for (smoothGps replaces the settings' own - a render's option).</summary>
+	public static List<DerivedFrame> Process(IReadOnlyList<TelemetryFrame> frames, ICameraFormat? camera, OverlaySettings settings, bool? smoothGps = null)
+	{
+		return Process(frames, camera, smoothGps ?? settings.SmoothGpsMotion, settings.SpeedCorrectionPercent, settings.OrientationSource);
+	}
 
 	/// <param name="camera">
 	///     Reads the accelerometer's axes (ICameraFormat.Gravity) for roll, pitch and the G-meter - all 0 without it or

@@ -162,7 +162,7 @@ Projects in `Telemavix.slnx` (net10.0):
 
 ## Tools and performance test
 
-- `ComparePlayer`: exported videos side by side on one clock; no sound on purpose; views must be attached again at every `PlaybackStarted`. `CameraAudioConverter` has no MP3 on purpose.
+- `ComparePlayer`: exported videos side by side on one clock; no sound on purpose; views must be attached again at every `PlaybackStarted`. `ComparePlayer.OpenSmoothingAsync` plays one recording twice (tiles with a `Compositor`, `Smoothed` false then true): the only difference is `TelemetryProcessor.Process`'s `smoothGps`, so keep the layout, settings and compositor (`OverlayCompositor.Create`, shared with `PreviewPlayer`) identical for both. `CameraAudioConverter` has no MP3 on purpose.
 - **Performance test** (`RenderBenchmark`) always runs on the generated recording (`SyntheticRecording`, read through `SyntheticCamera`). **Bump `SyntheticRecording.Version` whenever the picture or telemetry changes.** ffmpeg's input options go before any `-map`; frames a second come from `-progress` only. `Advise` suggests only decoding and the preview's shadows - the encoder preset changes quality, so it's never suggested. Only real renders feed `RenderSpeedHistory`; the load is sampled first (`BenchmarkLoad`). Preview measurements leave the route card out (`SuppressRouteIntro`).
 - Hardware decoding is checked by a real try on a tiny clip (`HardwareCheck`), since `-hwaccel` alone falls back to the CPU silently.
 

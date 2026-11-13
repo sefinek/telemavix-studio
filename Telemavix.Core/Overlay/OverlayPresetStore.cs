@@ -66,6 +66,13 @@ public static class OverlayPresetStore
 	// from a preset that's merely being written out again.
 	private static readonly Dictionary<string, string> KnownPresetContent = new(StringComparer.OrdinalIgnoreCase);
 
+	/// <summary>The preset the editor has active.</summary>
+	public static OverlayPreset LoadActive()
+	{
+		(List<OverlayPreset> presets, string activeId) = Load();
+		return presets.First(p => p.Id == activeId);
+	}
+
 	public static (List<OverlayPreset> Presets, string ActivePresetId) Load()
 	{
 		try

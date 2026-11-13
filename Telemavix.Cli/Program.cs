@@ -582,7 +582,7 @@ static (FileSummary Summary, List<DerivedFrame> Frames, OverlaySettings Settings
 	}
 
 	OverlaySettings settings = OverlaySettingsStore.Load();
-	List<DerivedFrame> frames = TelemetryProcessor.Process(raw, summary.CameraFormat, settings.SmoothGpsMotion, settings.SpeedCorrectionPercent, settings.OrientationSource);
+	List<DerivedFrame> frames = TelemetryProcessor.Process(raw, summary.CameraFormat, settings);
 	return (summary, frames, settings);
 }
 

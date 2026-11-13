@@ -125,7 +125,7 @@ public static class RenderJob
 				fps, segments.TotalFrameCount());
 			// The overlay describes the video as rendered: telemetry moved onto the output's own timeline.
 			var outputTimeline = new OutputTimeline(plan, fps);
-			List<DerivedFrame> derived = outputTimeline.MapFrames(TelemetryProcessor.Process(rawFrames, camera, smoothGps, settings.SpeedCorrectionPercent, settings.OrientationSource));
+			List<DerivedFrame> derived = outputTimeline.MapFrames(TelemetryProcessor.Process(rawFrames, camera, settings, smoothGps));
 			double startAltitude = derived[0].Raw.AltitudeMeters;
 			double maxSpeedKmh = TelemetryProcessor.Summarize(derived).MaxSpeedKmh;
 
@@ -474,8 +474,7 @@ public static class RenderJob
 
 	private static IReadOnlyList<OverlayElement> LoadActiveLayout()
 	{
-		(List<OverlayPreset> presets, string activeId) = OverlayPresetStore.Load();
-		OverlayPreset preset = presets.First(p => p.Id == activeId);
+		OverlayPreset preset = OverlayPresetStore.LoadActive();
 		// Muted (or not soloed) layers stay out of the render as they're out of the preview.
 		return OverlayLayers.Drawn(preset.Elements, preset.Layers);
 	}

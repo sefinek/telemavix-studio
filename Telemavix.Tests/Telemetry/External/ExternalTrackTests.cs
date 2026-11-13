@@ -47,6 +47,42 @@ public sealed class ExternalTrackTests
 	}
 
 	[TestMethod]
+	public void Gpx_TheSatellitesTheHeartRateAndThePhonesReadingsAreRead()
+	{
+		using MemoryStream gpx = Gpx("""
+		                             <trk><trkseg>
+		                             <trkpt lat="53.1" lon="18.9"><time>2026-10-21T14:20:49Z</time><sat>14</sat><extensions>
+		                             <gpxtpx:TrackPointExtension><gpxtpx:atemp>21</gpxtpx:atemp><gpxtpx:hr>151</gpxtpx:hr></gpxtpx:TrackPointExtension>
+		                             <tmx:Telemetry xmlns:tmx="urn:telemavix:gps:telemetry:v1"><tmx:accuracy>4.5</tmx:accuracy><tmx:bearing>181.5</tmx:bearing><tmx:pressure>1008.25</tmx:pressure>
+		                             <tmx:battery>80</tmx:battery><tmx:batteryTemp>33.5</tmx:batteryTemp><tmx:charging>true</tmx:charging><tmx:accel x="0.1" y="-9.8" z="0.5"/>
+		                             <tmx:gyro x="0.01" y="0.02" z="0.03"/><tmx:light>1200</tmx:light><tmx:cellLevel>2</tmx:cellLevel><tmx:cellDbm>-101</tmx:cellDbm></tmx:Telemetry>
+		                             </extensions></trkpt>
+		                             <trkpt lat="53.2" lon="18.9"><time>2026-10-21T14:20:50Z</time></trkpt>
+		                             </trkseg></trk>
+		                             """);
+
+		ExternalTrack track = GpxReader.Read(gpx);
+
+		ExternalTrackPoint point = track.Points[0];
+		Assert.AreEqual(21, point.TemperatureCelsius);
+		Assert.AreEqual(14, point.Satellites);
+		Assert.AreEqual(151, point.HeartRateBpm);
+		PhoneReading phone = point.Phone!;
+		Assert.AreEqual(4.5, phone.AccuracyMeters);
+		Assert.AreEqual(181.5, phone.BearingDegrees);
+		Assert.AreEqual(1008.25, phone.PressureHectopascals);
+		Assert.AreEqual(33.5, phone.BatteryTemperatureCelsius);
+		Assert.AreEqual(true, phone.IsCharging);
+		Assert.AreEqual(new PhoneVector(0.1, -9.8, 0.5), phone.Acceleration);
+		Assert.AreEqual(new PhoneVector(0.01, 0.02, 0.03), phone.AngularVelocity);
+		Assert.AreEqual(1200, phone.LightLux);
+		Assert.AreEqual(2, phone.CellSignalLevel);
+		Assert.AreEqual(-101, phone.CellSignalDbm);
+		Assert.IsNull(track.Points[1].Phone);
+		Assert.IsNull(track.Points[1].Satellites);
+	}
+
+	[TestMethod]
 	public void Gpx_APointWithoutATimeOrWithABadPositionIsLeftOut()
 	{
 		using MemoryStream gpx = Gpx("""

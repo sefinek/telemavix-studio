@@ -1,3 +1,5 @@
+using Telemavix.Core.Telemetry.External;
+
 namespace Telemavix.Core.Telemetry;
 
 public sealed record TelemetryFrame(
@@ -58,7 +60,11 @@ public sealed record TelemetryFrame(
 	string? FlightMode = null,
 	// ... the remote controller's sticks and the aircraft's attitude (the sticks, attitude indicator and 3D orientation widgets).
 	DroneSticks? DroneSticks = null,
-	DroneAttitude? DroneAttitude = null)
+	DroneAttitude? DroneAttitude = null,
+	// A track's heart rate, and what the phone that recorded it (Telemavix GPS) measured (accuracy, pressure, light, mobile signal, battery, motion - one reference, null for
+	// every camera's frame). The phone's motion and bearing are kept but no widget reads them: the phone's orientation on a bike is unknown.
+	int? HeartRateBpm = null,
+	PhoneReading? Phone = null)
 {
 	public double GForce => Math.Sqrt(AccelX * AccelX + AccelY * AccelY + AccelZ * AccelZ);
 

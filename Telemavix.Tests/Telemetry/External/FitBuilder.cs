@@ -45,6 +45,71 @@ internal sealed class FitBuilder
 		return this;
 	}
 
+	private const int PhoneDescriptionLocal = 4, PhoneRecordLocal = 5;
+
+	// What Telemavix GPS writes as developer fields of a record: the number, the size and the base type, in the order of its definition.
+	private static readonly (int Number, int Size, int Type, string Name)[] PhoneFields =
+	[
+		(0, 1, 0x02, "satellites"), (1, 4, 0x86, "pressure"), (4, 1, 0x02, "charging"), (3, 4, 0x88, "battery_temperature"),
+		(5, 4, 0x88, "accel_x"), (6, 4, 0x88, "accel_y"), (7, 4, 0x88, "accel_z"), (11, 4, 0x88, "light"),
+		(12, 4, 0x88, "bearing"), (13, 1, 0x02, "cell_level"), (14, 1, 0x01, "cell_dbm")
+	];
+
+	/// <summary>The field_description messages for the phone's developer fields, then the record definition that carries them (with heart_rate and gps_accuracy).</summary>
+	public FitBuilder DefinePhoneRecord(int developerIndex = 0)
+	{
+		Define(PhoneDescriptionLocal, 206, false, false, (0, 1, 2), (1, 1, 2), (2, 1, 2), (3, 32, 7));
+		foreach ((int number, _, int type, string name) in PhoneFields)
+		{
+			_data.Add(PhoneDescriptionLocal);
+			_data.Add((byte)developerIndex);
+			_data.Add((byte)number);
+			_data.Add((byte)type);
+			byte[] text = new byte[32];
+			System.Text.Encoding.UTF8.GetBytes(name).CopyTo(text, 0);
+			_data.AddRange(text);
+		}
+
+		_data.Add((byte)(0x60 | PhoneRecordLocal));
+		_data.Add(0);
+		_data.Add(0);
+		_data.AddRange(new byte[] { 20, 0 });
+		_data.Add(5);
+		foreach ((int number, int size, int type) in new[] { (253, 4, 6), (0, 4, 5), (1, 4, 5), (3, 1, 2), (31, 1, 2) }) _data.AddRange(new[] { (byte)number, (byte)size, (byte)type });
+		_data.Add((byte)PhoneFields.Length);
+		foreach ((int number, int size, _, _) in PhoneFields) _data.AddRange(new[] { (byte)number, (byte)size, (byte)developerIndex });
+		return this;
+	}
+
+	/// <summary>A record in the phone layout; a null value is FIT's invalid one.</summary>
+	public FitBuilder PhoneRecord(DateTime utc, double? lat, double? lon, int? heartRate = null, int? accuracy = null, int? satellites = null, double? pressureHectopascals = null,
+		bool? charging = null, float? batteryTemperature = null, (float X, float Y, float Z)? acceleration = null, float? light = null, float? bearing = null, int? cellLevel = null, int? cellDbm = null)
+	{
+		_data.Add(PhoneRecordLocal);
+		Number(Seconds(utc), 4, false);
+		Number(lat is { } degrees ? (uint)(int)Math.Round(degrees / 180.0 * 2147483648.0) : 0x7FFFFFFF, 4, false);
+		Number(lon is { } east ? (uint)(int)Math.Round(east / 180.0 * 2147483648.0) : 0x7FFFFFFF, 4, false);
+		_data.Add(heartRate is { } bpm ? (byte)bpm : byte.MaxValue);
+		_data.Add(accuracy is { } meters ? (byte)meters : byte.MaxValue);
+		_data.Add(satellites is { } count ? (byte)count : byte.MaxValue);
+		Number(pressureHectopascals is { } hpa ? (uint)Math.Round(hpa * 100) : uint.MaxValue, 4, false);
+		_data.Add(charging is { } flag ? (byte)(flag ? 1 : 0) : byte.MaxValue);
+		Float(batteryTemperature);
+		Float(acceleration?.X);
+		Float(acceleration?.Y);
+		Float(acceleration?.Z);
+		Float(light);
+		Float(bearing);
+		_data.Add(cellLevel is { } level ? (byte)level : byte.MaxValue);
+		_data.Add(cellDbm is { } dbm ? unchecked((byte)(sbyte)dbm) : (byte)0x7F);
+		return this;
+	}
+
+	private void Float(float? value)
+	{
+		Number(value is { } v ? BitConverter.SingleToUInt32Bits(v) : uint.MaxValue, 4, false);
+	}
+
 	public FitBuilder DefineBattery(bool deviceInfo = false)
 	{
 		if (deviceInfo) Define(3, 23, false, false, (253, 4, 6), (0, 1, 2), (32, 1, 2));

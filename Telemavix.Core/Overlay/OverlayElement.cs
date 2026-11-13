@@ -67,7 +67,11 @@ public enum OverlayElementType
 	FlightMode,
 	RcSticks,
 	AttitudeIndicator,
-	Orientation3D
+	Orientation3D,
+	HeartRate,
+	Pressure,
+	Light,
+	CellSignal
 }
 
 /// <summary>
@@ -134,6 +138,10 @@ public enum OverlayElementType
 [JsonDerivedType(typeof(RcSticksElement), (int)OverlayElementType.RcSticks)]
 [JsonDerivedType(typeof(AttitudeIndicatorElement), (int)OverlayElementType.AttitudeIndicator)]
 [JsonDerivedType(typeof(Orientation3DElement), (int)OverlayElementType.Orientation3D)]
+[JsonDerivedType(typeof(HeartRateElement), (int)OverlayElementType.HeartRate)]
+[JsonDerivedType(typeof(PressureElement), (int)OverlayElementType.Pressure)]
+[JsonDerivedType(typeof(LightElement), (int)OverlayElementType.Light)]
+[JsonDerivedType(typeof(CellSignalElement), (int)OverlayElementType.CellSignal)]
 public abstract record OverlayElement
 {
 	[JsonIgnore] public abstract OverlayElementType Type { get; }
@@ -293,9 +301,56 @@ public sealed record DeviceDistanceElement : LabeledStatElement
 	public UnitSystem Units { get; init; } = UnitSystem.Metric;
 }
 
-public sealed record DeviceBatteryElement : LabeledStatElement
+/// <summary>The heart rate a track carries (a chest strap or a watch), in beats per minute.</summary>
+public sealed record HeartRateElement : LabeledStatElement
+{
+	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.HeartRate;
+}
+
+/// <summary>The air pressure at the phone (its barometer): hectopascals, or inches of mercury in the imperial units.</summary>
+public sealed record PressureElement : LabeledStatElement
+{
+	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.Pressure;
+	public UnitSystem Units { get; init; } = UnitSystem.Metric;
+}
+
+/// <summary>The light the phone's sensor measures, in lux.</summary>
+public sealed record LightElement : LabeledStatElement
+{
+	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.Light;
+}
+
+/// <summary>The phone's mobile network signal: its strength in dBm (or the 0 to 4 level the phone reports when it has no dBm), with ShowBars as the same bars the GPS widget has.</summary>
+public sealed record CellSignalElement : LabeledStatElement
+{
+	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.CellSignal;
+	public bool ShowBars { get; init; } = true;
+}
+
+/// <summary>
+///     A battery's charge in percent as a caption and a reading - or, with ShowIcon, a battery icon filled to the charge beside the percent (OverlayRenderer.DroneBattery.cs). With ColorByCharge
+///     the icon and the percent follow the charge from green through yellow to LowColor at LowPercent and CriticalColor at CriticalPercent (null: orange and red).
+/// </summary>
+public abstract record BatteryElement : LabeledStatElement
+{
+	public bool ShowIcon { get; init; }
+	/// <summary>The icon and the percent follow the charge from green to red; off, they keep the plain colors.</summary>
+	public bool ColorByCharge { get; init; }
+	public int LowPercent { get; init; } = 30;
+	public int CriticalPercent { get; init; } = 15;
+	public string? LowColor { get; init; }
+	public string? CriticalColor { get; init; }
+}
+
+/// <summary>
+///     The battery of the device that recorded the track (a phone's, a GPS watch's): a plain reading, or the icon of the drone battery widget (ShowIcon), which shows a bolt while the phone
+///     charges. ShowTemperature adds a line under the reading with the battery's temperature, when the track has it.
+/// </summary>
+public sealed record DeviceBatteryElement : BatteryElement
 {
 	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.DeviceBattery;
+	public bool ShowTemperature { get; init; }
+	public UnitSystem Units { get; init; } = UnitSystem.Metric;
 }
 
 public sealed record AudioLevelElement : LabeledStatElement
@@ -335,11 +390,16 @@ public sealed record VerticalSpeedElement : LabeledStatElement
 	public string? SinkColor { get; init; }
 }
 
-/// <summary>The drone's GPS (a flight log): the number of satellites its receiver had and, as bars, the aircraft's own GPS level.</summary>
+/// <summary>
+///     The GPS: the number of satellites the receiver had and, as bars, its signal - a drone's own GPS level (a flight log), or for a phone's track the level its accuracy makes
+///     (GpsSignal). ShowAccuracy adds a line under the count with the fix's accuracy, when the track has it.
+/// </summary>
 public sealed record SatellitesElement : ThresholdStatElement
 {
 	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.Satellites;
 	public bool ShowBars { get; init; } = true;
+	public bool ShowAccuracy { get; init; }
+	public UnitSystem Units { get; init; } = UnitSystem.Metric;
 	/// <summary>The count takes WarnColor below WarnBelow satellites and AlertColor below AlertBelow.</summary>
 	public bool ColorByCount { get; init; } = true;
 	public int WarnBelow { get; init; } = 10;
@@ -368,26 +428,25 @@ public sealed record SignalElement : LabeledStatElement
 
 /// <summary>
 ///     A drone's battery from its flight log (OverlayRenderer.DroneBattery.cs): a battery icon filled to the charge, the percent,
-///     and optionally the pack voltage, temperature, current and each cell. The icon and the percent follow the charge from green
-///     through yellow to LowColor at LowPercent and CriticalColor at CriticalPercent (null: orange and red) while ColorByCharge is on. Units are the temperature's.
+///     and optionally the pack voltage, temperature, current and each cell. The icon and the percent follow the charge while ColorByCharge is on
+///     (both are on by default, unlike the device battery's). Units are the temperature's.
 /// </summary>
-public sealed record DroneBatteryElement : LabeledStatElement
+public sealed record DroneBatteryElement : BatteryElement
 {
+	public DroneBatteryElement()
+	{
+		ShowIcon = true;
+		ColorByCharge = true;
+	}
+
 	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.DroneBattery;
 	public UnitSystem Units { get; init; } = UnitSystem.Metric;
-	public bool ShowIcon { get; init; } = true;
 	public bool ShowVoltage { get; init; } = true;
 	public bool ShowTemperature { get; init; }
 	public bool ShowCurrent { get; init; }
 	/// <summary>The current on the voltage's line ("11.4 V · 7.1 A") instead of a line of its own; only with both shown.</summary>
 	public bool CurrentBesideVoltage { get; init; }
 	public bool ShowCells { get; init; }
-	/// <summary>The icon and the percent follow the charge from green to red and the voltage, cell and temperature lines turn orange or red when poor; off, all keep their plain colors.</summary>
-	public bool ColorByCharge { get; init; } = true;
-	public int LowPercent { get; init; } = 30;
-	public int CriticalPercent { get; init; } = 15;
-	public string? LowColor { get; init; }
-	public string? CriticalColor { get; init; }
 
 	// Where the voltage, cell and temperature lines turn LowColor and CriticalColor (DroneBatteryHealth): a cell below the first or at the
 	// second, a temperature (always in degrees Celsius) under the cold limits or at the hot ones.

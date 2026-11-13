@@ -6,11 +6,13 @@ namespace Telemavix.Core.Telemetry.External;
 ///     The records of a Garmin FIT activity file (the format of bike computers and watches): each fix (message 20) with its
 ///     time, position, altitude and speed, and the timer's start and stop events (message 21), which mark recording pauses.
 ///     Read as the SDK describes it: a header, definition messages naming the fields of the data messages after
-///     them (little or big endian), compressed timestamp headers, developer fields skipped, several files chained, CRC checked.
+///     them (little or big endian), compressed timestamp headers, several files chained, CRC checked. A developer field is read only when a field_description
+///     message names it with one of the names Telemavix GPS writes (ReadPhone); any other application's are skipped by size.
 /// </summary>
 public static class FitReader
 {
 	private const int RecordMessage = 20;
+	private const int FieldDescriptionMessage = 206;
 	private const int EventMessage = 21;
 	private const int BatteryMessage = 104;
 	private const int DeviceInfoMessage = 23;
@@ -23,7 +25,8 @@ public static class FitReader
 
 	// The field numbers of the messages this reads.
 	private const int Timestamp = 253;
-	private const int Latitude = 0, Longitude = 1, Altitude = 2, Distance = 5, Speed = 6, Temperature = 13, EnhancedSpeed = 73, EnhancedAltitude = 78;
+	private const int Latitude = 0, Longitude = 1, Altitude = 2, HeartRate = 3, Distance = 5, Speed = 6, Temperature = 13, GpsAccuracy = 31, EnhancedSpeed = 73, EnhancedAltitude = 78;
+	private const int DescriptionDeveloperIndex = 0, DescriptionNumber = 1, DescriptionName = 3;
 	private const int EventNumber = 0, EventType = 1;
 	private const int BatteryCapacity = 2, DeviceIndex = 0, DeviceBatteryLevel = 32;
 
@@ -42,20 +45,21 @@ public static class FitReader
 		List<ExternalTrackPoint> points = [];
 		List<(DateTime Utc, byte Type)> timer = [];
 		List<ExternalBatteryReading> batteries = [];
+		List<ExternalPhoneSample> samples = [];
 		int at = 0;
 		while (at + 12 <= file.Length && LooksLikeFit(file.AsSpan(at)))
-			at = ReadFile(file, at, points, timer, batteries);
+			at = ReadFile(file, at, points, timer, batteries, samples);
 
 		if (at == 0) throw new InvalidDataException("Not a FIT file.");
-		return new ExternalTrack(points, Pauses(timer), batteries);
+		return new ExternalTrack(points, Pauses(timer), batteries, phoneSamples: samples);
 	}
 
-	private sealed record Definition(bool BigEndian, int Message, (int Number, int Size, int BaseType)[] Fields, int DeveloperBytes)
+	private sealed record Definition(bool BigEndian, int Message, (int Number, int Size, int BaseType)[] Fields, (int Number, int Size, int Index)[] Developer)
 	{
-		public int Size => Fields.Sum(f => f.Size) + DeveloperBytes;
+		public int Size => Fields.Sum(f => f.Size) + Developer.Sum(f => f.Size);
 	}
 
-	private static int ReadFile(byte[] file, int start, List<ExternalTrackPoint> points, List<(DateTime, byte)> timer, List<ExternalBatteryReading> batteries)
+	private static int ReadFile(byte[] file, int start, List<ExternalTrackPoint> points, List<(DateTime, byte)> timer, List<ExternalBatteryReading> batteries, List<ExternalPhoneSample> samples)
 	{
 		int headerSize = file[start];
 		long dataSize = BinaryPrimitives.ReadUInt32LittleEndian(file.AsSpan(start + 4));
@@ -65,6 +69,7 @@ public static class FitReader
 			throw new InvalidDataException("The FIT file's checksum doesn't match - it is damaged.");
 
 		var definitions = new Definition?[16];
+		Dictionary<(int Index, int Number), string> descriptions = [];
 		uint? lastTimestamp = null;
 		int at = start + headerSize;
 		while (at < end)
@@ -100,6 +105,13 @@ public static class FitReader
 			if (compressed is { } offset) stamp = lastTimestamp = Roll(lastTimestamp ?? throw new InvalidDataException("A compressed FIT timestamp has no time reference."), offset);
 			else if (Field(definition, data, Timestamp) is { } full) stamp = lastTimestamp = (uint)full;
 
+			if (definition.Message == FieldDescriptionMessage)
+			{
+				if (Field(definition, data, DescriptionDeveloperIndex) is { } index && Field(definition, data, DescriptionNumber) is { } number && Text(definition, data, DescriptionName) is { Length: > 0 } name)
+					descriptions[((int)index, (int)number)] = name;
+				continue;
+			}
+
 			if (definition.Message is not (RecordMessage or EventMessage or BatteryMessage or DeviceInfoMessage) || stamp is not { } seconds) continue;
 
 			DateTime utc = Epoch.AddSeconds(seconds);
@@ -122,14 +134,22 @@ public static class FitReader
 				continue;
 			}
 
-			if (Field(definition, data, Latitude) is not { } lat || Field(definition, data, Longitude) is not { } lon) continue;
+			(PhoneReading reading, int? satellites) = ReadPhone(definition, data, descriptions, Field(definition, data, GpsAccuracy));
+			if (Field(definition, data, Latitude) is not { } lat || Field(definition, data, Longitude) is not { } lon)
+			{
+				// No position (the GPS had no signal): what the phone measured is still a reading, kept for the widgets that need no fix.
+				if (!reading.IsEmpty) samples.Add(new ExternalPhoneSample(utc, reading));
+				continue;
+			}
+
 
 			double? altitude = (Field(definition, data, EnhancedAltitude) ?? Field(definition, data, Altitude)) is { } a ? a / 5.0 - 500 : null;
 			double? speed = (Field(definition, data, EnhancedSpeed) ?? Field(definition, data, Speed)) is { } s ? s / 1000.0 : null;
 			double? temperature = Field(definition, data, Temperature);
 			double? distance = Field(definition, data, Distance) is { } d ? d / 100.0 : null;
+			int? heartRate = Field(definition, data, HeartRate) is { } bpm and > 0 ? (int)bpm : null;
 			points.Add(new ExternalTrackPoint(utc, lat * SemicirclesToDegrees, lon * SemicirclesToDegrees, altitude, speed,
-				TemperatureCelsius: temperature, DistanceMeters: distance));
+				TemperatureCelsius: temperature, DistanceMeters: distance, Satellites: satellites, HeartRateBpm: heartRate, Phone: reading.IsEmpty ? null : reading));
 		}
 
 		return (int)end + 2;
@@ -148,17 +168,17 @@ public static class FitReader
 		var fields = new (int, int, int)[count];
 		for (int i = 0; i < count; i++, at += 3) fields[i] = (file[at], file[at + 1], file[at + 2]);
 
-		int developerBytes = 0;
+		List<(int Number, int Size, int Index)> developer = [];
 		if ((header & 0x20) != 0)
 		{
 			if (at >= file.Length) throw new InvalidDataException("A FIT definition runs past the end of the file.");
 			int developers = file[at++];
 			if (at + developers * 3 > file.Length) throw new InvalidDataException("A FIT definition runs past the end of the file.");
 
-			for (int i = 0; i < developers; i++, at += 3) developerBytes += file[at + 1];
+			for (int i = 0; i < developers; i++, at += 3) developer.Add((file[at], file[at + 1], file[at + 2]));
 		}
 
-		definitions[header & 0x0F] = new Definition(big, message, fields, developerBytes);
+		definitions[header & 0x0F] = new Definition(big, message, fields, [.. developer]);
 		return at;
 	}
 
@@ -180,6 +200,94 @@ public static class FitReader
 		}
 
 		return null;
+	}
+
+	private static readonly PhoneReading NoReading = new();
+
+	/// <summary>A string field (field_description's name): the bytes up to the first zero, null when the message doesn't have it.</summary>
+	private static string? Text(Definition definition, ReadOnlySpan<byte> data, int number)
+	{
+		int at = 0;
+		foreach ((int fieldNumber, int size, _) in definition.Fields)
+		{
+			if (fieldNumber == number)
+			{
+				ReadOnlySpan<byte> text = data.Slice(at, size);
+				int end = text.IndexOf((byte)0);
+				return System.Text.Encoding.UTF8.GetString(end < 0 ? text : text[..end]);
+			}
+
+			at += size;
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	///     What Telemavix GPS writes as developer fields of a record, found by the name its field_description gave them (the field numbers are the application's own).
+	///     `accuracyMeters` is the standard gps_accuracy field, which the phone's accuracy goes into.
+	/// </summary>
+	private static (PhoneReading Reading, int? Satellites) ReadPhone(Definition definition, ReadOnlySpan<byte> data, Dictionary<(int Index, int Number), string> descriptions, long? accuracyMeters)
+	{
+		// A recording of another device has no developer fields: nothing to read, nothing to allocate for every one of its records.
+		if (definition.Developer.Length == 0 && accuracyMeters is null) return (NoReading, null);
+
+		double? pressure = null, batteryTemperature = null, light = null, bearing = null;
+		double? accelX = null, accelY = null, accelZ = null, gyroX = null, gyroY = null, gyroZ = null;
+		long? satellites = null, charging = null, cellLevel = null, cellDbm = null;
+
+		int at = definition.Fields.Sum(f => f.Size);
+		foreach ((int number, int size, int index) in definition.Developer)
+		{
+			ReadOnlySpan<byte> bytes = data.Slice(at, size);
+			at += size;
+			if (!descriptions.TryGetValue((index, number), out string? name)) continue;
+
+			bool big = definition.BigEndian;
+			switch (name)
+			{
+				case "satellites": satellites = Number(bytes, 0x02, big); break;
+				case "pressure": pressure = Number(bytes, 0x86, big) is { } pascals ? pascals / 100.0 : null; break;
+				case "battery_temperature": batteryTemperature = Float(bytes, big); break;
+				case "charging": charging = Number(bytes, 0x02, big); break;
+				case "accel_x": accelX = Float(bytes, big); break;
+				case "accel_y": accelY = Float(bytes, big); break;
+				case "accel_z": accelZ = Float(bytes, big); break;
+				case "gyro_x": gyroX = Float(bytes, big); break;
+				case "gyro_y": gyroY = Float(bytes, big); break;
+				case "gyro_z": gyroZ = Float(bytes, big); break;
+				case "light": light = Float(bytes, big); break;
+				case "bearing": bearing = Float(bytes, big); break;
+				case "cell_level": cellLevel = Number(bytes, 0x02, big); break;
+				case "cell_dbm": cellDbm = Number(bytes, 0x01, big); break;
+			}
+		}
+
+		var reading = new PhoneReading(
+			accuracyMeters,
+			bearing is >= 0 and <= 360 ? bearing : null,
+			pressure is > 0 ? pressure : null,
+			batteryTemperature,
+			charging is <= 1 ? charging == 1 : null,
+			accelX is { } ax && accelY is { } ay && accelZ is { } az ? new PhoneVector(ax, ay, az) : null,
+			gyroX is { } gx && gyroY is { } gy && gyroZ is { } gz ? new PhoneVector(gx, gy, gz) : null,
+			light is >= 0 ? light : null,
+			cellLevel is <= 4 ? (int?)cellLevel : null,
+			cellDbm is <= 0 and >= -140 ? (int?)cellDbm : null,
+			satellites is <= 250 ? (int?)satellites : null);
+		return (reading, reading.Satellites);
+	}
+
+	/// <summary>A FIT float32; its invalid value is all ones.</summary>
+	private static double? Float(ReadOnlySpan<byte> bytes, bool big)
+	{
+		if (bytes.Length != 4) return null;
+
+		uint raw = big ? BinaryPrimitives.ReadUInt32BigEndian(bytes) : BinaryPrimitives.ReadUInt32LittleEndian(bytes);
+		if (raw == uint.MaxValue) return null;
+
+		float value = BitConverter.UInt32BitsToSingle(raw);
+		return float.IsFinite(value) ? value : null;
 	}
 
 	private static long? Number(ReadOnlySpan<byte> bytes, int baseType, bool big)

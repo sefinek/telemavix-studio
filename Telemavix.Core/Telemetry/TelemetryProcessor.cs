@@ -55,6 +55,8 @@ public static class TelemetryProcessor
 		frames = GpsOutliers.Repair(frames);
 		if (smoothGps) frames = GpsInterpolation.Apply(frames);
 
+		// Smoothed for the speed the HUD shows only: the distance's standstill test and the outlier repair read the receiver's speed as it was.
+		double?[] receiverSpeeds = smoothGps ? GpsSpeedSmoothing.Apply(frames) : ReceiverSpeeds(frames);
 		double[] cumulativeDistances = SteppedDistances(frames);
 		int refIndex = 0;
 
@@ -77,7 +79,7 @@ public static class TelemetryProcessor
 
 			// Prefer the GPS receiver's own measured velocity (when the camera records it) over
 			// differentiating position samples - it's not affected by GPS position quantization/lag.
-			double speedKmh = current.GpsSpeedMs is { } gpsSpeedMs
+			double speedKmh = receiverSpeeds[i] is { } gpsSpeedMs
 				? gpsSpeedMs * 3.6
 				: dt > 0
 					? horizontalMeters / dt * 3.6
@@ -152,6 +154,13 @@ public static class TelemetryProcessor
 	///     across a gap between files (StartsAfterGap): what was travelled while the camera was off isn't in the video,
 	///     nor for a step the receiver measured as standing still at both ends (StandstillKmh).
 	/// </summary>
+	private static double?[] ReceiverSpeeds(IReadOnlyList<TelemetryFrame> frames)
+	{
+		var speeds = new double?[frames.Count];
+		for (int i = 0; i < speeds.Length; i++) speeds[i] = frames[i].GpsSpeedMs;
+		return speeds;
+	}
+
 	internal static double[] SteppedDistances(IReadOnlyList<TelemetryFrame> frames)
 	{
 		double[] distances = new double[frames.Count];

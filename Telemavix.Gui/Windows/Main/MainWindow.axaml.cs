@@ -289,6 +289,12 @@ public partial class MainWindow : Window
 		}
 
 		OverlaySettings startup = OverlaySettingsStore.Load();
+		if (!startup.WidgetsHintShown)
+		{
+			WidgetsHint.IsVisible = true;
+			OverlaySettingsStore.Save(startup with { WidgetsHintShown = true });
+		}
+
 		if (startup.LoopByDefault && !_loopEnabled) ToggleLoop();
 		if (startup.SecondScreenEnabled) OpenSecondScreen();
 		ApplyAutoSave(startup.AutoSaveMinutes);

@@ -1,4 +1,5 @@
 using SkiaSharp;
+using Telemavix.Core.Localization;
 using Telemavix.Core.Mapping;
 
 namespace Telemavix.Core.Overlay;
@@ -153,6 +154,66 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		};
 	}
 
+	/// <summary>
+	///     The layout for a ride recorded with Telemavix GPS (a phone on a bike or a motorcycle): the default one without the camera's roll gauge and G-meter, which a track
+	///     has no data for. The trip's figures (moving time, average and top speed) and the elevation profile are off, as in the default layout; the stats column is the default one.
+	///     The phone's own readings are a column down the right edge, where the G-meter was, lined up to the right and in the order of what they say: the connections (the GPS with its
+	///     signal bars and the fix's accuracy, the GSM signal), the phone itself (its battery with the temperature under the percent), then the air (pressure, light). The GPS alert is the top center.
+	///     Where a widget has no data behind it, it is turned off at render time as everywhere (OverlayDataRequirements).
+	/// </summary>
+	public static OverlayPreset CreateTelemavixGps(string id, string name)
+	{
+		OverlayPreset basis = CreateDefault(id, name);
+		const float width = OverlayElementBounds.ReferenceWidth;
+		float top = basis.Elements.First(e => e is DateTimeTextElement).Y;
+
+		const float m = OverlayElementBounds.Margin;
+
+		// The GPS alert is the top center, on the row of the date and the phone's column; the alert's panel is as high as a stat, so nothing sits under it.
+		OverlayElement AtTopCenter(GpsAlertElement alert)
+		{
+			SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.GpsAlert, 0, 0, 1);
+			return alert with { X = width / 2f - (box.Left + box.Right) / 2, Y = top - box.Top };
+		}
+
+		// The column down the right edge: each widget under the one before it by the gap a plain stat has between two (the column's step less a stat's height).
+		float statHeight = OverlayElementBounds.GetBounds(OverlayElementType.Pressure, 0, 0, 1).Height;
+		float rowGap = StatColumnStep - statHeight;
+		float nextRowTop = top;
+
+		OverlayElement OnRightEdge(StyledOverlayElement e)
+		{
+			StyledOverlayElement aligned = e with { Visible = true, TextAlign = TextAlign.Right };
+			SKRect box = OverlayElementBounds.GetBounds(e.Type, 0, 0, 1, element: aligned);
+			aligned = aligned with { Y = nextRowTop - box.Top };
+			nextRowTop += box.Height + rowGap;
+			return aligned with { X = width - m - OverlayElementBounds.TextBoxRight(aligned) };
+		}
+
+		Dictionary<OverlayElementType, OverlayElement> column = [];
+		foreach (StyledOverlayElement e in new StyledOverlayElement[]
+		{
+			basis.Elements.OfType<SatellitesElement>().Single() with { ShowAccuracy = true }, basis.Elements.OfType<CellSignalElement>().Single(),
+			basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true, ShowTemperature = true, Label = CoreStrings.Overlay_PhoneBattery },
+			basis.Elements.OfType<PressureElement>().Single(), basis.Elements.OfType<LightElement>().Single()
+		})
+			column[e.Type] = OnRightEdge(e);
+
+		return basis with
+		{
+			Elements =
+			[
+				.. basis.Elements.Select(e => e switch
+				{
+					RollGaugeElement or GMeterElement => e with { Visible = false },
+					GpsAlertElement alert => AtTopCenter(alert),
+					SatellitesElement or CellSignalElement or DeviceBatteryElement or PressureElement or LightElement => column[e.Type] with { Id = e.Id },
+					_ => e
+				})
+			]
+		};
+	}
+
 	// The widest the GPS and the signal widgets get at 4K (measured), the gap between them, and the rhythm of the left column (the battery's own height).
 	private const float DroneGpsWidth = 240;
 	private const float DroneSignalWidth = 280;
@@ -207,11 +268,10 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		// The frame's own bottom-left corner, closer to the edge than the margin, under the map (its text's baseline).
 		const float mapCreditInset = 12;
 		float mapCreditY = height - mapCreditInset - 6;
-		// The credit widget with BackdropCreditId is the one under a track's map-backdrop (OverlayRenderer.BackdropCredit): its right edge on the frame's, the widest credit (Esri's with its labels) fitting.
+		// The credit widget with BackdropCreditId is the one under a track's map-backdrop (OverlayRenderer.BackdropCredit): anchored on the frame's right corner with its lines ending on the
+		// anchor (TextAlign Right), so whatever the backdrop's credit says it ends at the corner, as the first one starts at the left one.
 		const float mapCreditScale = 0.8f;
-		var widestCredit = new MapSources(new Dictionary<string, string> { [MapProviders.EsriKeyGroup] = "-" });
-		SKRect backdropCreditBox = OverlayElementBounds.GetBounds(OverlayElementType.MapAttribution, 0, 0, 1, text: widestCredit.Attribution(null, showLabels: true));
-		float backdropCreditX = width - mapCreditInset - backdropCreditBox.Right * mapCreditScale;
+		float backdropCreditX = width - mapCreditInset;
 		float gMeterCx = width - m - (OverlayElementBounds.GMeterRadius + 3);
 		float gMeterCy = m + (OverlayElementBounds.GMeterRadius + 3);
 		float sunCx = width - m - (OverlayElementBounds.SunRadius + 2);
@@ -248,7 +308,7 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 			new RollGaugeElement { X = speedCx, Y = rollCy },
 			new MapWidgetElement { X = mapCx, Y = mapCy },
 			new MapAttributionElement { X = mapCreditInset, Y = mapCreditY, Scale = mapCreditScale },
-			new MapAttributionElement { X = backdropCreditX, Y = mapCreditY, Scale = mapCreditScale, Id = BackdropCreditId },
+			new MapAttributionElement { X = backdropCreditX, Y = mapCreditY, Scale = mapCreditScale, TextAlign = TextAlign.Right, Id = BackdropCreditId },
 			new GMeterElement { X = gMeterCx, Y = gMeterCy },
 			// The opening of the bottom center, one layer: the watermark for the first seconds, fading out, and the progress bar
 			// fading in where it was as soon as it's gone (both counted from the route overview card's end when it's on).
@@ -290,7 +350,11 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 			new FlightModeElement { X = 2900, Y = 1700, Visible = false },
 			new RcSticksElement { X = 2900, Y = 1960, Visible = false },
 			new AttitudeIndicatorElement { X = 2448, Y = 1810, Visible = false },
-			new Orientation3DElement { X = 2740, Y = 1810, Visible = false }
+			new Orientation3DElement { X = 2740, Y = 1810, Visible = false },
+			new HeartRateElement { X = 1700, Y = 1400, Visible = false },
+			new PressureElement { X = 1200, Y = 2000, Visible = false },
+			new LightElement { X = 3400, Y = 1100, Visible = false },
+			new CellSignalElement { X = 3400, Y = 800, Visible = false }
 		];
 
 		// Each type's built-in instance gets a stable id (its own type name) rather than a random Guid, so a

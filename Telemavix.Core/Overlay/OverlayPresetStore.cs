@@ -25,9 +25,12 @@ public static class OverlayPresetStore
 	/// <summary>Id of the third built-in preset, the drone layout in the manner of FPV goggles' OSD (OverlayPreset.CreateFpv) - read-only like the others.</summary>
 	public const string FpvPresetId = "fpv-drones";
 
+	/// <summary>Id of the fourth built-in preset, for rides recorded with Telemavix GPS (OverlayPreset.CreateTelemavixGps) - read-only like the others.</summary>
+	public const string TelemavixGpsPresetId = "telemavix-gps";
+
 	public static bool IsBuiltIn(string? id)
 	{
-		return id is DefaultPresetId or DronePresetId or FpvPresetId;
+		return id is DefaultPresetId or DronePresetId or FpvPresetId or TelemavixGpsPresetId;
 	}
 
 	/// <summary>The built-in layouts for a drone's footage.</summary>
@@ -44,7 +47,8 @@ public static class OverlayPresetStore
 		[
 			units.ApplyTo(OverlayPreset.CreateDefault(DefaultPresetId, CoreStrings.Preset_ActionCameras)),
 			units.ApplyTo(OverlayPreset.CreateDrone(DronePresetId, CoreStrings.Preset_DjiDrones)),
-			units.ApplyTo(OverlayPreset.CreateFpv(FpvPresetId, CoreStrings.Preset_FpvDrones))
+			units.ApplyTo(OverlayPreset.CreateFpv(FpvPresetId, CoreStrings.Preset_FpvDrones)),
+			units.ApplyTo(OverlayPreset.CreateTelemavixGps(TelemavixGpsPresetId, CoreStrings.Preset_TelemavixGps))
 		];
 	}
 

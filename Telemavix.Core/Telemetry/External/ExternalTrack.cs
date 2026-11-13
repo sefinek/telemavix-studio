@@ -17,7 +17,9 @@ public sealed record ExternalTrackPoint(
 	int? Satellites = null,
 	int? GpsLevel = null,
 	string? FlightMode = null,
-	DroneAttitude? Attitude = null);
+	DroneAttitude? Attitude = null,
+	int? HeartRateBpm = null,
+	PhoneReading? Phone = null);
 
 /// <summary>Where a flight began (a drone's take-off point), for the distance from it.</summary>
 public readonly record struct ExternalTrackHome(double Latitude, double Longitude);
@@ -64,7 +66,8 @@ public readonly record struct ExternalTrackSample(
 	int? Satellites = null,
 	int? GpsLevel = null,
 	string? FlightMode = null,
-	DroneAttitude? Attitude = null);
+	DroneAttitude? Attitude = null,
+	int? HeartRateBpm = null);
 
 /// <summary>
 ///     A track on its own UTC clock. Gaps and timer pauses preserve elapsed time and do not imply a standstill,
@@ -83,7 +86,8 @@ public sealed class ExternalTrack
 	public ExternalTrack(IEnumerable<ExternalTrackPoint> points, IEnumerable<ExternalTrackPause>? pauses = null, IEnumerable<ExternalBatteryReading>? batteries = null,
 		IEnumerable<ExternalTrackRecording>? recordings = null,
 		ExternalTrackHome? home = null, IEnumerable<ExternalDroneBatteryReading>? droneBatteries = null, IEnumerable<ExternalTrackEvent>? events = null,
-		IEnumerable<ExternalDroneSignalReading>? droneSignals = null, string? deviceName = null, IEnumerable<ExternalDroneSticksReading>? droneSticks = null)
+		IEnumerable<ExternalDroneSignalReading>? droneSignals = null, string? deviceName = null, IEnumerable<ExternalDroneSticksReading>? droneSticks = null,
+		IEnumerable<ExternalPhoneSample>? phoneSamples = null)
 	{
 		Home = home;
 		DeviceName = string.IsNullOrWhiteSpace(deviceName) ? null : deviceName.Trim();
@@ -106,6 +110,34 @@ public sealed class ExternalTrack
 		Batteries = [.. (batteries ?? []).Where(b => double.IsFinite(b.Percent) && b.Percent is >= 0 and <= 100).OrderBy(b => b.Utc)];
 		double[] intervals = [.. sorted.Zip(sorted.Skip(1), (a, b) => (b.Utc - a.Utc).TotalSeconds).Order()];
 		GapSeconds = Math.Max(MinGapSeconds, GapIntervals * intervals[intervals.Length / 2]);
+
+		_phone = [.. sorted.Where(p => p.Phone is not null).Select(p => (p.Utc, p.Phone!)), .. (phoneSamples ?? []).Where(s => !s.Reading.IsEmpty).Select(s => (s.Utc, s.Reading))];
+		_phone.Sort(static (a, b) => a.Utc.CompareTo(b.Utc));
+		PhoneStaleSeconds = _phone.Count < 2
+			? MinGapSeconds
+			: Math.Max(MinGapSeconds, GapIntervals * _phone.Zip(_phone.Skip(1), (a, b) => (b.Utc - a.Utc).TotalSeconds).Order().ElementAt((_phone.Count - 1) / 2));
+	}
+
+	private readonly List<(DateTime Utc, PhoneReading Reading)> _phone;
+
+	/// <summary>How long a phone reading is held without a newer one before it is taken to be gone (the same reasoning as GapSeconds, on the sensors' own rhythm).</summary>
+	public double PhoneStaleSeconds { get; }
+
+	/// <summary>
+	///     What the phone measured at `utc`: the latest reading at or before it, on a fix or on a moment without one (GPS lost), held for PhoneStaleSeconds. Null when the track has none
+	///     (a drone's flight log, a GPX from another device) or none is that recent. Never interpolated: a pressure or a light is a reading, not a position.
+	/// </summary>
+	public PhoneReading? PhoneAt(DateTime utc)
+	{
+		int low = 0, high = _phone.Count;
+		while (low < high)
+		{
+			int middle = low + (high - low) / 2;
+			if (_phone[middle].Utc <= utc) low = middle + 1;
+			else high = middle;
+		}
+
+		return low > 0 && (utc - _phone[low - 1].Utc).TotalSeconds <= PhoneStaleSeconds ? _phone[low - 1].Reading : null;
 	}
 
 	public IReadOnlyList<ExternalTrackPoint> Points { get; }
@@ -229,7 +261,7 @@ public sealed class ExternalTrack
 		double? distance = to.DistanceMeters >= from.DistanceMeters ? Interpolate(from.DistanceMeters, to.DistanceMeters, fraction) : null;
 		double? height = Interpolate(from.HeightMeters, to.HeightMeters, fraction);
 		return new ExternalTrackSample(ExternalTrackState.Fix, latitude, longitude, altitude, speed, temperature, distance, height,
-			Interpolate(from.VerticalSpeedMs, to.VerticalSpeedMs, fraction), from.Satellites, from.GpsLevel, from.FlightMode, Interpolate(from.Attitude, to.Attitude, fraction));
+			Interpolate(from.VerticalSpeedMs, to.VerticalSpeedMs, fraction), from.Satellites, from.GpsLevel, from.FlightMode, Interpolate(from.Attitude, to.Attitude, fraction), from.HeartRateBpm);
 	}
 
 	private ExternalTrackSample FixAt(int index)
@@ -248,7 +280,7 @@ public sealed class ExternalTrack
 		}
 
 		return new ExternalTrackSample(ExternalTrackState.Fix, point.Latitude, point.Longitude, point.AltitudeMeters, speed, point.TemperatureCelsius, point.DistanceMeters, point.HeightMeters,
-			point.VerticalSpeedMs, point.Satellites, point.GpsLevel, point.FlightMode, point.Attitude);
+			point.VerticalSpeedMs, point.Satellites, point.GpsLevel, point.FlightMode, point.Attitude, point.HeartRateBpm);
 	}
 
 	private static double? Interpolate(double? from, double? to, double fraction) => from is { } a && to is { } b ? a + (b - a) * fraction : null;

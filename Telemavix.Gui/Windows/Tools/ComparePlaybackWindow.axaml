@@ -41,6 +41,8 @@
 				<Button Name="AddButton" Content="{x:Static local:Strings.ComparePlay_Add}" Click="OnAddClick" />
 				<Button Name="ClearButton" Content="{x:Static local:Strings.Common_ClearAll}" Click="OnClearClick" />
 			</StackPanel>
+			<TextBlock Grid.Column="1" Name="SmoothingHint" Classes="hint" IsVisible="False" Margin="12,0" VerticalAlignment="Center"
+			           TextTrimming="CharacterEllipsis" Text="{x:Static local:Strings.CompareSmooth_Hint}" />
 			<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
 				<Button Name="ZoomOutButton" Classes="transport" Click="OnZoomOutClick" ToolTip.Tip="{x:Static local:Strings.ComparePlay_ZoomOut}">
 					<local:IconView Data="{StaticResource IconMinus}" Width="14" Height="14" />

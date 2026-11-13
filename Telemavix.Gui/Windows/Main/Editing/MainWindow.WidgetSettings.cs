@@ -117,12 +117,28 @@ public partial class MainWindow
 		UpdateElement(id, el => el is SignalElement w ? w with { ShowUplink = up, ShowDownlink = down, ShowBars = bars, ColorByLevel = colored } : el);
 	}
 
+	private void OnDeviceBatteryOptionChanged(object? sender, RoutedEventArgs e)
+	{
+		if (_suppressOverlayEvents || _editingElementId is not { } id) return;
+
+		bool icon = DeviceBatteryIconCheck.IsChecked == true, colored = DeviceBatteryColorCheck.IsChecked == true, temperature = DeviceBatteryTemperatureCheck.IsChecked == true;
+		UpdateElement(id, el => el is DeviceBatteryElement b ? b with { ShowIcon = icon, ColorByCharge = colored, ShowTemperature = temperature } : el);
+		SensorUnitsPanel.IsVisible = temperature;
+		if (ActiveElements.FirstOrDefault(el => el.Id == id) is DeviceBatteryElement updated) SensorStyle.Populate(updated);
+	}
+
 	private void OnSatellitesBarsChanged(object? sender, RoutedEventArgs e)
 	{
 		if (_suppressOverlayEvents || _editingElementId is not { } id) return;
 
-		bool bars = SatellitesBarsCheck.IsChecked == true;
-		UpdateElement(id, el => el is SatellitesElement g ? g with { ShowBars = bars } : el);
+		bool bars = SatellitesBarsCheck.IsChecked == true, accuracy = SatellitesAccuracyCheck.IsChecked == true;
+		UpdateElement(id, el => el switch
+		{
+			SatellitesElement g => g with { ShowBars = bars, ShowAccuracy = accuracy },
+			CellSignalElement c => c with { ShowBars = bars },
+			_ => el
+		});
+		if (ActiveElements.FirstOrDefault(el => el.Id == id) is StyledOverlayElement updated) SensorStyle.Populate(updated);
 	}
 
 	private void OnFlightAlertsOptionChanged(object? sender, RoutedEventArgs e)

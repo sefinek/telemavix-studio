@@ -246,7 +246,7 @@ public partial class MainWindow
 	}
 
 	/// <summary>The loaded flight log has some drone data, so a missing drone widget is the log's gap, not a log left out.</summary>
-	private bool HasDroneLogData => _availability is { HeightAboveHome: true } or { Satellites: true } or { DroneBattery: true } or { Signal: true } or { FlightMode: true } or { DroneAttitude: true } or { DroneSticks: true };
+	private bool HasDroneLogData => _availability is { HeightAboveHome: true } or { DroneBattery: true } or { Signal: true } or { FlightMode: true } or { DroneAttitude: true } or { DroneSticks: true };
 
 	private string UnsupportedReason(OverlayElementType type)
 	{
@@ -266,7 +266,10 @@ public partial class MainWindow
 			OverlayElementType.AudioLevel => Strings.Editor_UnavailableAudioLevel,
 			OverlayElementType.WindProcessing => Strings.Editor_UnavailableWindProcessing,
 			OverlayElementType.ImageLuma => Strings.Editor_UnavailableImageLuma,
-			OverlayElementType.Height or OverlayElementType.HomeDistance or OverlayElementType.VerticalSpeed or OverlayElementType.Satellites or OverlayElementType.DroneBattery
+			OverlayElementType.Satellites => Strings.Editor_UnavailableSatellites,
+			OverlayElementType.HeartRate => Strings.Editor_UnavailableHeartRate,
+			OverlayElementType.Pressure or OverlayElementType.Light or OverlayElementType.CellSignal => Strings.Editor_UnavailablePhoneSensor,
+			OverlayElementType.Height or OverlayElementType.HomeDistance or OverlayElementType.VerticalSpeed or OverlayElementType.DroneBattery
 				or OverlayElementType.FlightAlerts or OverlayElementType.Signal or OverlayElementType.FlightMode or OverlayElementType.RcSticks
 				or OverlayElementType.AttitudeIndicator or OverlayElementType.Orientation3D => HasDroneLogData ? Strings.Editor_UnavailableInDroneLog : Strings.Editor_UnavailableDroneLog,
 			_ => Strings.Editor_UnavailableGps
@@ -292,6 +295,10 @@ public partial class MainWindow
 			OverlayElementType.ImuTemperature => ImuTemperatureListItem,
 			OverlayElementType.DeviceDistance => DeviceDistanceListItem,
 			OverlayElementType.DeviceBattery => DeviceBatteryListItem,
+			OverlayElementType.HeartRate => HeartRateListItem,
+			OverlayElementType.Pressure => PressureListItem,
+			OverlayElementType.Light => LightListItem,
+			OverlayElementType.CellSignal => CellSignalListItem,
 			OverlayElementType.AudioLevel => AudioLevelListItem,
 			OverlayElementType.WindProcessing => WindProcessingListItem,
 			OverlayElementType.ImageLuma => ImageLumaListItem,
@@ -581,6 +588,9 @@ public partial class MainWindow
 			DistanceElement e => e with { Units = units },
 			TemperatureElementBase e => e with { Units = units },
 			DeviceDistanceElement e => e with { Units = units },
+			SatellitesElement e => e with { Units = units },
+			DeviceBatteryElement e => e with { Units = units },
+			PressureElement e => e with { Units = units },
 			HeightElement e => e with { Units = units },
 			HomeDistanceElement e => e with { Units = units },
 			VerticalSpeedElement e => e with { Units = units },
@@ -868,6 +878,10 @@ public partial class MainWindow
 			case OverlayElementType.AudioLevel:
 			case OverlayElementType.WindProcessing:
 			case OverlayElementType.ImageLuma:
+			case OverlayElementType.HeartRate:
+			case OverlayElementType.Pressure:
+			case OverlayElementType.Light:
+			case OverlayElementType.CellSignal:
 			case OverlayElementType.Height:
 			case OverlayElementType.HomeDistance:
 			case OverlayElementType.VerticalSpeed:
@@ -877,16 +891,26 @@ public partial class MainWindow
 				var x = (LabeledStatElement)el;
 				SensorLabelBox.Text = x.Label;
 				SensorLabelBox.PlaceholderText = OverlayRenderer.DefaultLabel(x);
-				SensorUnitsPanel.IsVisible = el is TemperatureElementBase or DeviceDistanceElement or HeightElement or HomeDistanceElement or VerticalSpeedElement;
-				SensorMetricRadio.Content = el is TemperatureElementBase ? "°C" : Strings.Common_Metric;
-				SensorImperialRadio.Content = el is TemperatureElementBase ? "°F" : Strings.Common_Imperial;
+				SensorUnitsPanel.IsVisible = el is TemperatureElementBase or DeviceDistanceElement or HeightElement or HomeDistanceElement or VerticalSpeedElement or SatellitesElement or PressureElement
+					or DeviceBatteryElement { ShowTemperature: true };
+				SensorMetricRadio.Content = el switch { TemperatureElementBase or DeviceBatteryElement => "°C", PressureElement => "hPa", _ => Strings.Common_Metric };
+				SensorImperialRadio.Content = el switch { TemperatureElementBase or DeviceBatteryElement => "°F", PressureElement => "inHg", _ => Strings.Common_Imperial };
 				UnitSystem units = el switch
 				{
 					TemperatureElementBase t => t.Units, DeviceDistanceElement d => d.Units, HeightElement h => h.Units, HomeDistanceElement a => a.Units,
-					VerticalSpeedElement v => v.Units, _ => UnitSystem.Metric
+					VerticalSpeedElement v => v.Units, SatellitesElement g => g.Units, DeviceBatteryElement b => b.Units, PressureElement p => p.Units, _ => UnitSystem.Metric
 				};
 				SetUnitsRadio(SensorMetricRadio, SensorImperialRadio, units);
-				SensorBarsPanel.IsVisible = el is SatellitesElement;
+				SensorBarsPanel.IsVisible = el is SatellitesElement or CellSignalElement;
+				SatellitesAccuracyCheck.IsVisible = el is SatellitesElement;
+				SensorBatteryPanel.IsVisible = el is DeviceBatteryElement;
+				if (el is DeviceBatteryElement battery)
+				{
+					DeviceBatteryIconCheck.IsChecked = battery.ShowIcon;
+					DeviceBatteryColorCheck.IsChecked = battery.ColorByCharge;
+					DeviceBatteryTemperatureCheck.IsChecked = battery.ShowTemperature;
+				}
+
 				SensorLimitsGroup.IsVisible = el is RangeLimitedElement;
 				SensorGpsGroup.IsVisible = el is SatellitesElement;
 				SensorModeGroup.IsVisible = el is FlightModeElement;
@@ -918,7 +942,8 @@ public partial class MainWindow
 					SensorAlertColorBox.Text = threshold.AlertColor;
 				}
 
-				if (el is SatellitesElement gps) SatellitesBarsCheck.IsChecked = gps.ShowBars;
+				SatellitesBarsCheck.IsChecked = el switch { SatellitesElement g => g.ShowBars, CellSignalElement c => c.ShowBars, _ => false };
+				if (el is SatellitesElement gps) SatellitesAccuracyCheck.IsChecked = gps.ShowAccuracy;
 				SensorDescription.Text = el switch
 				{
 					AmbientTemperatureElement => Strings.Widget_AmbientTemperatureDescription,
@@ -927,6 +952,10 @@ public partial class MainWindow
 					AudioLevelElement => Strings.Widget_AudioLevelDescription,
 					WindProcessingElement => Strings.Widget_WindProcessingDescription,
 					ImageLumaElement => Strings.Widget_ImageLumaDescription,
+					HeartRateElement => Strings.Widget_HeartRateDescription,
+					PressureElement => Strings.Widget_PressureDescription,
+					LightElement => Strings.Widget_LightDescription,
+					CellSignalElement => Strings.Widget_CellSignalDescription,
 					HeightElement => Strings.Widget_HeightDescription,
 					HomeDistanceElement => Strings.Widget_HomeDistanceDescription,
 					VerticalSpeedElement => Strings.Widget_VerticalSpeedDescription,

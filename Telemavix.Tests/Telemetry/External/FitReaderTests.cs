@@ -25,6 +25,70 @@ public sealed class FitReaderTests
 	}
 
 	[TestMethod]
+	public void Read_ThePhonesDeveloperFieldsAreFoundByTheNameTheirDescriptionGave()
+	{
+		ExternalTrack track = FitReader.Read(new FitBuilder().DefinePhoneRecord(3)
+			.PhoneRecord(T0, 53.1, 18.9, heartRate: 142, accuracy: 6, satellites: 17, pressureHectopascals: 1013.25, charging: true, batteryTemperature: 31.5f,
+				acceleration: (0.5f, -9.75f, 1.25f), light: 480.5f, bearing: 270f, cellLevel: 3, cellDbm: -97)
+			.PhoneRecord(T0.AddSeconds(1), 53.1001, 18.9).ToArray());
+
+		ExternalTrackPoint point = track.Points[0];
+		Assert.AreEqual(142, point.HeartRateBpm);
+		Assert.AreEqual(17, point.Satellites);
+		PhoneReading phone = point.Phone!;
+		Assert.AreEqual(6, phone.AccuracyMeters);
+		Assert.AreEqual(1013.25, phone.PressureHectopascals!.Value, 1e-9);
+		Assert.AreEqual(true, phone.IsCharging);
+		Assert.AreEqual(31.5, phone.BatteryTemperatureCelsius!.Value, 1e-6);
+		Assert.AreEqual(new PhoneVector(0.5, -9.75, 1.25), phone.Acceleration);
+		Assert.IsNull(phone.AngularVelocity);
+		Assert.AreEqual(480.5, phone.LightLux!.Value, 1e-6);
+		Assert.AreEqual(270, phone.BearingDegrees!.Value, 1e-6);
+		Assert.AreEqual(3, phone.CellSignalLevel);
+		Assert.AreEqual(-97, phone.CellSignalDbm);
+	}
+
+	[TestMethod]
+	public void Read_ARecordWithoutAPositionIsAPhoneSampleAndNotAFix()
+	{
+		ExternalTrack track = FitReader.Read(new FitBuilder().DefinePhoneRecord()
+			.PhoneRecord(T0, 53.1, 18.9, satellites: 12)
+			.PhoneRecord(T0.AddSeconds(1), null, null, satellites: 0, pressureHectopascals: 990, light: 4, cellDbm: -101, batteryTemperature: 28)
+			.PhoneRecord(T0.AddSeconds(2), null, null)
+			.PhoneRecord(T0.AddSeconds(3), 53.1002, 18.9, satellites: 14).ToArray());
+
+		Assert.AreEqual(2, track.Points.Count, "a record with no position is not a fix");
+		PhoneReading during = track.PhoneAt(T0.AddSeconds(1.5))!;
+		Assert.AreEqual(990, during.PressureHectopascals!.Value, 1e-9);
+		Assert.AreEqual(4, during.LightLux!.Value, 1e-6);
+		Assert.AreEqual(-101, during.CellSignalDbm);
+		Assert.AreEqual(0, during.Satellites);
+		Assert.AreEqual(28, during.BatteryTemperatureCelsius!.Value, 1e-6);
+		Assert.AreEqual(12, track.PhoneAt(T0.AddSeconds(0.5))!.Satellites, "the fix's own reading is held until the next one");
+	}
+
+	[TestMethod]
+	public void Read_APhoneRecordWithNothingValidHasNoReadings()
+	{
+		ExternalTrack track = FitReader.Read(new FitBuilder().DefinePhoneRecord()
+			.PhoneRecord(T0, 53.1, 18.9).PhoneRecord(T0.AddSeconds(1), 53.1001, 18.9).ToArray());
+
+		Assert.IsNull(track.Points[0].Phone);
+		Assert.IsNull(track.Points[0].HeartRateBpm);
+		Assert.IsNull(track.Points[0].Satellites);
+	}
+
+	[TestMethod]
+	public void Read_ADeveloperFieldNobodyDescribedIsSkippedBySize()
+	{
+		ExternalTrack track = FitReader.Read(new FitBuilder().DefineRecord(false, true)
+			.Record(T0, 53.1, 18.9, 80, 2, false, true).Record(T0.AddSeconds(1), 53.1001, 18.9, 80, 2, false, true).ToArray());
+
+		Assert.AreEqual(2, track.Points.Count);
+		Assert.IsNull(track.Points[0].Phone);
+	}
+
+	[TestMethod]
 	public void Read_DeviceInfoBatteryUsesOnlyTheRecordingDevice()
 	{
 		ExternalTrack track = FitReader.Read(new FitBuilder().DefineSensorRecord().DefineBattery(true)

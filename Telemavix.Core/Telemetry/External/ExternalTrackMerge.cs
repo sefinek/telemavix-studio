@@ -25,6 +25,7 @@ public static class ExternalTrackMerge
 			DateTime utc = synchronization.At(frame.SampleTimeSeconds);
 			clock.Add(utc);
 			ExternalTrackSample? reading = track.At(utc, ref cursor);
+			PhoneReading? phone = track.PhoneAt(utc);
 			TelemetryFrame merged = frame with
 			{
 				AmbientTemperatureCelsius = reading?.TemperatureCelsius,
@@ -38,7 +39,9 @@ public static class ExternalTrackMerge
 				GpsLevel = reading is { State: ExternalTrackState.Fix } leveled ? leveled.GpsLevel : null,
 				HeightAboveHomeMeters = reading is { State: ExternalTrackState.Fix } fix ? fix.HeightMeters : null,
 				VerticalSpeedMs = reading is { State: ExternalTrackState.Fix } climbing ? climbing.VerticalSpeedMs : null,
-				GpsSatellites = reading is { State: ExternalTrackState.Fix } counted ? counted.Satellites : null,
+				GpsSatellites = phone?.Satellites ?? (reading is { State: ExternalTrackState.Fix } counted ? counted.Satellites : null),
+				HeartRateBpm = reading is { State: ExternalTrackState.Fix } pulse ? pulse.HeartRateBpm : null,
+				Phone = phone,
 				DistanceFromHomeMeters = reading is { State: ExternalTrackState.Fix } at && track.Home is { } home
 					? TelemetryMath.HaversineMeters(home.Latitude, home.Longitude, at.Latitude, at.Longitude)
 					: null

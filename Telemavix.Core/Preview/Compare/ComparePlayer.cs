@@ -1,3 +1,8 @@
+using Telemavix.Core.Logging;
+using Telemavix.Core.Mapping;
+using Telemavix.Core.Overlay;
+using Telemavix.Core.Telemetry;
+
 namespace Telemavix.Core.Preview;
 
 /// <summary>A file the comparison couldn't open, and why.</summary>
@@ -27,6 +32,7 @@ public sealed class ComparePlayer : IDisposable
 	private int _generation;
 	private volatile bool _playing;
 	private volatile bool _loop;
+	private readonly CancellationTokenSource _maps = new();
 	private bool _disposed;
 
 	private ComparePlayer(CompareClock clock, List<CompareTile> tiles)
@@ -100,6 +106,88 @@ public sealed class ComparePlayer : IDisposable
 		}
 
 		return (tiles.Count == 0 ? null : new ComparePlayer(clock, tiles), failures);
+	}
+
+	/// <summary>
+	///     One recording twice, on one clock: the overlay drawn from telemetry processed without GPS smoothing (first tile) and with it
+	///     (second). The picture, layout, settings and the speed correction are the same, so smoothing is the only difference.
+	///     Error is why the recording can't be compared; both null when it has no GPS fix.
+	/// </summary>
+	public static async Task<(ComparePlayer? Player, string? Error)> OpenSmoothingAsync(FileSummary summary, int tileWidth, CancellationToken ct = default)
+	{
+		if (summary.TelemetryFrames is not { Count: > 0 } raw || !OverlayAvailability.Of(raw, false, summary.CameraFormat).GpsFix)
+			return (null, null);
+
+		OverlaySettings settings = OverlaySettingsStore.Load() with { ShowRouteIntro = false };
+		var availability = OverlayAvailability.Of(raw, summary.ContainerRecordingStartUtc is not null, summary.CameraFormat);
+		(List<OverlayPreset> presets, string activeId) = OverlayPresetStore.Load();
+		IReadOnlyList<OverlayElement> layout = availability.Apply(presets.First(p => p.Id == activeId).Elements);
+
+		var clock = new CompareClock();
+		var tiles = new List<CompareTile>(2);
+		try
+		{
+			foreach (bool smoothed in new[] { false, true })
+			{
+				IReadOnlyList<DerivedFrame> frames = await Task.Run(() =>
+					TelemetryProcessor.Process(raw, summary.CameraFormat, smoothed, settings.SpeedCorrectionPercent, settings.OrientationSource), ct);
+				tiles.Add(await Task.Run(() => CompareTile.OpenRecording(summary, smoothed, frames, layout, availability, settings, tileWidth, () => clock.Position), ct));
+			}
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			foreach (CompareTile tile in tiles) tile.Dispose();
+			return (null, ex.Message);
+		}
+		catch
+		{
+			foreach (CompareTile tile in tiles) tile.Dispose();
+			throw;
+		}
+
+		var player = new ComparePlayer(clock, tiles);
+		bool mapShown = layout.Any(e => e is MapWidgetElement { Visible: true });
+		for (int i = 0; i < tiles.Count; i++) _ = player.PrepareMapAsync(i, mapShown);
+		return (player, null);
+	}
+
+	/// <summary>The Map widget's tiles for a recording's tile, fetched in the background like the preview does - the picture is shown meanwhile.</summary>
+	private async Task PrepareMapAsync(int index, bool mapShown)
+	{
+		if (!mapShown || _tiles[index].Compositor is not { } compositor) return;
+
+		CancellationToken ct = _maps.Token;
+		try
+		{
+			OverlayRenderer renderer = compositor.Renderer;
+			if (!renderer.NeedsMapPrepare(renderer.Layout)) return;
+
+			(MapMosaicSet? mosaics, MapAssignments? key) = await renderer.BuildMapMosaicAsync((_, _) => { }, ct);
+			if (ct.IsCancellationRequested)
+			{
+				mosaics?.Dispose();
+				return;
+			}
+
+			ComposedPreviewFrame? still = compositor.Change(r => r.ApplyMapMosaic(mosaics, key));
+			if (still is null) return;
+
+			try
+			{
+				if (!_playing && !ct.IsCancellationRequested) StillReady?.Invoke(index, still);
+			}
+			finally
+			{
+				PlaybackFrameSource.Release(still);
+			}
+		}
+		catch (OperationCanceledException)
+		{
+		}
+		catch (Exception ex)
+		{
+			AppLogger.Warn(ex, "The map of the smoothing comparison could not be prepared.");
+		}
 	}
 
 	/// <summary>Every tile starts together from the current position (from the beginning when it is at the end).</summary>
@@ -186,6 +274,7 @@ public sealed class ComparePlayer : IDisposable
 		_playing = false;
 		_seek.Cancel();
 		_run.Cancel();
+		_maps.Cancel();
 		try
 		{
 			Task.WhenAll(_workers).Wait(TimeSpan.FromSeconds(2));
@@ -197,6 +286,7 @@ public sealed class ComparePlayer : IDisposable
 		foreach (CompareTile tile in _tiles) tile.Dispose();
 		_run.Dispose();
 		_seek.Dispose();
+		_maps.Dispose();
 	}
 
 	private async Task StartLockedAsync()
@@ -214,6 +304,7 @@ public sealed class ComparePlayer : IDisposable
 		VideoFrame?[] first = await Task.WhenAll(_tiles.Select((tile, i) => Task.Run(() =>
 		{
 			tile.Frames.Clear();
+			tile.Compositor?.ClearStill();
 			tile.Error = null;
 			try
 			{
@@ -229,8 +320,8 @@ public sealed class ComparePlayer : IDisposable
 
 		for (int i = 0; i < _tiles.Count; i++)
 		{
-			if (first[i] is { } frame && streams[i] is { } stream)
-				_tiles[i].Frames.Enqueue(new ComposedPreviewFrame(stream.Position, frame.Bgra, frame.Width, frame.Height) { Owner = _tiles[i].Pool });
+			if (first[i] is { } frame && streams[i] is { } stream && _tiles[i].Compose(frame, stream.Position) is { } composed)
+				_tiles[i].Frames.Enqueue(composed);
 			_tiles[i].Frames.SetPlaying(true);
 		}
 
@@ -285,7 +376,9 @@ public sealed class ComparePlayer : IDisposable
 					return;
 				}
 
-				tile.Frames.Enqueue(new ComposedPreviewFrame(stream.Position, frame.Bgra, frame.Width, frame.Height) { Owner = tile.Pool });
+				if (tile.Compose(frame, stream.Position) is not { } composed) return;
+
+				tile.Frames.Enqueue(composed);
 			}
 		}
 		catch (Exception ex) when (ex is InvalidOperationException or ObjectDisposedException)
@@ -354,6 +447,24 @@ public sealed class ComparePlayer : IDisposable
 				}
 
 				if (frame is null) return;
+
+				if (tile.Compositor is { } compositor)
+				{
+					// The compositor keeps the clean frame for a redraw (a map arriving) and draws into a copy.
+					ComposedPreviewFrame? composed = compositor.ShowStill(frame, TimeSpan.FromSeconds(PreviewFrames.IndexAt(seconds, tile.Fps) / tile.Fps));
+					if (composed is null) return;
+
+					try
+					{
+						if (!ct.IsCancellationRequested) StillReady?.Invoke(i, composed);
+					}
+					finally
+					{
+						PlaybackFrameSource.Release(composed);
+					}
+
+					return;
+				}
 
 				try
 				{

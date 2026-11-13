@@ -160,6 +160,19 @@ public partial class ToolsWindow : Window
 		new ComparePlaybackWindow().Show(this);
 	}
 
+	private async void OnCompareSmoothingClick(object? sender, RoutedEventArgs e)
+	{
+		IReadOnlyList<IStorageFile> files = await StorageProvider.OpenRememberedAsync("recordings", new FilePickerOpenOptions
+		{
+			Title = Strings.Main_PickRecordings,
+			AllowMultiple = false,
+			FileTypeFilter = [new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.insv", "*.lrv"] }]
+		});
+		if (files.Count == 0 || files[0].TryGetLocalPath() is not { } path) return;
+
+		new ComparePlaybackWindow(path).Show(this);
+	}
+
 	private async void OnSelectColorTagFileClick(object? sender, RoutedEventArgs e)
 	{
 		TopLevel? topLevel = GetTopLevel(this);

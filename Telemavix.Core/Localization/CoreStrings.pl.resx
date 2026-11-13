@@ -685,6 +685,9 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   <data name="Preset_FpvDrones" xml:space="preserve">
     <value>Drony FPV</value>
   </data>
+  <data name="Preset_TelemavixGps" xml:space="preserve">
+    <value>Telemavix GPS</value>
+  </data>
   <data name="Overlay_AmbientTemperature" xml:space="preserve">
     <value>Temperatura z trasy</value>
   </data>
@@ -783,6 +786,21 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   </data>
   <data name="Overlay_DeviceBattery" xml:space="preserve">
     <value>Bateria urządzenia GPS</value>
+  </data>
+  <data name="Overlay_PhoneBattery" xml:space="preserve">
+    <value>Bateria telefonu</value>
+  </data>
+  <data name="Overlay_HeartRate" xml:space="preserve">
+    <value>Tętno</value>
+  </data>
+  <data name="Overlay_Pressure" xml:space="preserve">
+    <value>Ciśnienie</value>
+  </data>
+  <data name="Overlay_Light" xml:space="preserve">
+    <value>Światło</value>
+  </data>
+  <data name="Overlay_CellSignal" xml:space="preserve">
+    <value>Sygnał GSM</value>
   </data>
   <data name="Overlay_AudioLevel" xml:space="preserve">
     <value>Poziom dźwięku</value>

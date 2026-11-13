@@ -225,7 +225,8 @@ public sealed partial class OverlayRenderer : IDisposable
 	public void Dispose()
 	{
 		_gpsAlertPaint.Dispose();
-		_droneBatteryPaint.Dispose();
+		_batteryPaint.Dispose();
+		_chargingBolt.Dispose();
 		_droneControlPaint.Dispose();
 		_droneModel.Dispose();
 		_flightAlertPaint.Dispose();
@@ -816,7 +817,7 @@ public sealed partial class OverlayRenderer : IDisposable
 				DrawDistance(canvas, frame, distance);
 				break;
 			case TemperatureElementBase or DeviceDistanceElement or DeviceBatteryElement or WindProcessingElement or ImageLumaElement or HeightElement or HomeDistanceElement
-				or VerticalSpeedElement or SatellitesElement:
+				or VerticalSpeedElement or SatellitesElement or HeartRateElement or PressureElement or LightElement or CellSignalElement:
 				DrawSensorStat(canvas, frame, (LabeledStatElement)element);
 				break;
 			case DroneBatteryElement droneBattery:
@@ -878,7 +879,7 @@ public sealed partial class OverlayRenderer : IDisposable
 				break;
 			case MapAttributionElement mapCredit:
 				DrawCredit(canvas, MapCreditText(), 0, 0, TextFont(mapCredit, OverlayElementBounds.CreditFontSize), TextColorOf(mapCredit),
-					MapCreditOpacity, OutlineColorOf(mapCredit), mapCredit.OutlineWidth * 0.6f);
+					MapCreditOpacity, OutlineColorOf(mapCredit), mapCredit.OutlineWidth * 0.6f, mapCredit.TextAlign == TextAlign.Right ? SKTextAlign.Right : SKTextAlign.Left);
 				break;
 			case GMeterElement gMeter:
 				DrawGMeter(canvas, frame, gMeter);
@@ -1027,13 +1028,13 @@ public sealed partial class OverlayRenderer : IDisposable
 	///     of several lines grows away from the frame's edge it sits at, never past it.
 	/// </summary>
 	private void DrawCredit(SKCanvas canvas, string text, float x, float y, SKFont font, SKColor color,
-		float opacity = 1f, SKColor? outlineColor = null, float outlineWidthScale = 1f)
+		float opacity = 1f, SKColor? outlineColor = null, float outlineWidthScale = 1f, SKTextAlign align = SKTextAlign.Left)
 	{
 		string[] lines = text.Split('\n');
 		for (int i = 0; i < lines.Length; i++)
 		{
 			DrawOutlined(canvas, lines[i], x, y - (lines.Length - 1 - i) * font.Spacing, font, color,
-				opacity: opacity, outlineColor: outlineColor, outlineWidthScale: outlineWidthScale);
+				align, opacity, outlineColor, outlineWidthScale);
 		}
 	}
 

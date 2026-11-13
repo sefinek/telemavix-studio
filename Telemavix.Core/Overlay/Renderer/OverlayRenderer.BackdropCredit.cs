@@ -31,7 +31,6 @@ public sealed partial class OverlayRenderer
 		if (own is not null) return (own with { Visible = true }, text);
 
 		MapAttributionElement style = first ?? DefaultMapCredit;
-		SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.MapAttribution, 0, 0, 1, fontFamily: style.FontFamily, text: text, element: style);
-		return (style with { X = OverlayElementBounds.ReferenceWidth - DefaultMapCredit.X - box.Right * style.Scale, Y = DefaultMapCredit.Y, Visible = true }, text);
+		return (style with { X = OverlayElementBounds.ReferenceWidth - DefaultMapCredit.X, Y = DefaultMapCredit.Y, TextAlign = TextAlign.Right, Visible = true }, text);
 	}
 }

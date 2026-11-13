@@ -54,6 +54,7 @@ public partial class MainWindow
 			OverlayElementType.CameraInfo => CameraInfoSettingsPanel,
 			OverlayElementType.AmbientTemperature or OverlayElementType.ImuTemperature or OverlayElementType.DeviceDistance or OverlayElementType.DeviceBattery
 				or OverlayElementType.AudioLevel or OverlayElementType.WindProcessing or OverlayElementType.ImageLuma
+				or OverlayElementType.HeartRate or OverlayElementType.Pressure or OverlayElementType.Light or OverlayElementType.CellSignal
 				or OverlayElementType.Height or OverlayElementType.HomeDistance or OverlayElementType.VerticalSpeed or OverlayElementType.Satellites
 				or OverlayElementType.FlightMode => SensorSettingsPanel,
 			OverlayElementType.Compass => CompassSettingsPanel,

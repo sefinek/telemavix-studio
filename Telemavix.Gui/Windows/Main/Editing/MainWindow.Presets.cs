@@ -230,6 +230,7 @@ public partial class MainWindow
 					OverlayPresetStore.DefaultPresetId => Strings.Presets_ActionCamerasHint,
 					OverlayPresetStore.DronePresetId => Strings.Presets_DjiDronesHint,
 					OverlayPresetStore.FpvPresetId => Strings.Presets_FpvDronesHint,
+					OverlayPresetStore.TelemavixGpsPresetId => Strings.Presets_TelemavixGpsHint,
 					_ => PresetDatesTooltip(option.Id)
 				};
 				ToolTip.SetTip(text, tip);

@@ -167,6 +167,8 @@ public sealed record OverlaySettings(
 	// The SDK key of the user's DJI Open API app, which DJI's flight record API asks for to give the keys of an encrypted flight log (DjiKeychains). A secret: protected on disk like MapApiKeys.
 	string? DjiApiKey = null,
 	bool DjiApiNoticeShown = false,
+	// The how-to under "Widgets" in the overlay panel is shown on the first start only (MainWindow); it is on screen once and then gone.
+	bool WidgetsHintShown = false,
 	// While a recording is read the panels give way to an animated "app is working" screen over the console; off keeps them in place (a slow computer).
 	bool WorkingAnimation = true,
 	// The units new widgets and the built-in layouts start with (UnitPreferences); null = metric, until the welcome window's Units step is saved.

@@ -78,10 +78,11 @@
 					<Border Grid.Row="1" Grid.Column="1" Classes="card toolCard">
 						<DockPanel>
 							<TextBlock DockPanel.Dock="Top" Classes="toolTitle" Text="{x:Static local:Strings.Common_CompareVideos}" />
-							<StackPanel DockPanel.Dock="Bottom" Classes="toolActions">
+							<WrapPanel DockPanel.Dock="Bottom" Margin="0,14,0,0" ItemSpacing="8" LineSpacing="8">
 								<Button Content="{x:Static local:Strings.Tools_Compare}" Click="OnCompareVideosClick" />
 								<Button Content="{x:Static local:Strings.Tools_ComparePlayback}" Click="OnComparePlaybackClick" />
-							</StackPanel>
+								<Button Content="{x:Static local:Strings.Tools_CompareSmoothing}" Click="OnCompareSmoothingClick" />
+							</WrapPanel>
 							<TextBlock Classes="hint"
 							           Text="{x:Static local:Strings.Tools_PickUpTo6Files}" />
 						</DockPanel>

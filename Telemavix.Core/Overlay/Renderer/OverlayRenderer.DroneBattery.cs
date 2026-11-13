@@ -5,40 +5,61 @@ using Telemavix.Core.Telemetry;
 namespace Telemavix.Core.Overlay;
 
 /// <summary>
-///     The drone battery widget (DroneBatteryElement): the caption, a battery icon filled to the charge beside the percent, and
+///     The battery widgets. The drone battery (DroneBatteryElement): the caption, a battery icon filled to the charge beside the percent, and
 ///     under the percent the extra lines the user asked for (voltage, temperature, current, cells). The icon and the percent take
 ///     a color that follows the charge: green when full, through yellow to LowColor (orange) at LowPercent and CriticalColor (red) at
 ///     CriticalPercent and below, blended in between. The voltage, temperature and cell lines stay the text color while they are fine and
-///     take LowColor or CriticalColor when the reading is poor (DroneBatteryHealth).
+///     take LowColor or CriticalColor when the reading is poor (DroneBatteryHealth). The device battery (DeviceBatteryElement) draws
+///     the same caption, icon and percent when ShowIcon is on, and otherwise is a plain stat (DrawStat) that can still take the charge's color.
 /// </summary>
 public sealed partial class OverlayRenderer
 {
-	private static readonly SKColor DroneBatteryLowDefault = SKColor.Parse("#FF9800");
-	private static readonly SKColor DroneBatteryCriticalDefault = SKColor.Parse("#F44336");
-	private static readonly SKColor DroneBatteryFullColor = SKColor.Parse("#4CAF50");
-	private static readonly SKColor DroneBatteryMidColor = SKColor.Parse("#FFC107");
+	private static readonly SKColor BatteryLowDefault = SKColor.Parse("#FF9800");
+	private static readonly SKColor BatteryCriticalDefault = SKColor.Parse("#F44336");
+	private static readonly SKColor BatteryFullColor = SKColor.Parse("#4CAF50");
+	private static readonly SKColor BatteryMidColor = SKColor.Parse("#FFC107");
 
 	private const string CurrentSeparator = " · ";
 
 	internal static readonly DroneBattery SampleDroneBattery = new(100, 99.9, 99.9, 99.9, [3.99, 3.99, 3.99]);
 
-	private readonly SKPaint _droneBatteryPaint = new() { IsAntialias = true };
+	private readonly SKPaint _batteryPaint = new() { IsAntialias = true };
+
+	/// <summary>A lightning bolt in the middle of the icon's body, drawn while the phone is charging.</summary>
+	private readonly SKPath _chargingBolt = BuildChargingBolt();
+
+	private static SKPath BuildChargingBolt()
+	{
+		float cx = OverlayElementBounds.DroneBatteryIconWidth / 2f;
+		float cy = (OverlayElementBounds.DroneBatteryIconTop + OverlayElementBounds.DroneBatteryCapHeight + OverlayElementBounds.DroneBatteryIconBottom) / 2f;
+		float h = (OverlayElementBounds.DroneBatteryIconBottom - OverlayElementBounds.DroneBatteryIconTop - OverlayElementBounds.DroneBatteryCapHeight) * 0.55f;
+		float w = OverlayElementBounds.DroneBatteryIconWidth * 0.5f;
+		using var path = new SKPathBuilder();
+		path.MoveTo(cx + w * 0.12f, cy - h / 2);
+		path.LineTo(cx - w / 2, cy + h * 0.08f);
+		path.LineTo(cx - w * 0.04f, cy + h * 0.08f);
+		path.LineTo(cx - w * 0.12f, cy + h / 2);
+		path.LineTo(cx + w / 2, cy - h * 0.08f);
+		path.LineTo(cx + w * 0.04f, cy - h * 0.08f);
+		path.Close();
+		return path.Detach();
+	}
 
 	/// <summary>
 	///     The charge's color: stops at 100 % (green), halfway between LowPercent and full (yellow), LowPercent and CriticalPercent, blended
 	///     between them, the critical color below. Without a reading the widget's accent.
 	/// </summary>
-	internal static SKColor DroneBatteryColor(DroneBatteryElement element, double? percent)
+	internal static SKColor BatteryColor(BatteryElement element, double? percent)
 	{
 		if (percent is not { } charge || !element.ColorByCharge) return AccentColorOf(element);
 
 		double critical = element.CriticalPercent, low = Math.Max(element.LowPercent, critical);
 		ReadOnlySpan<(double At, SKColor Color)> stops =
 		[
-			(critical, ResolveColor(element.CriticalColor, DroneBatteryCriticalDefault)),
-			(low, ResolveColor(element.LowColor, DroneBatteryLowDefault)),
-			((low + 100) / 2, DroneBatteryMidColor),
-			(100, DroneBatteryFullColor)
+			(critical, ResolveColor(element.CriticalColor, BatteryCriticalDefault)),
+			(low, ResolveColor(element.LowColor, BatteryLowDefault)),
+			((low + 100) / 2, BatteryMidColor),
+			(100, BatteryFullColor)
 		];
 
 		if (charge <= stops[0].At) return stops[0].Color;
@@ -93,30 +114,15 @@ public sealed partial class OverlayRenderer
 	private static SKColor DroneBatteryLineColor(DroneBatteryElement element, BatteryCondition condition, SKColor text)
 	{
 		return !element.ColorByCharge || condition == BatteryCondition.Normal ? text
-			: condition == BatteryCondition.Critical ? ResolveColor(element.CriticalColor, DroneBatteryCriticalDefault)
-			: ResolveColor(element.LowColor, DroneBatteryLowDefault);
+			: condition == BatteryCondition.Critical ? ResolveColor(element.CriticalColor, BatteryCriticalDefault)
+			: ResolveColor(element.LowColor, BatteryLowDefault);
 	}
 
 	private void DrawDroneBattery(SKCanvas canvas, DerivedFrame frame, DroneBatteryElement element)
 	{
 		DroneBattery? battery = frame.Raw.DroneBattery is { } reading && double.IsFinite(reading.Percent) ? reading : null;
-		SKColor textColor = TextColorOf(element), outlineColor = OutlineColorOf(element), level = DroneBatteryColor(element, battery?.Percent);
-
-		DrawOutlined(canvas, (element.Label ?? CoreStrings.Overlay_DroneBattery).ToUpperInvariant(), 0, 0, TextFont(element, OverlayElementBounds.LabelFontSize), textColor,
-			outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
-
-		float left = 0;
-		if (element.ShowIcon)
-		{
-			DrawBatteryIcon(canvas, battery?.Percent, level, textColor);
-			left = OverlayElementBounds.DroneBatteryIconWidth + OverlayElementBounds.DroneBatteryIconGap;
-		}
-
-		SKFont valueFont = TextFont(element, OverlayElementBounds.DroneBatteryValueFontSize);
-		string value = battery is null ? "--" : F(battery.Percent, "0");
-		DrawOutlined(canvas, value, left, OverlayElementBounds.DroneBatteryValueBaseline, valueFont, level, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
-		DrawOutlined(canvas, "%", left + valueFont.MeasureText(value) + OverlayElementBounds.StatUnitGapX, OverlayElementBounds.DroneBatteryValueBaseline,
-			TextFont(element, OverlayElementBounds.UnitFontSize), textColor, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		SKColor textColor = TextColorOf(element), outlineColor = OutlineColorOf(element);
+		float left = DrawBatteryReading(canvas, element, element.Label ?? CoreStrings.Overlay_DroneBattery, battery?.Percent);
 
 		SKFont lineFont = TextFont(element, OverlayElementBounds.SmallFontSize);
 		(string Text, BatteryCondition Condition)[] rows = DroneBatteryRows(element, battery);
@@ -139,8 +145,51 @@ public sealed partial class OverlayRenderer
 		}
 	}
 
+	/// <summary>
+	///     The caption, the icon (when the widget shows it) and the percent in the charge's color: what the drone battery and the device battery share.
+	///     The widgets that line their text up (OverlayElementBounds.SupportsTextAlign: the device battery) line the caption, the icon with the percent and the note up to the right or the
+	///     center of the box as a block each; the drone battery stays on the left. Returns where the readout's text starts, for what a widget draws under it.
+	/// </summary>
+	private float DrawBatteryReading(SKCanvas canvas, BatteryElement element, string caption, double? percent, bool charging = false, string? note = null)
+	{
+		SKColor textColor = TextColorOf(element), outlineColor = OutlineColorOf(element), level = BatteryColor(element, percent);
+		SKFont captionFont = TextFont(element, OverlayElementBounds.LabelFontSize), valueFont = TextFont(element, OverlayElementBounds.DroneBatteryValueFontSize);
+		SKFont unitFont = TextFont(element, OverlayElementBounds.UnitFontSize), noteFont = TextFont(element, OverlayElementBounds.SmallFontSize);
+		string title = caption.ToUpperInvariant(), value = percent is { } charge ? F(charge, "0") : "--";
+
+		float iconPart = element.ShowIcon ? OverlayElementBounds.DroneBatteryIconWidth + OverlayElementBounds.DroneBatteryIconGap : 0;
+		float valueWidth = valueFont.MeasureText(value);
+		float readout = iconPart + valueWidth + OverlayElementBounds.StatUnitGapX + unitFont.MeasureText("%");
+		float titleWidth = captionFont.MeasureText(title), noteWidth = note is null ? 0 : noteFont.MeasureText(note);
+		TextAlign align = OverlayElementBounds.SupportsTextAlign(element) ? element.TextAlign : TextAlign.Left;
+		float box = align == TextAlign.Left ? 0 : Math.Max(OverlayElementBounds.TextBoxRight(element), Math.Max(titleWidth, Math.Max(readout, noteWidth)));
+		float readoutX = OverlayElementBounds.AlignedX(align, box, readout);
+
+		DrawOutlined(canvas, title, OverlayElementBounds.AlignedX(align, box, titleWidth), 0, captionFont, textColor, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+
+		if (element.ShowIcon)
+		{
+			canvas.Save();
+			canvas.Translate(readoutX, 0);
+			DrawBatteryIcon(canvas, percent, level, textColor, charging);
+			canvas.Restore();
+		}
+
+		float left = readoutX + iconPart;
+		DrawOutlined(canvas, value, left, OverlayElementBounds.DroneBatteryValueBaseline, valueFont, level, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		DrawOutlined(canvas, "%", left + valueWidth + OverlayElementBounds.StatUnitGapX, OverlayElementBounds.DroneBatteryValueBaseline, unitFont, textColor,
+			outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		if (note is not null)
+		{
+			DrawOutlined(canvas, note, align == TextAlign.Left ? left : OverlayElementBounds.AlignedX(align, box, noteWidth), OverlayElementBounds.DroneBatteryLineBaseline, noteFont, textColor,
+				outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		}
+
+		return left;
+	}
+
 	/// <summary>An upright battery - a body with a cap on top - outlined in the text color and filled from the bottom to `percent`.</summary>
-	private void DrawBatteryIcon(SKCanvas canvas, double? percent, SKColor fill, SKColor outline)
+	private void DrawBatteryIcon(SKCanvas canvas, double? percent, SKColor fill, SKColor outline, bool charging)
 	{
 		const float stroke = 5, radius = 9;
 		float width = OverlayElementBounds.DroneBatteryIconWidth;
@@ -148,9 +197,9 @@ public sealed partial class OverlayRenderer
 		float top = OverlayElementBounds.DroneBatteryIconTop + capHeight, bottom = OverlayElementBounds.DroneBatteryIconBottom;
 		var body = new SKRect(0, top, width, bottom);
 
-		_droneBatteryPaint.Style = SKPaintStyle.Fill;
-		_droneBatteryPaint.Color = outline;
-		canvas.DrawRoundRect(new SKRect((width - capWidth) / 2, OverlayElementBounds.DroneBatteryIconTop, (width + capWidth) / 2, top + 2), 3, 3, _droneBatteryPaint);
+		_batteryPaint.Style = SKPaintStyle.Fill;
+		_batteryPaint.Color = outline;
+		canvas.DrawRoundRect(new SKRect((width - capWidth) / 2, OverlayElementBounds.DroneBatteryIconTop, (width + capWidth) / 2, top + 2), 3, 3, _batteryPaint);
 
 		if (percent is { } charge)
 		{
@@ -161,15 +210,21 @@ public sealed partial class OverlayRenderer
 				canvas.Save();
 				using var clip = new SKRoundRect(inner, radius - stroke / 2);
 				canvas.ClipRoundRect(clip);
-				_droneBatteryPaint.Color = fill;
-				canvas.DrawRect(new SKRect(inner.Left, inner.Bottom - height, inner.Right, inner.Bottom), _droneBatteryPaint);
+				_batteryPaint.Color = fill;
+				canvas.DrawRect(new SKRect(inner.Left, inner.Bottom - height, inner.Right, inner.Bottom), _batteryPaint);
 				canvas.Restore();
 			}
 		}
 
-		_droneBatteryPaint.Style = SKPaintStyle.Stroke;
-		_droneBatteryPaint.StrokeWidth = stroke;
-		_droneBatteryPaint.Color = outline;
-		canvas.DrawRoundRect(SKRect.Inflate(body, -stroke / 2, -stroke / 2), radius, radius, _droneBatteryPaint);
+		_batteryPaint.Style = SKPaintStyle.Stroke;
+		_batteryPaint.StrokeWidth = stroke;
+		_batteryPaint.Color = outline;
+		canvas.DrawRoundRect(SKRect.Inflate(body, -stroke / 2, -stroke / 2), radius, radius, _batteryPaint);
+
+		if (!charging) return;
+
+		_batteryPaint.Style = SKPaintStyle.Fill;
+		_batteryPaint.Color = outline;
+		canvas.DrawPath(_chargingBolt, _batteryPaint);
 	}
 }

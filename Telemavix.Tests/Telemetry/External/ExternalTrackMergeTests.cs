@@ -39,6 +39,53 @@ public sealed class ExternalTrackMergeTests
 	}
 
 	[TestMethod]
+	public void Apply_ThePhonesReadingsAndTheHeartRateReachTheFrames()
+	{
+		var phone = new PhoneReading(AccuracyMeters: 5, PressureHectopascals: 1000, LightLux: 200, CellSignalDbm: -90, CellSignalLevel: 3, BatteryTemperatureCelsius: 30, IsCharging: true,
+			Acceleration: new PhoneVector(1, 2, 3), BearingDegrees: 90);
+		var track = new ExternalTrack([new ExternalTrackPoint(T0, 53.1, 18.9, Satellites: 12, HeartRateBpm: 130, Phone: phone), new ExternalTrackPoint(T0.AddSeconds(2), 53.1002, 18.9)]);
+
+		TelemetryFrame frame = ExternalTrackMerge.Apply(Frames(25), track, T0)[10];
+
+		Assert.AreEqual(12, frame.GpsSatellites);
+		Assert.AreEqual(130, frame.HeartRateBpm);
+		Assert.AreEqual(phone, frame.Phone, "every reading of the phone, motion and bearing too, rides on the frame");
+	}
+
+	[TestMethod]
+	public void Apply_ThePhonesSensorsKeepGoingWhereTheGpsHasNoFix()
+	{
+		ExternalTrackPoint[] fixes = [.. Enumerable.Range(0, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1000, Satellites: 15))),
+			.. Enumerable.Range(20, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1001, Satellites: 15)))];
+		ExternalPhoneSample[] samples = [.. Enumerable.Range(3, 17).Select(i => new ExternalPhoneSample(T0.AddSeconds(i), new PhoneReading(PressureHectopascals: 1000.5, LightLux: 10 + i, Satellites: 0)))];
+		var track = new ExternalTrack(fixes, phoneSamples: samples);
+
+		List<TelemetryFrame> merged = ExternalTrackMerge.Apply(Frames(25 * 22), track, T0);
+
+		TelemetryFrame lost = merged[25 * 10];
+		Assert.IsFalse(lost.HasGpsFix, "the position is still lost");
+		Assert.IsNull(lost.GpsSpeedMs);
+		Assert.AreEqual(1000.5, lost.Phone!.PressureHectopascals);
+		Assert.AreEqual(20, lost.Phone.LightLux);
+		Assert.AreEqual(0, lost.GpsSatellites, "the receiver says it has none");
+		Assert.IsNull(lost.Phone.AccuracyMeters);
+		Assert.AreEqual(1001, merged[25 * 21].Phone!.PressureHectopascals, "the fixes' own readings come back with them");
+	}
+
+	[TestMethod]
+	public void PhoneAt_HoldsTheLatestReadingAndLetsGoOfAStaleOne()
+	{
+		var track = new ExternalTrack([new ExternalTrackPoint(T0, 53.1, 18.9), new ExternalTrackPoint(T0.AddSeconds(1), 53.1001, 18.9)],
+			phoneSamples: [new ExternalPhoneSample(T0.AddSeconds(5), new PhoneReading(LightLux: 7)), new ExternalPhoneSample(T0.AddSeconds(6), new PhoneReading(LightLux: 8)), new ExternalPhoneSample(T0.AddSeconds(7), new PhoneReading())]);
+
+		Assert.IsNull(track.PhoneAt(T0.AddSeconds(4.9)), "nothing before the first reading");
+		Assert.AreEqual(7, track.PhoneAt(T0.AddSeconds(5.5))!.LightLux);
+		Assert.AreEqual(8, track.PhoneAt(T0.AddSeconds(6 + track.PhoneStaleSeconds - 0.1))!.LightLux);
+		Assert.IsNull(track.PhoneAt(T0.AddSeconds(6 + track.PhoneStaleSeconds + 0.1)), "a reading nobody renewed is gone");
+		Assert.IsNull(new ExternalTrack([new ExternalTrackPoint(T0, 53.1, 18.9), new ExternalTrackPoint(T0.AddSeconds(1), 53.1001, 18.9)]).PhoneAt(T0), "a track with no readings has none");
+	}
+
+	[TestMethod]
 	public void Apply_AFlightLogsHeightAndDistanceFromTakeOffReachTheFrames()
 	{
 		var track = new ExternalTrack(

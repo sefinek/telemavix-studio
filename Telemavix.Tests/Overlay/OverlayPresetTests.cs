@@ -1,5 +1,6 @@
 using System.Globalization;
 using SkiaSharp;
+using Telemavix.Core.Localization;
 using Telemavix.Core.Overlay;
 using Telemavix.Core.Telemetry;
 
@@ -135,6 +136,53 @@ public sealed class OverlayPresetTests
 	}
 
 	[TestMethod]
+	public void CreateTelemavixGps_IsTheDefaultLayoutForATrackWithoutACamera()
+	{
+		OverlayPreset basis = OverlayPreset.CreateDefault("d", "Default");
+		OverlayPreset gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
+
+		foreach (OverlayElementType type in new[] { OverlayElementType.RollGauge, OverlayElementType.GMeter })
+			Assert.IsFalse(gps.Elements.Single(e => e.Type == type).Visible, type.ToString());
+		Assert.IsTrue(gps.Elements.Single(e => e.Type == OverlayElementType.DeviceBattery).Visible);
+		foreach (OverlayElementType type in new[] { OverlayElementType.ProfileChart, OverlayElementType.TripStat })
+			Assert.IsFalse(gps.Elements.Single(e => e.Type == type).Visible, type + " is off, as in the default layout");
+		Assert.IsFalse(gps.Elements.Single(e => e.Type == OverlayElementType.ElapsedTimeText).Visible, "the time is a labelled trip stat, not the bare clock");
+		var battery = (DeviceBatteryElement)gps.Elements.Single(e => e.Type == OverlayElementType.DeviceBattery);
+		Assert.IsTrue(battery is { ShowIcon: true, ColorByCharge: true, ShowTemperature: true });
+		Assert.AreEqual(CoreStrings.Overlay_PhoneBattery, battery.Label);
+
+		OverlayElementType[] changed = [OverlayElementType.RollGauge, OverlayElementType.GMeter, OverlayElementType.DeviceBattery,
+			OverlayElementType.Satellites, OverlayElementType.CellSignal, OverlayElementType.Pressure, OverlayElementType.Light, OverlayElementType.GpsAlert];
+		foreach (OverlayElement element in basis.Elements.Where(e => !changed.Contains(e.Type)))
+			Assert.AreEqual(element, gps.Elements.Single(e => e.Id == element.Id), element.Type.ToString());
+	}
+
+	[TestMethod]
+	public void CreateTelemavixGps_ThePhonesReadingsAreAColumnOnTheRightInTheOrderOfWhatTheySay()
+	{
+		OverlayPreset gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
+		OverlayElementType[] column = [OverlayElementType.Satellites, OverlayElementType.CellSignal, OverlayElementType.DeviceBattery, OverlayElementType.Pressure, OverlayElementType.Light];
+		List<OverlayElement> shown = [.. column.Select(type => gps.Elements.Single(e => e.Type == type))];
+
+		Assert.IsTrue(shown.All(e => e.Visible));
+		CollectionAssert.AreEqual(shown.Select(e => e.Y).Order().ToArray(), shown.Select(e => e.Y).ToArray(), "from the top in the order of the list");
+		Assert.IsTrue(shown.OfType<SatellitesElement>().Single() is { ShowBars: true, ShowAccuracy: true }, "the GPS widget carries its signal bars and the accuracy");
+		Assert.IsFalse(gps.Elements.Single(e => e.Type == OverlayElementType.HeartRate).Visible);
+
+		Assert.IsTrue(shown.OfType<DeviceBatteryElement>().Single() is { ShowIcon: true, ShowTemperature: true, TextAlign: TextAlign.Right }, "the phone's battery is in the column, lined up like the rest");
+
+		OverlayElement alert = gps.Elements.Single(e => e.Type == OverlayElementType.GpsAlert);
+		SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.GpsAlert, alert.X, alert.Y, 1);
+		Assert.AreEqual(OverlayElementBounds.ReferenceWidth / 2f, (box.Left + box.Right) / 2, 1, "the GPS alert is the top center");
+	}
+
+	[TestMethod]
+	public void CreateTelemavixGps_NoShownWidgetCoversAnother()
+	{
+		AssertWidgetsDoNotOverlap(OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS"), false);
+	}
+
+	[TestMethod]
 	public void CreateDrone_NoShownWidgetCoversAnother()
 	{
 		AssertWidgetsDoNotOverlap(OverlayPreset.CreateDrone("x", "Drones"), false);
@@ -197,6 +245,8 @@ public sealed class OverlayPresetTests
 		Assert.IsTrue(OverlayPresetStore.IsBuiltIn(OverlayPresetStore.DefaultPresetId));
 		Assert.IsTrue(OverlayPresetStore.IsBuiltIn(OverlayPresetStore.DronePresetId));
 		Assert.IsTrue(OverlayPresetStore.IsBuiltIn(OverlayPresetStore.FpvPresetId));
+		Assert.IsTrue(OverlayPresetStore.IsBuiltIn(OverlayPresetStore.TelemavixGpsPresetId));
+		Assert.IsFalse(OverlayPresetStore.IsDronePreset(OverlayPresetStore.TelemavixGpsPresetId));
 		Assert.IsTrue(OverlayPresetStore.IsDronePreset(OverlayPresetStore.FpvPresetId));
 		Assert.IsFalse(OverlayPresetStore.IsDronePreset(OverlayPresetStore.DefaultPresetId));
 		Assert.IsFalse(OverlayPresetStore.IsBuiltIn(Guid.NewGuid().ToString("N")));

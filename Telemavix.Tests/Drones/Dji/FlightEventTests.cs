@@ -407,14 +407,14 @@ public sealed class FlightEventTests
 	{
 		var battery = new DroneBatteryElement { X = 0, Y = 0, LowPercent = 40, CriticalPercent = 10 };
 
-		Assert.AreEqual(SKColor.Parse("#4CAF50"), OverlayRenderer.DroneBatteryColor(battery, 100));
-		Assert.AreEqual(SKColor.Parse("#FFC107"), OverlayRenderer.DroneBatteryColor(battery, 70));
-		Assert.AreEqual(SKColor.Parse("#FF9800"), OverlayRenderer.DroneBatteryColor(battery, 40));
-		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.DroneBatteryColor(battery, 10));
-		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.DroneBatteryColor(battery, 0));
-		SKColor between = OverlayRenderer.DroneBatteryColor(battery, 85);
+		Assert.AreEqual(SKColor.Parse("#4CAF50"), OverlayRenderer.BatteryColor(battery, 100));
+		Assert.AreEqual(SKColor.Parse("#FFC107"), OverlayRenderer.BatteryColor(battery, 70));
+		Assert.AreEqual(SKColor.Parse("#FF9800"), OverlayRenderer.BatteryColor(battery, 40));
+		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.BatteryColor(battery, 10));
+		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.BatteryColor(battery, 0));
+		SKColor between = OverlayRenderer.BatteryColor(battery, 85);
 		Assert.IsTrue(between.Green > 0xAF && between.Red > 0x4C && between.Red < 0xFF, "between green and yellow");
-		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.DroneBatteryColor(new DroneBatteryElement { X = 0, Y = 0, LowPercent = 10, CriticalPercent = 30 }, 20), "levels the wrong way round read as one");
+		Assert.AreEqual(SKColor.Parse("#F44336"), OverlayRenderer.BatteryColor(new DroneBatteryElement { X = 0, Y = 0, LowPercent = 10, CriticalPercent = 30 }, 20), "levels the wrong way round read as one");
 	}
 
 	[TestMethod]

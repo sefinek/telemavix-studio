@@ -445,7 +445,7 @@ Zamknąć Telemavix Studio?</value>
     <value>Pomiń</value>
   </data>
   <data name="Common_SmoothGpsDerivedMotion" xml:space="preserve">
-    <value>Wygładzaj ruch wyliczany z GPS</value>
+    <value>Wygładzaj wskazania GPS</value>
   </data>
   <data name="Common_Speed" xml:space="preserve">
     <value>Prędkość</value>
@@ -2253,7 +2253,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Przez pierwsze sekundy filmu pokazuje planszę z mapą i statystykami zachowanej części nagrania. Nie wydłuża filmu. Wymaga danych GPS. Do pobrania mapy potrzebne jest połączenie z internetem.</value>
   </data>
   <data name="Settings_AFullScreenWindowThere" xml:space="preserve">
-    <value>Otwiera okno pełnoekranowe na wybranym monitorze. Podczas odtwarzania pokazuje podgląd, a poza nim log. Naciśnij Esc lub F9, aby je zamknąć.</value>
+    <value>Otwiera okno pełnoekranowe na wybranym monitorze. Podczas odtwarzania wyświetla podgląd, a w pozostałym czasie dziennik zdarzeń. Naciśnij Esc lub F9, aby zamknąć to okno.</value>
   </data>
   <data name="Settings_AppliesRightAwayAFew" xml:space="preserve">
     <value>Działa od razu; niektóre poświaty i gradienty zmienią się dopiero po ponownym otwarciu okna.</value>
@@ -2319,7 +2319,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>{0}x źródła</value>
   </data>
   <data name="Settings_ByDefaultARenderMatches" xml:space="preserve">
-    <value>Domyślnie film jest kodowany z takim samym bitrate, odstępem między klatkami kluczowymi i poziomem HEVC jak źródło, bez klatek B. Poniższe ustawienia pozwalają wybrać inne parametry kodowania.</value>
+    <value>Domyślnie eksport zachowuje bitrate, odstęp między klatkami kluczowymi i poziom HEVC z oryginalnego nagrania. Film jest kodowany ponownie, bez klatek B. Poniżej możesz dostosować parametry eksportu.</value>
   </data>
   <data name="Settings_CameraDebugTrack" xml:space="preserve">
     <value>Ścieżka diagnostyczna kamery</value>
@@ -2334,7 +2334,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Sprawdź aktualizacje</value>
   </data>
   <data name="Settings_CheckingForANewVersion" xml:space="preserve">
-    <value>Sprawdzanie nowej wersji...</value>
+    <value>Sprawdzanie dostępności aktualizacji...</value>
   </data>
   <data name="Settings_ClosingEndsARunningRender" xml:space="preserve">
     <value>Zamknięcie aplikacji przerywa renderowanie. Plik wyjściowy może pozostać niekompletny.</value>
@@ -2376,7 +2376,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Czas wyświetlania (sekundy)</value>
   </data>
   <data name="Settings_EffortPerFrameAtThe" xml:space="preserve">
-    <value>Określa nakład pracy enkodera przy niezmienionym bitrate. Domyślny preset P7 zapewnia najlepszą jakość, a niższe presety przyspieszają kodowanie. Na kartach AMD P6-P7 odpowiadają trybowi quality, a P3-P5 trybowi balanced. Dotyczy tylko enkoderów GPU; enkoder CPU ma osobne ustawienia.</value>
+    <value>Pozwala wybrać między szybszym kodowaniem a lepszą jakością przy tym samym bitrate. Domyślne P7 daje najlepszą jakość, a niższe wartości skracają kodowanie. Na kartach AMD P6-P7 używają trybu quality, a P3-P5 trybu balanced. Dotyczy tylko kodowania na karcie graficznej (GPU). Kodowanie na procesorze (CPU) ma osobne ustawienia.</value>
   </data>
   <data name="Settings_ElevationGain" xml:space="preserve">
     <value>Suma przewyższeń</value>
@@ -2403,7 +2403,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Kolor trasy zmienia się od zielonego przy małej prędkości, przez żółty i pomarańczowy, do czerwonego przy dużej. Skala dopasowuje się do prędkości w filmie.</value>
   </data>
   <data name="Settings_HigherMakesABiggerFile" xml:space="preserve">
-    <value>Wyższy bitrate zwiększa rozmiar pliku, ale pomaga zachować ostrość drobnego tekstu nakładki po ponownej kompresji przez YouTube i podobne serwisy.</value>
+    <value>Wyższy bitrate pomaga zachować czytelność drobnego tekstu nakładki po kompresji przez YouTube i podobne serwisy, ale zwiększa rozmiar pliku.</value>
   </data>
   <data name="Settings_HowTheAppLooksAnd" xml:space="preserve">
     <value>Wygląd i język aplikacji.</value>
@@ -2484,10 +2484,10 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Otwórz...</value>
   </data>
   <data name="Settings_OpensOvprojFilesWithThis" xml:space="preserve">
-    <value>Pliki .ovproj otwierają się w tej aplikacji po dwukliku. Działa od razu, tylko dla twojego konta.</value>
+    <value>Po dwukrotnym kliknięciu pliku .ovproj projekt otworzy się w Telemavix Studio. Skojarzenie działa od razu i dotyczy tylko twojego konta w systemie.</value>
   </data>
   <data name="Settings_OpenTheWindowWhereIt" xml:space="preserve">
-    <value>Otwieraj okno tam, gdzie zostało zamknięte</value>
+    <value>Zapamiętuj położenie okna</value>
   </data>
   <data name="Settings_OutputBitrate" xml:space="preserve">
     <value>Bitrate wyjściowy</value>
@@ -2514,7 +2514,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Format obrazu</value>
   </data>
   <data name="Settings_OutputAspectHint" xml:space="preserve">
-    <value>Zmienia proporcje obrazu, np. na 9:16 dla pionowych filmów. Domyślnie obraz jest przycinany centralnie, a nakładka rysowana na kadrze wynikowym. Podgląd w oknie głównym zachowuje proporcje źródłowe. Nagrania 360° są renderowane bezpośrednio w wybranych proporcjach.</value>
+    <value>Wybierz proporcje filmu, np. 9:16 dla pionowego wideo. Domyślnie aplikacja przycina obraz wokół jego środka i rysuje nakładkę w nowym kadrze. Podgląd w oknie głównym zachowuje oryginalne proporcje. Nagrania 360° są renderowane bezpośrednio w wybranym formacie.</value>
   </data>
   <data name="Settings_OutputAspectBars" xml:space="preserve">
     <value>Czarne pasy zamiast przycinania</value>
@@ -2526,13 +2526,13 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Kodek</value>
   </data>
   <data name="Settings_OutputCodecHint" xml:space="preserve">
-    <value>H.264 jest obsługiwany przez większość odtwarzaczy i edytorów, także na starszych urządzeniach. Przy podobnej jakości wymaga wyższego bitrate niż HEVC, dlatego przy zmianie kodeka na H.264 aplikacja zwiększa bitrate o 50%. Eksport H.264 w tej aplikacji jest zawsze 8-bitowy.</value>
+    <value>H.264 ułatwia odtwarzanie i edycję filmu także na starszych urządzeniach. Aby uzyskać jakość zbliżoną do HEVC, potrzebuje wyższego bitrate. Po wybraniu H.264 aplikacja zwiększa bitrate o 50% i zapisuje film w 8 bitach.</value>
   </data>
   <data name="Settings_OutputEightBit" xml:space="preserve">
     <value>Zapisuj w 8 bitach</value>
   </data>
   <data name="Settings_OutputEightBitHint" xml:space="preserve">
-    <value>Eksport 8-bitowy jest obsługiwany przez więcej urządzeń niż wideo 10-bitowe, ale może powodować widoczne pasy na płynnych przejściach kolorów, np. na niebie. Opcja nie zmienia nagrań, które już są 8-bitowe.</value>
+    <value>Film 8-bitowy odtworzysz na większej liczbie urządzeń niż 10-bitowy. Na łagodnych przejściach kolorów, np. na niebie, mogą jednak pojawić się widoczne pasy. Opcja nie wpływa na nagrania, które już są 8-bitowe.</value>
   </data>
   <data name="Settings_OutputQuality" xml:space="preserve">
     <value>JAKOŚĆ WYJŚCIOWA</value>
@@ -2541,7 +2541,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Rozdzielczość</value>
   </data>
   <data name="Settings_OutputResolutionHint" xml:space="preserve">
-    <value>Niższa rozdzielczość ułatwia udostępnianie filmu: skraca renderowanie i zmniejsza bitrate proporcjonalnie do liczby pikseli. Nagranie nie jest skalowane powyżej rozdzielczości źródłowej.</value>
+    <value>Niższa rozdzielczość skraca renderowanie i ułatwia udostępnianie filmu. Aplikacja zmniejsza też bitrate proporcjonalnie do liczby pikseli. Rozdzielczość eksportu nie przekroczy rozdzielczości oryginalnego nagrania.</value>
   </data>
   <data name="Settings_PlaybackAndMonitors" xml:space="preserve">
     <value>ODTWARZANIE I MONITORY</value>
@@ -2565,7 +2565,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>PROJEKTY</value>
   </data>
   <data name="Settings_PutsTheIndexFirstSo" xml:space="preserve">
-    <value>Przenosi indeks na początek pliku, aby odtwarzanie w przeglądarce lub komunikatorze mogło rozpocząć się przed pobraniem całego filmu. Obraz pozostaje bez zmian. Dodatkowy etap zapisu trwa kilka sekund na każdy GB.</value>
+    <value>Pozwala rozpocząć odtwarzanie w przeglądarce lub komunikatorze przed pobraniem całego filmu. W tym celu przenosi indeks na początek pliku, bez zmiany obrazu. Wydłuża zapis o kilka sekund na każdy GB.</value>
   </data>
   <data name="Settings_RenderWithoutAudio" xml:space="preserve">
     <value>Zapisuj filmy bez dźwięku</value>
@@ -2631,7 +2631,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>URUCHAMIANIE</value>
   </data>
   <data name="Settings_StartupProjectsPlaybackAndMonitors" xml:space="preserve">
-    <value>Uruchamianie, projekty, odtwarzanie i monitory.</value>
+    <value>Uruchamianie, projekty i zamykanie programu.</value>
   </data>
   <data name="Settings_StatsToShow" xml:space="preserve">
     <value>POKAZYWANE STATYSTYKI</value>
@@ -2643,7 +2643,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Ponownie otwiera przewodnik konfiguracji kamer, narzędzi, map, korekty prędkości, folderu wyjściowego i plików projektów.</value>
   </data>
   <data name="Settings_TheGpsReportsAFew" xml:space="preserve">
-    <value>GPS podaje tylko kilka pozycji na sekundę, więc ślad kompasu i mapa poruszają się skokowo. Ta opcja wygładza ruch między kolejnymi pozycjami. Zmiana działa od razu i powoduje ponowne wczytanie otwartego podglądu.</value>
+    <value>Mapa i kompas poruszają się płynniej, a wskazania prędkości są stabilniejsze. Opcja ogranicza skokowe zmiany wynikające z odczytów GPS. Zmiana ustawienia od razu przeładowuje otwarty podgląd.</value>
   </data>
   <data name="Settings_Theme" xml:space="preserve">
     <value>Motyw</value>
@@ -2673,7 +2673,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Wyświetla czas przy osi czasu w formacie godziny:minuty:sekundy:klatki, liczony od 00:00:00:00, np. 00:01:23:12. Przy 29,97 i 59,94 kl./s stosuje numerację drop-frame oznaczoną średnikiem, tak jak edytory wideo.</value>
   </data>
   <data name="Settings_UpdateCheckFailed" xml:space="preserve">
-    <value>Nie udało się sprawdzić nowej wersji.</value>
+    <value>Nie udało się sprawdzić dostępności aktualizacji.</value>
   </data>
   <data name="Settings_Updates" xml:space="preserve">
     <value>Aktualizacje</value>
@@ -3581,7 +3581,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Test wydajności</value>
   </data>
   <data name="Welcome_SmoothGpsHint" xml:space="preserve">
-    <value>Pozycja GPS jest aktualizowana rzadziej niż klatki nagrania, dlatego ślad w kompasie i mapa mogą poruszać się skokowo. Wygładzanie zapewnia płynny ruch między kolejnymi pozycjami.</value>
+    <value>Pozycja GPS jest aktualizowana rzadziej niż klatki nagrania, dlatego ślad w kompasie i mapa mogą poruszać się skokowo, a prędkość z odbiornika może na chwilę podskoczyć. Wygładzanie zapewnia płynny ruch między kolejnymi pozycjami i wyrównuje te skoki.</value>
   </data>
   <data name="Welcome_SpeedFromACameraS" xml:space="preserve">
     <value>Jeśli podczas jazdy ze stałą prędkością GPS regularnie wskazuje za mało, możesz zwiększyć odczyty na nakładce o wybrany procent. Oblicz korektę z dwóch porównywanych odczytów lub wpisz ją ręcznie. Jeśli nie potrzebujesz kalibracji, pozostaw 0%.</value>
@@ -4368,7 +4368,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Prędkość pionowa drona, obliczana ze zmian wysokości w dzienniku lotu DJI w przedziale około sekundy. Wartości dodatnie oznaczają wznoszenie, a ujemne opadanie.</value>
   </data>
   <data name="Widget_SatellitesDescription" xml:space="preserve">
-    <value>Liczba satelitów odbiornika drona oraz poziom sygnału GPS przedstawiony za pomocą pasków. Dane pochodzą z dziennika lotu DJI.</value>
+    <value>Liczba satelitów widocznych dla odbiornika oraz pasek siły sygnału GPS. W dronie to poziom GPS z dziennika lotu DJI, a w trasie z telefonu (Telemavix GPS) poziom wyliczony z dokładności pozycji. Opcjonalnie pod liczbą pokazuje dokładność pozycji.</value>
   </data>
   <data name="Widget_DroneBattery" xml:space="preserve">
     <value>Akumulator drona</value>
@@ -4512,13 +4512,49 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Dystans zapisany przez urządzenie GPS w pliku FIT. Obejmuje także odcinek sprzed początku filmu i fragmenty wycięte z nagrania.</value>
   </data>
   <data name="Widget_DeviceBatteryDescription" xml:space="preserve">
-    <value>Ostatni zapisany poziom baterii urządzenia GPS z pliku FIT.</value>
+    <value>Ostatni zapisany poziom baterii urządzenia, które nagrało trasę (zegarek GPS albo telefon z Telemavix GPS), z ikoną i, jeśli trasa ma te dane, temperaturą baterii i znakiem ładowania. To osobna wartość od baterii kamery.</value>
   </data>
   <data name="Widget_AudioLevel" xml:space="preserve">
     <value>Poziom dźwięku</value>
   </data>
   <data name="Widget_WindProcessing" xml:space="preserve">
     <value>Redukcja szumu wiatru</value>
+  </data>
+  <data name="Widget_HeartRate" xml:space="preserve">
+    <value>Tętno</value>
+  </data>
+  <data name="Widget_HeartRateDescription" xml:space="preserve">
+    <value>Tętno zapisane w trasie przez pulsometr lub zegarek (FIT lub GPX).</value>
+  </data>
+  <data name="Widget_Pressure" xml:space="preserve">
+    <value>Ciśnienie</value>
+  </data>
+  <data name="Widget_PressureDescription" xml:space="preserve">
+    <value>Ciśnienie powietrza mierzone barometrem telefonu, w hPa lub inHg. Dane pochodzą z trasy nagranej aplikacją Telemavix GPS.</value>
+  </data>
+  <data name="Widget_Light" xml:space="preserve">
+    <value>Światło</value>
+  </data>
+  <data name="Widget_LightDescription" xml:space="preserve">
+    <value>Natężenie światła mierzone czujnikiem telefonu, w luksach. Zależy od miejsca montażu telefonu, więc nie jest jasnością sceny.</value>
+  </data>
+  <data name="Widget_CellSignal" xml:space="preserve">
+    <value>Sygnał GSM</value>
+  </data>
+  <data name="Widget_CellSignalDescription" xml:space="preserve">
+    <value>Sygnał sieci komórkowej telefonu: siła w dBm (albo poziom 0-4, gdy telefon nie podaje dBm) i pasek siły sygnału. Im bliżej 0 dBm, tym silniejszy.</value>
+  </data>
+  <data name="Editor_UnavailablePhoneSensor" xml:space="preserve">
+    <value>Brak tego odczytu w trasie. Dołącz plik FIT lub GPX nagrany aplikacją Telemavix GPS na telefonie z tym czujnikiem.</value>
+  </data>
+  <data name="Editor_UnavailableHeartRate" xml:space="preserve">
+    <value>Trasa nie zawiera tętna. Dołącz plik FIT lub GPX zawierający ten odczyt.</value>
+  </data>
+  <data name="Editor_UnavailableSatellites" xml:space="preserve">
+    <value>Brak liczby satelitów. Dodaj dziennik lotu drona lub trasę z aplikacji Telemavix GPS.</value>
+  </data>
+  <data name="Satellites_Accuracy" xml:space="preserve">
+    <value>Pokaż dokładność</value>
   </data>
   <data name="Widget_ImageLuma" xml:space="preserve">
     <value>Jasność obrazu</value>
@@ -5113,7 +5149,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Aplikacja pracuje...</value>
   </data>
   <data name="Settings_WorkingAnimation" xml:space="preserve">
-    <value>Ekran pracy z animacją</value>
+    <value>Animacja podczas wczytywania</value>
   </data>
   <data name="Settings_WorkingAnimationHint" xml:space="preserve">
     <value>Podczas wczytywania nagrania aplikacja zastępuje panele animowanym tłem z napisem „Aplikacja pracuje...”. Wyłącz tę opcję, jeśli animacja obciąża komputer. Panele pozostaną wtedy widoczne.</value>
@@ -5400,6 +5436,9 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   <data name="Presets_FpvDronesHint" xml:space="preserve">
     <value>Do nagrań z dronów. Układ nieco inspirowany OSD gogli FPV, ale zawierający więcej szczegółów.</value>
   </data>
+  <data name="Presets_TelemavixGpsHint" xml:space="preserve">
+    <value>Do przejazdów nagranych aplikacją Telemavix GPS.</value>
+  </data>
   <data name="Main_RingThemeHint" xml:space="preserve">
     <value>Styl inspirowany prędkościomierzem z aplikacji DJI Mimo.</value>
   </data>
@@ -5480,5 +5519,47 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="Editor_SingleMapCredit" xml:space="preserve">
     <value>Już na nakładce: jeden podpis mapy obejmuje wszystkie widżety Mapa, więc drugi nigdy by się nie pojawił.</value>
+  </data>
+  <data name="Tools_CompareSmoothing" xml:space="preserve">
+    <value>Porównaj wygładzanie GPS...</value>
+  </data>
+  <data name="CompareSmooth_Title" xml:space="preserve">
+    <value>Wygładzanie GPS - porównanie</value>
+  </data>
+  <data name="CompareSmooth_Raw" xml:space="preserve">
+    <value>Bez wygładzania</value>
+  </data>
+  <data name="CompareSmooth_Smoothed" xml:space="preserve">
+    <value>Wygładzone</value>
+  </data>
+  <data name="CompareSmooth_Hint" xml:space="preserve">
+    <value>To samo nagranie i ta sama nakładka. Różni się tylko wygładzanie wskazań GPS.</value>
+  </data>
+  <data name="CompareSmooth_NoGps" xml:space="preserve">
+    <value>To nagranie nie ma pozycji GPS, więc nie ma czego wygładzać. Wybierz oryginalne nagranie z telemetrią GPS.</value>
+  </data>
+  <data name="CompareSmooth_Failed" xml:space="preserve">
+    <value>Nie udało się otworzyć nagrania: {0}</value>
+  </data>
+  <data name="SettingsPage_Privacy" xml:space="preserve">
+    <value>Prywatność</value>
+  </data>
+  <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
+    <value>Co render przejmuje z pliku kamery i co mówi o sobie.</value>
+  </data>
+  <data name="SettingsPage_Telemetry" xml:space="preserve">
+    <value>Telemetria</value>
+  </data>
+  <data name="SettingsPage_TelemetrySubtitle" xml:space="preserve">
+    <value>Jak odczyty GPS i czujników zamieniają się w to, co pokazuje nakładka.</value>
+  </data>
+  <data name="SettingsPage_Preview" xml:space="preserve">
+    <value>Podgląd</value>
+  </data>
+  <data name="SettingsPage_PreviewSubtitle" xml:space="preserve">
+    <value>Odtwarzanie w edytorze, cienie i ekrany, na które można przenieść podgląd.</value>
+  </data>
+  <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
+    <value>Dzienniki lotów dronów DJI wymagają klucza od DJI.</value>
   </data>
 </root>

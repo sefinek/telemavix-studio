@@ -97,7 +97,7 @@ public sealed class TextAlignTests
 		Assert.IsTrue(OverlayElementBounds.SupportsTextAlign(new HomeDistanceElement { X = 0, Y = 0 }));
 		Assert.IsTrue(OverlayElementBounds.SupportsTextAlign(new TextElement { X = 0, Y = 0 }));
 		Assert.IsTrue(OverlayElementBounds.SupportsTextAlign(new FlightModeElement { X = 0, Y = 0 }));
-		Assert.IsFalse(OverlayElementBounds.SupportsTextAlign(new SatellitesElement { X = 0, Y = 0 }), "its bars follow the value");
+		Assert.IsTrue(OverlayElementBounds.SupportsTextAlign(new SatellitesElement { X = 0, Y = 0 }), "its bars and its accuracy line line up with the reading");
 		Assert.IsFalse(OverlayElementBounds.SupportsTextAlign(new SpeedGaugeElement { X = 0, Y = 0 }));
 	}
 
@@ -138,8 +138,8 @@ public sealed class TextAlignTests
 	{
 		var battery = new DroneBatteryElement { X = 0, Y = 0, AccentColor = "#112233", ColorByCharge = false };
 
-		Assert.AreEqual(SKColor.Parse("#112233"), OverlayRenderer.DroneBatteryColor(battery, 5));
-		Assert.AreNotEqual(SKColor.Parse("#112233"), OverlayRenderer.DroneBatteryColor(battery with { ColorByCharge = true }, 5));
+		Assert.AreEqual(SKColor.Parse("#112233"), OverlayRenderer.BatteryColor(battery, 5));
+		Assert.AreNotEqual(SKColor.Parse("#112233"), OverlayRenderer.BatteryColor(battery with { ColorByCharge = true }, 5));
 	}
 
 	[TestMethod]

@@ -62,6 +62,34 @@ public sealed class BackdropCreditTests
 		Assert.IsGreaterThan(without.Width, withBackdrop.Width, "the backdrop's credit is not the sample's");
 	}
 
+	/// <summary>The preset's credit of the backdrop ends on the right corner whatever it says, as the first credit starts on the left one.</summary>
+	[TestMethod]
+	[DataRow(true)]
+	[DataRow(false)]
+	public void TheBackdropCreditOfThePresetEndsOnTheRightCornerWhateverItSays(bool labels)
+	{
+		List<DerivedFrame> frames = TelemetryProcessor.Process([new TelemetryFrame(0, 0, 50, 20, 100, null, 0, 0, 1)], null);
+		OverlayElement credit = OverlayPreset.CreateDefault("x", "x").Elements.Single(e => e.Id == OverlayPreset.BackdropCreditId);
+		using var renderer = new OverlayRenderer(Width, Height, 0, [credit with { ShadowEnabled = false }], frames, showWatermark: false)
+		{
+			Backdrop = new BackdropMap(MapProviders.EsriPublicId, labels)
+		};
+		byte[] bgra = new byte[Width * Height * 4];
+		renderer.RenderInto(frames[0], bgra);
+
+		int right = -1;
+		for (int x = Width - 1; x >= 0 && right < 0; x--)
+		for (int y = 0; y < Height; y++)
+			if (bgra[(y * Width + x) * 4 + 3] != 0)
+			{
+				right = x;
+				break;
+			}
+
+		float inset = 12f * Width / OverlayElementBounds.ReferenceWidth;
+		Assert.AreEqual(Width - inset, right, 3, "the credit's last letter is at the margin of the corner");
+	}
+
 	[TestMethod]
 	public void WithOneCreditWidgetTheBackdropIsCreditedAtTheBottomRight()
 	{

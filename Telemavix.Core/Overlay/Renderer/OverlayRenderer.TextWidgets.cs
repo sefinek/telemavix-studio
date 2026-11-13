@@ -126,6 +126,10 @@ public sealed partial class OverlayRenderer
 			ImuTemperatureElement => CoreStrings.Overlay_ImuTemperature,
 			DeviceDistanceElement => CoreStrings.Overlay_DeviceDistance,
 			DeviceBatteryElement => CoreStrings.Overlay_DeviceBattery,
+			HeartRateElement => CoreStrings.Overlay_HeartRate,
+			PressureElement => CoreStrings.Overlay_Pressure,
+			LightElement => CoreStrings.Overlay_Light,
+			CellSignalElement => CoreStrings.Overlay_CellSignal,
 			AudioLevelElement => CoreStrings.Overlay_AudioLevel,
 			WindProcessingElement => CoreStrings.Overlay_WindProcessing,
 			ImageLumaElement => CoreStrings.Overlay_ImageLuma,
@@ -185,10 +189,26 @@ public sealed partial class OverlayRenderer
 
 	private void DrawSensorStat(SKCanvas canvas, DerivedFrame frame, LabeledStatElement element)
 	{
+		if (element is DeviceBatteryElement { ShowIcon: true } battery)
+		{
+			DrawBatteryReading(canvas, battery, battery.Label ?? DefaultLabel(battery), frame.Raw.DeviceBatteryPercent is { } charge && double.IsFinite(charge) ? charge : null, frame.Raw.Phone?.IsCharging == true,
+				BatteryNote(battery, frame));
+			return;
+		}
+
 		(string value, string unit) = element switch
 		{
 			AmbientTemperatureElement t => FormatTemperature(frame.Raw.AmbientTemperatureCelsius, t.Units, t.Decimals),
 			ImuTemperatureElement t => FormatTemperature(frame.Raw.ImuTemperatureCelsius, t.Units, t.Decimals),
+			HeartRateElement => (frame.Raw.HeartRateBpm is > 0 and { } bpm ? F(bpm, "0") : "--", "BPM"),
+			PressureElement p => FormatPressure(frame.Raw.Phone?.PressureHectopascals, p.Units, p.Decimals),
+			LightElement => (frame.Raw.Phone?.LightLux is >= 0 and { } lux ? F(lux, "0") : "--", "LX"),
+			CellSignalElement => frame.Raw.Phone switch
+			{
+				{ CellSignalDbm: { } dbm } => (F(dbm, "0"), "dBm"),
+				{ CellSignalLevel: { } level } => (F(level, "0"), "/4"),
+				_ => ("--", "dBm")
+			},
 			DeviceDistanceElement d => frame.Raw.DeviceDistanceMeters is { } meters && double.IsFinite(meters) ? FormatDistance(meters, d.Units, d.Decimals) : ("--", d.Units == UnitSystem.Imperial ? "FT" : "M"),
 			HeightElement h => frame.Raw.HeightAboveHomeMeters is { } height && double.IsFinite(height) ? FormatAltitude(height, h.Units, h.Decimals) : ("--", h.Units == UnitSystem.Imperial ? "FT" : "M"),
 			HomeDistanceElement d => frame.Raw.DistanceFromHomeMeters is { } away && double.IsFinite(away) ? FormatDistance(away, d.Units, d.Decimals) : ("--", d.Units == UnitSystem.Imperial ? "FT" : "M"),
@@ -199,12 +219,20 @@ public sealed partial class OverlayRenderer
 			ImageLumaElement => (frame.Raw.ImageLuma is >= 0 and <= 255 and { } luma ? F(luma, "0") : "--", "/255"),
 			_ => ("--", "")
 		};
-		DrawStat(canvas, element, element.Label ?? DefaultLabel(element), value, unit, StatValueColor(element, frame));
-		if (element is SatellitesElement { ShowBars: true })
+		string? note = element switch
 		{
-			float left = TextFont(element, OverlayElementBounds.ValueFontSize).MeasureText(value) + OverlayElementBounds.SignalBarsGap;
-			DrawSignalBars(canvas, element, left, OverlayElementBounds.StatValueBaselineY, frame.Raw.GpsLevel);
-		}
+			DeviceBatteryElement device => BatteryNote(device, frame),
+			SatellitesElement { ShowAccuracy: true } gps => AccuracyNote(frame.Raw.Phone?.AccuracyMeters, gps.Units),
+			_ => null
+		};
+		(int? Level, bool Shown) bars = element switch
+		{
+			SatellitesElement { ShowBars: true } => (frame.Raw.GpsLevel ?? GpsSignal.LevelFromAccuracy(frame.Raw.Phone?.AccuracyMeters), true),
+			CellSignalElement { ShowBars: true } => (GpsSignal.CellBars(frame.Raw.Phone?.CellSignalLevel, frame.Raw.Phone?.CellSignalDbm), true),
+			_ => (null, false)
+		};
+		float barsLeft = DrawStat(canvas, element, element.Label ?? DefaultLabel(element), value, unit, StatValueColor(element, frame), bars.Shown ? OverlayElementBounds.SignalBarsWidth : 0, note);
+		if (bars.Shown) DrawSignalBars(canvas, element, barsLeft, OverlayElementBounds.StatValueBaselineY, bars.Level);
 
 		if (element is WindProcessingElement)
 		{
@@ -213,6 +241,22 @@ public sealed partial class OverlayRenderer
 			DrawOutlined(canvas, state.ToUpperInvariant(), 0, 150, TextFont(element, OverlayElementBounds.SmallFontSize), stateColor,
 				outlineColor: OutlineColorOf(element), outlineWidthScale: element.OutlineWidth);
 		}
+	}
+
+	/// <summary>The line under a device battery's reading with the battery's temperature, null when the widget doesn't show it.</summary>
+	private static string? BatteryNote(DeviceBatteryElement element, DerivedFrame frame)
+	{
+		if (!element.ShowTemperature) return null;
+
+		(string value, string unit) = FormatTemperature(frame.Raw.Phone?.BatteryTemperatureCelsius, element.Units, element.Decimals);
+		return $"{value} {unit}";
+	}
+
+	/// <summary>The line under the GPS count with the fix's accuracy (plus or minus, in metres or feet).</summary>
+	private static string AccuracyNote(double? meters, UnitSystem units)
+	{
+		string unit = units == UnitSystem.Imperial ? "FT" : "M";
+		return meters is >= 0 and { } accuracy && double.IsFinite(accuracy) ? $"±{F(units == UnitSystem.Imperial ? accuracy * MetersToFeet : accuracy, "0")} {unit}" : $"-- {unit}";
 	}
 
 	private static readonly SKColor ThresholdWarnDefault = SKColor.Parse("#FF9800");
@@ -241,6 +285,8 @@ public sealed partial class OverlayRenderer
 
 				return ThresholdColor(limited, limited.AlertAboveMeters is { } alert && meters > alert ? 2 : limited.WarnAboveMeters is { } warn && meters > warn ? 1 : 0);
 			}
+			case DeviceBatteryElement { ColorByCharge: true } battery when frame.Raw.DeviceBatteryPercent is { } charge && double.IsFinite(charge):
+				return BatteryColor(battery, charge);
 			case SatellitesElement { ColorByCount: true } gps when frame.Raw.GpsSatellites is >= 0 and { } count:
 				return ThresholdColor(gps, count < gps.AlertBelow ? 2 : count < gps.WarnBelow ? 1 : 0);
 			case VerticalSpeedElement { } vertical when frame.Raw.VerticalSpeedMs is { } rate && double.IsFinite(rate):
@@ -276,6 +322,15 @@ public sealed partial class OverlayRenderer
 		string digits = Digits(decimals, "0.0");
 		double shown = units == UnitSystem.Imperial ? speed * MetersToFeet : speed;
 		return (Math.Abs(shown) < 0.05 ? F(0, digits) : F(shown, $"+{digits};-{digits}"), unit);
+	}
+
+	internal static (string Value, string Unit) FormatPressure(double? hectopascals, UnitSystem units, int? decimals = null)
+	{
+		const double InchesOfMercuryPerHectopascal = 0.0295299830714;
+		string unit = units == UnitSystem.Imperial ? "inHg" : "hPa";
+		if (hectopascals is not { } pressure || !double.IsFinite(pressure) || pressure <= 0) return ("--", unit);
+
+		return units == UnitSystem.Imperial ? (F(pressure * InchesOfMercuryPerHectopascal, Digits(decimals, "0.00")), unit) : (F(pressure, Digits(decimals, "0.0")), unit);
 	}
 
 	internal static (string Value, string Unit) FormatTemperature(double? celsius, UnitSystem units, int? decimals = null) =>
@@ -346,7 +401,11 @@ public sealed partial class OverlayRenderer
 		return denominator >= 1 ? $"1/{F(denominator, "0")} S" : $"{F(seconds.Value, "0.0")} S";
 	}
 
-	private void DrawStat(SKCanvas canvas, LabeledStatElement element, string label, string value, string unit, SKColor? valueColor = null)
+	/// <summary>
+	///     A caption over a value and a unit. `trailingWidth` leaves room after the reading for something drawn there (the signal bars) and `note` is a small line under it; both take part
+	///     in the text alignment. Returns where the trailing part starts.
+	/// </summary>
+	private float DrawStat(SKCanvas canvas, LabeledStatElement element, string label, string value, string unit, SKColor? valueColor = null, float trailingWidth = 0, string? note = null)
 	{
 		SKFont valueFont = TextFont(element, OverlayElementBounds.ValueFontSize);
 		SKColor textColor = TextColorOf(element);
@@ -355,9 +414,13 @@ public sealed partial class OverlayRenderer
 		SKFont labelFont = TextFont(element, OverlayElementBounds.LabelFontSize), unitFont = TextFont(element, OverlayElementBounds.UnitFontSize);
 		string caption = element.UppercaseLabel ? label.ToUpperInvariant() : label;
 		float valueWidth = valueFont.MeasureText(value), labelWidth = element.ShowLabel ? labelFont.MeasureText(caption) : 0;
-		float readout = valueWidth + (element.ShowUnit ? OverlayElementBounds.StatUnitGapX + unitFont.MeasureText(unit) : 0);
+		// Bars after a reading with no unit (the GPS count) sit right behind the value; the gap before a unit only counts when there is one.
+		float unitPart = element.ShowUnit && (unit.Length > 0 || trailingWidth <= 0) ? OverlayElementBounds.StatUnitGapX + unitFont.MeasureText(unit) : 0;
+		float readout = valueWidth + unitPart + (trailingWidth > 0 ? OverlayElementBounds.SignalBarsGap + trailingWidth : 0);
+		SKFont noteFont = TextFont(element, OverlayElementBounds.SmallFontSize);
+		float noteWidth = note is null ? 0 : noteFont.MeasureText(note);
 		TextAlign align = OverlayElementBounds.SupportsTextAlign(element) ? element.TextAlign : TextAlign.Left;
-		float box = align == TextAlign.Left ? 0 : Math.Max(OverlayElementBounds.TextBoxRight(element), Math.Max(labelWidth, readout));
+		float box = align == TextAlign.Left ? 0 : Math.Max(OverlayElementBounds.TextBoxRight(element), Math.Max(labelWidth, Math.Max(readout, noteWidth)));
 		float readoutX = OverlayElementBounds.AlignedX(align, box, readout);
 
 		if (element.ShowLabel)
@@ -372,6 +435,14 @@ public sealed partial class OverlayRenderer
 			DrawOutlined(canvas, unit, readoutX + valueWidth + OverlayElementBounds.StatUnitGapX, 90, unitFont, textColor,
 				outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
 		}
+
+		if (note is not null)
+		{
+			DrawOutlined(canvas, note, OverlayElementBounds.AlignedX(align, box, noteWidth), OverlayElementBounds.StatNoteBaselineY, noteFont, textColor,
+				outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		}
+
+		return readoutX + valueWidth + unitPart + (trailingWidth > 0 ? OverlayElementBounds.SignalBarsGap : 0);
 	}
 
 	/// <summary>This widget's own font at `baseSize`, from its FontFamily override (or the built-in HUD font when null/not installed) - see OverlayRenderer.GetFont.</summary>

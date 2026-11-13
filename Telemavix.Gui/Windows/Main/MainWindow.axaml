@@ -1142,8 +1142,8 @@
 
 							<StackPanel Spacing="10">
 								<TextBlock Text="{x:Static local:Strings.Main_Widgets}" Classes="sectionLabel" Margin="0" />
-								<TextBlock Text="{x:Static local:Strings.Main_DragAWidgetFromThe}"
-								           Classes="infoLabel" Margin="0,-6,0,0" FontSize="13" TextWrapping="Wrap" />
+								<TextBlock Name="WidgetsHint" Text="{x:Static local:Strings.Main_DragAWidgetFromThe}"
+								           Classes="infoLabel" Margin="0,-6,0,0" FontSize="13" TextWrapping="Wrap" IsVisible="False" />
 
 								<TextBlock Text="{x:Static local:Strings.Main_OnOverlay}" Classes="sectionLabel" Margin="0,6,0,0" />
 								<StackPanel Name="AddedWidgetsList" Spacing="4" />
@@ -2544,6 +2544,26 @@
 											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
 												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_DeviceBattery}" />
 											</Border>
+											<Border Name="HeartRateListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.HeartRate}"
+											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
+											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
+												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_HeartRate}" />
+											</Border>
+											<Border Name="PressureListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.Pressure}"
+											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
+											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
+												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_Pressure}" />
+											</Border>
+											<Border Name="LightListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.Light}"
+											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
+											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
+												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_Light}" />
+											</Border>
+											<Border Name="CellSignalListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.CellSignal}"
+											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
+											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
+												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_CellSignal}" />
+											</Border>
 											<Border Name="HeightListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.Height}"
 											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
 											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
@@ -2595,6 +2615,12 @@
 														<TextBox Name="SensorLabelBox" LostFocus="OnSensorLabelChanged" />
 														<StackPanel Name="SensorBarsPanel" Spacing="8" IsVisible="False">
 															<CheckBox Name="SatellitesBarsCheck" Content="{x:Static local:Strings.Signal_Bars}" Click="OnSatellitesBarsChanged" />
+															<CheckBox Name="SatellitesAccuracyCheck" Content="{x:Static local:Strings.Satellites_Accuracy}" Click="OnSatellitesBarsChanged" />
+														</StackPanel>
+														<StackPanel Name="SensorBatteryPanel" Spacing="8" IsVisible="False">
+															<CheckBox Name="DeviceBatteryIconCheck" Content="{x:Static local:Strings.DroneBattery_Icon}" Click="OnDeviceBatteryOptionChanged" />
+															<CheckBox Name="DeviceBatteryColorCheck" Content="{x:Static local:Strings.DroneBattery_ColorByCharge}" Click="OnDeviceBatteryOptionChanged" />
+															<CheckBox Name="DeviceBatteryTemperatureCheck" Content="{x:Static local:Strings.DroneBattery_Temperature}" Click="OnDeviceBatteryOptionChanged" />
 														</StackPanel>
 														<StackPanel Name="SensorUnitsPanel" Spacing="8">
 															<TextBlock Text="{x:Static local:Strings.Common_Units}" Classes="infoLabel" Margin="0" />

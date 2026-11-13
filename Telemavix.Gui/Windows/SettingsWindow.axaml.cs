@@ -127,7 +127,7 @@ public partial class SettingsWindow : Window
 		// The preview's own switch has nothing to change while every shadow is off.
 		DisableShadowsCheck.IsCheckedChanged += (_, _) => PreviewShadowsCheck.IsEnabled = DisableShadowsCheck.IsChecked != true;
 		CacheCleanupCombo.ItemsSource = CacheCleanupOptions;
-		_pages = [PresetsPanel, RenderingPanel, SpeedPanel, RouteIntroPanel, InterfacePanel, BehaviorPanel, AboutPanel];
+		_pages = [PresetsPanel, RenderingPanel, PrivacyPanel, TelemetryPanel, SpeedPanel, RouteIntroPanel, InterfacePanel, PreviewPanel, BehaviorPanel, DronesPanel, AboutPanel];
 		RouteIntroMapSource.SelectionChanged += provider => _routeIntroProvider = provider;
 
 		string appVersion = AppUpdates.CurrentVersion.Version.ToString(3);

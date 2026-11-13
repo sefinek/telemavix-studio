@@ -22,6 +22,8 @@ namespace Telemavix.Gui;
 ///     Exported videos played side by side on one clock (ComparePlayer) - to see what a release of the program changed in
 ///     the same frames of the same recording. The window only shows and steers; the tiles' decoding and timing are the
 ///     player's. Changing the set of videos opens every one again.
+///     With a recording instead (the smoothing comparison): its two tiles are the same footage with the overlay drawn from telemetry
+///     without and with GPS smoothing.
 /// </summary>
 public partial class ComparePlaybackWindow : Window
 {
@@ -41,6 +43,7 @@ public partial class ComparePlaybackWindow : Window
 	private const double WheelPanStep = 0.1;
 	private const double KeyZoomStep = 1.25;
 
+	private readonly string? _recordingPath;
 	private readonly List<string> _paths = [];
 	private readonly List<TileZoomView> _zoomViews = [];
 	private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(40) };
@@ -71,6 +74,16 @@ public partial class ComparePlaybackWindow : Window
 			_timer.Stop();
 			DisposePlayer();
 		};
+	}
+
+	public ComparePlaybackWindow(string recordingPath) : this()
+	{
+		_recordingPath = recordingPath;
+		Title = Strings.CompareSmooth_Title;
+		AddButton.IsVisible = false;
+		ClearButton.IsVisible = false;
+		SmoothingHint.IsVisible = true;
+		Opened += async (_, _) => await RunAsync(ReloadAsync);
 	}
 
 	private async void OnAddClick(object? sender, RoutedEventArgs e)
@@ -144,11 +157,32 @@ public partial class ComparePlaybackWindow : Window
 		Timeline.IsEnabled = false;
 		SetPlayingIcon(false);
 		UpdateTimeText(TimeSpan.Zero, TimeSpan.Zero);
-		EmptyText.IsVisible = _paths.Count == 0;
-		OpeningText.IsVisible = _paths.Count > 0;
-		if (_paths.Count == 0) return;
+		bool recording = _recordingPath is not null;
+		EmptyText.IsVisible = !recording && _paths.Count == 0;
+		OpeningText.IsVisible = recording || _paths.Count > 0;
+		if (!recording && _paths.Count == 0) return;
 
-		(ComparePlayer? player, IReadOnlyList<CompareFailure> failures) = await ComparePlayer.OpenAsync([.. _paths], TileDecodeWidth);
+		ComparePlayer? player;
+		IReadOnlyList<CompareFailure> failures = [];
+		if (_recordingPath is { } recordingPath)
+		{
+			(FileSummary? summary, string? problem) = await Task.Run(() => FileSummaryReader.Read([recordingPath]));
+			string? error = problem;
+			player = null;
+			if (summary is not null) (player, error) = await ComparePlayer.OpenSmoothingAsync(summary, TileDecodeWidth);
+			if (generation == _generation && player is null)
+			{
+				OpeningText.IsVisible = false;
+				EmptyText.Text = error is null && summary is not null ? Strings.CompareSmooth_NoGps : string.Format(Strings.CompareSmooth_Failed, error);
+				EmptyText.IsVisible = true;
+				return;
+			}
+		}
+		else
+		{
+			(player, failures) = await ComparePlayer.OpenAsync([.. _paths], TileDecodeWidth);
+		}
+
 		if (generation != _generation)
 		{
 			player?.Dispose();
@@ -243,18 +277,20 @@ public partial class ComparePlaybackWindow : Window
 
 	private Border BuildTile(CompareTile tile, VideoView view, bool[] differs, ComparePlayer player, int index)
 	{
+		bool recording = tile.Smoothed is not null;
 		var remove = new Button
 		{
 			Tag = tile.Path,
 			Padding = new Thickness(7),
-			Content = new IconView { Data = Icons.Close, Width = 9, Height = 9 }
+			Content = new IconView { Data = Icons.Close, Width = 9, Height = 9 },
+			IsVisible = !recording
 		};
 		remove.Click += OnRemoveClick;
 		ToolTip.SetTip(remove, Strings.ComparePlay_Remove);
 
 		var name = new TextBlock
 		{
-			Text = Path.GetFileName(tile.Path),
+			Text = recording ? tile.Smoothed == true ? Strings.CompareSmooth_Smoothed : Strings.CompareSmooth_Raw : Path.GetFileName(tile.Path),
 			FontSize = 13,
 			FontWeight = FontWeight.SemiBold,
 			TextTrimming = TextTrimming.CharacterEllipsis,
@@ -267,21 +303,15 @@ public partial class ComparePlaybackWindow : Window
 		header.Children.Add(name);
 
 		var marker = new TextBlock { FontSize = 12, Foreground = Palette.TextPrimary, TextWrapping = TextWrapping.Wrap };
-		AddMarkerText(marker, tile.Marker, differs);
-		var info = new TextBlock
+		var info = new TextBlock { FontSize = 12, Foreground = Palette.TextMuted };
+		var size = new TextBlock { FontSize = 12, Foreground = Palette.TextMuted };
+		if (tile.Source is { } source)
 		{
-			Text = string.Format(Strings.ComparePlay_Info, tile.Source.Video.Width, tile.Source.Video.Height,
-				tile.Fps.ToString("0.###", CultureInfo.InvariantCulture)),
-			FontSize = 12,
-			Foreground = Palette.TextMuted
-		};
-		var size = new TextBlock
-		{
-			Text = string.Format(Strings.ComparePlay_Size, tile.FileSizeBytes.ToString("N0", CultureInfo.CurrentCulture),
-				FormatHelper.FormatBytes(tile.FileSizeBytes)),
-			FontSize = 12,
-			Foreground = Palette.TextMuted
-		};
+			AddMarkerText(marker, tile.Marker, differs);
+			info.Text = string.Format(Strings.ComparePlay_Info, source.Video.Width, source.Video.Height, tile.Fps.ToString("0.###", CultureInfo.InvariantCulture));
+			size.Text = string.Format(Strings.ComparePlay_Size, tile.FileSizeBytes.ToString("N0", CultureInfo.CurrentCulture),
+				FormatHelper.FormatBytes(tile.FileSizeBytes));
+		}
 		var error = new TextBlock { FontSize = 12, Foreground = Palette.Danger, TextWrapping = TextWrapping.Wrap, IsVisible = false };
 		player.TileFailed += failed =>
 		{
@@ -294,7 +324,8 @@ public partial class ComparePlaybackWindow : Window
 			});
 		};
 
-		var footer = new StackPanel { Margin = new Thickness(10, 6, 10, 8), Spacing = 2, Children = { marker, info, size, error } };
+		var footer = new StackPanel { Margin = new Thickness(10, 6, 10, 8), Spacing = 2, Children = { error } };
+		if (tile.Source is not null) footer.Children.InsertRange(0, [marker, info, size]);
 		var scale = new ScaleTransform();
 		var shift = new TranslateTransform();
 		var zoomed = new Viewbox { Stretch = Stretch.Uniform, Child = view, RenderTransform = new TransformGroup { Children = { scale, shift } } };

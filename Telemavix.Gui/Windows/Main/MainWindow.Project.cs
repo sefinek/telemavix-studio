@@ -355,7 +355,8 @@ public partial class MainWindow
 	}
 
 	/// <summary>
-	///     A built-in layout follows the recording's camera (a drone's footage gets the drone layout, anything else the default one);
+	///     A built-in layout follows the recording's camera (a drone's footage gets the drone layout, anything else the default one, except that
+	///     the Telemavix GPS layout is a choice made for the track, not the camera, so a camera with no layout of its own leaves it);
 	///     a layout of the user's own is left alone. A project opened after this brings its own.
 	/// </summary>
 	private void AdoptCameraLayout(FileSummary summary)
@@ -363,6 +364,7 @@ public partial class MainWindow
 		string wanted = summary.CameraFormat?.PreferredPresetId ?? OverlayPresetStore.DefaultPresetId;
 		if (!OverlayPresetStore.IsBuiltIn(_activePresetId) || _activePresetId == wanted || _overlayPresets.All(p => p.Id != wanted)) return;
 		if (OverlayPresetStore.IsDronePreset(_activePresetId) && OverlayPresetStore.IsDronePreset(wanted)) return;
+		if (_activePresetId == OverlayPresetStore.TelemavixGpsPresetId && wanted == OverlayPresetStore.DefaultPresetId) return;
 
 		SwitchToPreset(wanted);
 	}

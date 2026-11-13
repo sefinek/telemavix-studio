@@ -32,7 +32,11 @@ public readonly record struct OverlayAvailability(
 	bool FlightMode = false,
 	bool DroneSticks = false,
 	bool DroneAttitude = false,
-	bool AltitudeAboveSea = true)
+	bool AltitudeAboveSea = true,
+	bool HeartRate = false,
+	bool Pressure = false,
+	bool Light = false,
+	bool CellSignal = false)
 {
 	public static OverlayAvailability Of(IReadOnlyList<TelemetryFrame> frames, bool containerTime, ICameraFormat? camera)
 	{
@@ -55,7 +59,11 @@ public readonly record struct OverlayAvailability(
 			frames.Any(f => !string.IsNullOrEmpty(f.FlightMode)),
 			frames.Any(f => f.DroneSticks is not null),
 			frames.Any(f => f.DroneAttitude is not null),
-			!frames.Any(f => f.HeightAboveHomeMeters is not null));
+			!frames.Any(f => f.HeightAboveHomeMeters is not null),
+			frames.Any(f => f.HeartRateBpm is > 0),
+			frames.Any(f => f.Phone?.PressureHectopascals is > 0),
+			frames.Any(f => f.Phone?.LightLux is >= 0),
+			frames.Any(f => f.Phone is { CellSignalDbm: not null } or { CellSignalLevel: not null }));
 	}
 
 	public IReadOnlyList<OverlayElement> Apply(IReadOnlyList<OverlayElement> layout)
@@ -107,6 +115,10 @@ public static class OverlayDataRequirements
 			OverlayElementType.FlightMode => data.FlightMode,
 			OverlayElementType.RcSticks => data.DroneSticks,
 			OverlayElementType.AttitudeIndicator or OverlayElementType.Orientation3D => data.DroneAttitude,
+			OverlayElementType.HeartRate => data.HeartRate,
+			OverlayElementType.Pressure => data.Pressure,
+			OverlayElementType.Light => data.Light,
+			OverlayElementType.CellSignal => data.CellSignal,
 			// Text and Image need no data.
 			_ => true
 		};

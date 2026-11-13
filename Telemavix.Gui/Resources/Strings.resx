@@ -445,7 +445,7 @@ Close Telemavix Studio?</value>
     <value>Skip</value>
   </data>
   <data name="Common_SmoothGpsDerivedMotion" xml:space="preserve">
-    <value>Smooth GPS-derived motion</value>
+    <value>Smooth GPS readings</value>
   </data>
   <data name="Common_Speed" xml:space="preserve">
     <value>Speed</value>
@@ -2253,7 +2253,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Shows a card with the route map and statistics for the retained parts of the recording during the first seconds of the video. It does not extend the video. GPS data is required. An internet connection is needed to download the map.</value>
   </data>
   <data name="Settings_AFullScreenWindowThere" xml:space="preserve">
-    <value>Opens a full-screen window on the selected monitor. It shows the preview during playback and the log otherwise. Press Esc or F9 to close it.</value>
+    <value>Opens a full-screen window on the selected monitor. It displays the preview during playback and the event log at other times. Press Esc or F9 to close this window.</value>
   </data>
   <data name="Settings_AppliesRightAwayAFew" xml:space="preserve">
     <value>Applies right away; a few glows and gradients update when their window is reopened.</value>
@@ -2319,7 +2319,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>{0}x source</value>
   </data>
   <data name="Settings_ByDefaultARenderMatches" xml:space="preserve">
-    <value>By default, video is encoded with the source's bitrate, keyframe interval and HEVC level, without B-frames. The settings below let you choose different encoding parameters.</value>
+    <value>By default, export keeps the original recording&apos;s bitrate, keyframe interval and HEVC level. The video is re-encoded without B-frames. You can adjust the export settings below.</value>
   </data>
   <data name="Settings_CameraDebugTrack" xml:space="preserve">
     <value>Camera debug track</value>
@@ -2334,7 +2334,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Check for updates</value>
   </data>
   <data name="Settings_CheckingForANewVersion" xml:space="preserve">
-    <value>Checking for a new version...</value>
+    <value>Checking for updates...</value>
   </data>
   <data name="Settings_ClosingEndsARunningRender" xml:space="preserve">
     <value>Closing the app stops rendering. The output file may be left incomplete.</value>
@@ -2376,7 +2376,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Display duration (seconds)</value>
   </data>
   <data name="Settings_EffortPerFrameAtThe" xml:space="preserve">
-    <value>Controls encoder effort at the same bitrate. The default P7 preset gives the best quality, while lower presets encode faster. On AMD cards, P6-P7 use quality mode and P3-P5 use balanced mode. Applies only to GPU encoders; the CPU encoder has separate settings.</value>
+    <value>Lets you choose between faster encoding and better quality at the same bitrate. The default P7 gives the best quality, while lower values encode faster. On AMD cards, P6-P7 use quality mode and P3-P5 use balanced mode. Applies only to graphics card (GPU) encoding. Processor (CPU) encoding has separate settings.</value>
   </data>
   <data name="Settings_ElevationGain" xml:space="preserve">
     <value>Elevation gain</value>
@@ -2403,7 +2403,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>The route color changes from green at low speeds, through yellow and orange, to red at high speeds. The scale adapts to the speeds in the video.</value>
   </data>
   <data name="Settings_HigherMakesABiggerFile" xml:space="preserve">
-    <value>A higher bitrate increases file size but helps preserve small overlay text after recompression by YouTube and similar services.</value>
+    <value>A higher bitrate helps keep small overlay text readable after compression by YouTube and similar services, but increases file size.</value>
   </data>
   <data name="Settings_HowTheAppLooksAnd" xml:space="preserve">
     <value>Appearance and language.</value>
@@ -2484,10 +2484,10 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Open...</value>
   </data>
   <data name="Settings_OpensOvprojFilesWithThis" xml:space="preserve">
-    <value>Double-clicking a .ovproj file opens it in this app. Applies right away, for your user account only.</value>
+    <value>Double-clicking a .ovproj file opens the project in Telemavix Studio. The file association takes effect immediately and applies only to your system account.</value>
   </data>
   <data name="Settings_OpenTheWindowWhereIt" xml:space="preserve">
-    <value>Open the window where it was closed</value>
+    <value>Remember window position</value>
   </data>
   <data name="Settings_OutputBitrate" xml:space="preserve">
     <value>Output bitrate</value>
@@ -2514,7 +2514,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Aspect ratio</value>
   </data>
   <data name="Settings_OutputAspectHint" xml:space="preserve">
-    <value>Changes the video&apos;s aspect ratio, e.g. to 9:16 for vertical videos. By default, the image is cropped from the center and the overlay is drawn on the output frame. The main window preview keeps the original aspect ratio. 360° recordings are rendered directly at the selected aspect ratio.</value>
+    <value>Choose the video&apos;s aspect ratio, such as 9:16 for vertical video. By default, the app crops the image around its center and draws the overlay in the new frame. The main window preview keeps the original aspect ratio. 360° recordings are rendered directly in the selected format.</value>
   </data>
   <data name="Settings_OutputAspectBars" xml:space="preserve">
     <value>Add black bars instead of cropping</value>
@@ -2526,13 +2526,13 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Codec</value>
   </data>
   <data name="Settings_OutputCodecHint" xml:space="preserve">
-    <value>H.264 is supported by most players and editors, including older devices. It needs a higher bitrate than HEVC for similar quality, so the app increases the bitrate by 50% when switching to H.264. H.264 output in this app is always 8-bit.</value>
+    <value>H.264 makes the video easier to play and edit, including on older devices. It needs a higher bitrate to achieve quality similar to HEVC. When you select H.264, the app increases the bitrate by 50% and saves the video in 8-bit.</value>
   </data>
   <data name="Settings_OutputEightBit" xml:space="preserve">
     <value>Write 8-bit video</value>
   </data>
   <data name="Settings_OutputEightBitHint" xml:space="preserve">
-    <value>8-bit output is supported by more devices than 10-bit video, but it may introduce visible bands in smooth color gradients, such as the sky. This option does not change recordings that are already 8-bit.</value>
+    <value>8-bit video plays on more devices than 10-bit video. However, visible bands may appear in smooth color gradients, such as the sky. This option does not affect recordings that are already 8-bit.</value>
   </data>
   <data name="Settings_OutputQuality" xml:space="preserve">
     <value>OUTPUT QUALITY</value>
@@ -2541,7 +2541,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Resolution</value>
   </data>
   <data name="Settings_OutputResolutionHint" xml:space="preserve">
-    <value>A lower resolution makes the video easier to share: rendering is faster and the bitrate decreases with the pixel count. The recording is never upscaled beyond its source resolution.</value>
+    <value>A lower resolution speeds up rendering and makes the video easier to share. The app also reduces the bitrate in proportion to the pixel count. The export resolution will not exceed the original recording&apos;s resolution.</value>
   </data>
   <data name="Settings_PlaybackAndMonitors" xml:space="preserve">
     <value>PLAYBACK AND MONITORS</value>
@@ -2565,7 +2565,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>PROJECTS</value>
   </data>
   <data name="Settings_PutsTheIndexFirstSo" xml:space="preserve">
-    <value>Moves the index to the start of the file so playback in a browser or messaging app can begin before the entire video is downloaded. The image remains unchanged. This extra step takes a few seconds per GB.</value>
+    <value>Allows playback in a browser or messaging app to begin before the entire video is downloaded. It does this by moving the index to the start of the file without changing the image. Adds a few seconds of saving time per GB.</value>
   </data>
   <data name="Settings_RenderWithoutAudio" xml:space="preserve">
     <value>Render without audio</value>
@@ -2631,7 +2631,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>STARTUP</value>
   </data>
   <data name="Settings_StartupProjectsPlaybackAndMonitors" xml:space="preserve">
-    <value>Startup, projects, playback and monitors.</value>
+    <value>Startup, projects and closing the program.</value>
   </data>
   <data name="Settings_StatsToShow" xml:space="preserve">
     <value>STATS TO SHOW</value>
@@ -2643,7 +2643,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Reopens the setup guide for cameras, tools, maps, speed correction, the output folder and project files.</value>
   </data>
   <data name="Settings_TheGpsReportsAFew" xml:space="preserve">
-    <value>GPS reports only a few positions per second, causing the compass trail and map to move in jumps. This option smooths movement between consecutive positions. Changes apply immediately and reload the open preview.</value>
+    <value>Makes map and compass movement smoother and speed readings steadier. Reduces abrupt changes caused by GPS readings. Changing this setting immediately reloads the open preview.</value>
   </data>
   <data name="Settings_Theme" xml:space="preserve">
     <value>Theme</value>
@@ -2673,7 +2673,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Displays time next to the timeline as hours:minutes:seconds:frames, starting at 00:00:00:00, for example 00:01:23:12. At 29.97 and 59.94 fps, it uses drop-frame numbering with a semicolon, as video editors do.</value>
   </data>
   <data name="Settings_UpdateCheckFailed" xml:space="preserve">
-    <value>Could not check for a new version.</value>
+    <value>Could not check for updates.</value>
   </data>
   <data name="Settings_Updates" xml:space="preserve">
     <value>Updates</value>
@@ -3581,7 +3581,7 @@ Note: Telemavix Studio is provided free of charge. If someone asks you to pay fo
     <value>Performance test</value>
   </data>
   <data name="Welcome_SmoothGpsHint" xml:space="preserve">
-    <value>GPS positions update less often than video frames, so the compass trail and map may move in jumps. Smoothing provides continuous movement between consecutive positions.</value>
+    <value>GPS positions update less often than video frames, so the compass trail and map may move in jumps, and the receiver's speed may flick for a moment. Smoothing provides continuous movement between consecutive positions and evens out those flicks.</value>
   </data>
   <data name="Welcome_SpeedFromACameraS" xml:space="preserve">
     <value>If GPS consistently reads too low while driving at a steady speed, you can increase speeds on the overlay by a chosen percentage. Calculate the correction from two readings or enter it manually. If you do not need calibration, leave it at 0%.</value>
@@ -4368,7 +4368,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The drone&apos;s vertical speed, calculated from height changes in the DJI flight log over about one second. Positive values indicate ascent; negative values indicate descent.</value>
   </data>
   <data name="Widget_SatellitesDescription" xml:space="preserve">
-    <value>The number of satellites detected by the drone&apos;s receiver and the GPS signal level shown as bars. Data comes from the DJI flight log.</value>
+    <value>The number of satellites the receiver sees and the GPS signal bars. For a drone they are the GPS level from the DJI flight log, for a phone's track (Telemavix GPS) a level worked out from the fix's accuracy. Optionally the accuracy is shown under the count.</value>
   </data>
   <data name="Widget_DroneBattery" xml:space="preserve">
     <value>Drone battery</value>
@@ -4512,13 +4512,49 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The original distance counter from the FIT file. Includes the route before the video and any parts cut out.</value>
   </data>
   <data name="Widget_DeviceBatteryDescription" xml:space="preserve">
-    <value>The last recorded GPS device battery level from the FIT file. This is separate from the camera's battery.</value>
+    <value>The last recorded battery level of the device that recorded the track (a GPS watch or a phone with Telemavix GPS), with an icon and, when the track has them, the battery's temperature and a charging bolt. This is separate from the camera's battery.</value>
   </data>
   <data name="Widget_AudioLevel" xml:space="preserve">
     <value>Audio level</value>
   </data>
   <data name="Widget_WindProcessing" xml:space="preserve">
     <value>Wind noise reduction</value>
+  </data>
+  <data name="Widget_HeartRate" xml:space="preserve">
+    <value>Heart rate</value>
+  </data>
+  <data name="Widget_HeartRateDescription" xml:space="preserve">
+    <value>The heart rate saved in the track by a chest strap or a watch (FIT or GPX).</value>
+  </data>
+  <data name="Widget_Pressure" xml:space="preserve">
+    <value>Pressure</value>
+  </data>
+  <data name="Widget_PressureDescription" xml:space="preserve">
+    <value>The air pressure measured by the phone&apos;s barometer, in hPa or inHg. Data comes from a track recorded by Telemavix GPS.</value>
+  </data>
+  <data name="Widget_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Widget_LightDescription" xml:space="preserve">
+    <value>The light measured by the phone&apos;s sensor, in lux. It depends on where the phone is mounted, so it is not the brightness of the scene.</value>
+  </data>
+  <data name="Widget_CellSignal" xml:space="preserve">
+    <value>GSM signal</value>
+  </data>
+  <data name="Widget_CellSignalDescription" xml:space="preserve">
+    <value>The phone's mobile network signal: its strength in dBm (or the 0 to 4 level when the phone gives no dBm) and signal bars. The closer to 0 dBm, the stronger.</value>
+  </data>
+  <data name="Editor_UnavailablePhoneSensor" xml:space="preserve">
+    <value>The track has no such reading. Attach a FIT or GPX file recorded by the Telemavix GPS app on a phone that has this sensor.</value>
+  </data>
+  <data name="Editor_UnavailableHeartRate" xml:space="preserve">
+    <value>The track has no heart rate. Attach a FIT or GPX file containing this reading.</value>
+  </data>
+  <data name="Editor_UnavailableSatellites" xml:space="preserve">
+    <value>No satellite count. Add a drone&apos;s flight log or a track from the Telemavix GPS app.</value>
+  </data>
+  <data name="Satellites_Accuracy" xml:space="preserve">
+    <value>Show accuracy</value>
   </data>
   <data name="Widget_ImageLuma" xml:space="preserve">
     <value>Image brightness</value>
@@ -5113,7 +5149,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The app is working...</value>
   </data>
   <data name="Settings_WorkingAnimation" xml:space="preserve">
-    <value>Animated working screen</value>
+    <value>Animation while loading</value>
   </data>
   <data name="Settings_WorkingAnimationHint" xml:space="preserve">
     <value>While a recording loads, the app replaces the panels with an animated background showing &quot;The app is working...&quot;. Turn this option off if the animation affects performance. The panels will then remain visible.</value>
@@ -5400,6 +5436,9 @@ GPS points: {2} · timer pauses: {3}</value>
   <data name="Presets_FpvDronesHint" xml:space="preserve">
     <value>For drone footage. A layout loosely inspired by FPV goggles' OSD, but with more detail.</value>
   </data>
+  <data name="Presets_TelemavixGpsHint" xml:space="preserve">
+    <value>For rides recorded with the Telemavix GPS app.</value>
+  </data>
   <data name="Main_RingThemeHint" xml:space="preserve">
     <value>A style inspired by the speedometer in the DJI Mimo app.</value>
   </data>
@@ -5480,5 +5519,47 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="Editor_SingleMapCredit" xml:space="preserve">
     <value>Already on the overlay: one map credit covers every Map widget, so a second one would never be drawn.</value>
+  </data>
+  <data name="Tools_CompareSmoothing" xml:space="preserve">
+    <value>Compare GPS smoothing...</value>
+  </data>
+  <data name="CompareSmooth_Title" xml:space="preserve">
+    <value>GPS smoothing comparison</value>
+  </data>
+  <data name="CompareSmooth_Raw" xml:space="preserve">
+    <value>Not smoothed</value>
+  </data>
+  <data name="CompareSmooth_Smoothed" xml:space="preserve">
+    <value>Smoothed</value>
+  </data>
+  <data name="CompareSmooth_Hint" xml:space="preserve">
+    <value>The same recording and overlay. Only the GPS smoothing differs.</value>
+  </data>
+  <data name="CompareSmooth_NoGps" xml:space="preserve">
+    <value>This recording has no GPS positions, so there is nothing to smooth. Choose an original recording with GPS telemetry.</value>
+  </data>
+  <data name="CompareSmooth_Failed" xml:space="preserve">
+    <value>Couldn't open the recording: {0}</value>
+  </data>
+  <data name="SettingsPage_Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
+    <value>What a render carries over from the camera&apos;s file, and what it says about itself.</value>
+  </data>
+  <data name="SettingsPage_Telemetry" xml:space="preserve">
+    <value>Telemetry</value>
+  </data>
+  <data name="SettingsPage_TelemetrySubtitle" xml:space="preserve">
+    <value>How GPS and sensor readings become what the overlay shows.</value>
+  </data>
+  <data name="SettingsPage_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="SettingsPage_PreviewSubtitle" xml:space="preserve">
+    <value>Playback in the editor, shadows and the screens the preview can move to.</value>
+  </data>
+  <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
+    <value>Flight logs of DJI drones need a key from DJI.</value>
   </data>
 </root>

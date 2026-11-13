@@ -226,11 +226,13 @@ public sealed class SensorWidgetTests
 			int right = -1;
 			for (int y = 0; y < 1080; y++)
 			for (int x = 1919; x > right; x--)
+			{
 				if (buffer[(y * 1920 + x) * 4 + 3] > 40)
 				{
 					right = x;
 					break;
 				}
+			}
 
 			return right;
 		}
@@ -265,8 +267,8 @@ public sealed class SensorWidgetTests
 		];
 		foreach (OverlayElement widget in widgets)
 		{
-			string json = System.Text.Json.JsonSerializer.Serialize(widget);
-			OverlayElement back = System.Text.Json.JsonSerializer.Deserialize<OverlayElement>(json)!;
+			string json = JsonSerializer.Serialize(widget);
+			OverlayElement back = JsonSerializer.Deserialize<OverlayElement>(json)!;
 			Assert.AreEqual(widget, back, widget.Type.ToString());
 			Assert.IsFalse(string.IsNullOrEmpty(OverlayRenderer.DefaultLabel((LabeledStatElement)widget)), widget.Type.ToString());
 			Assert.IsTrue(OverlayElementBounds.SupportsTextAlign(widget), widget.Type.ToString());

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Telemavix.Core.Telemetry;
 
 namespace Telemavix.Tests.Telemetry;
@@ -103,7 +104,7 @@ public sealed class GpsSpeedSmoothingTests
 		var frames = new List<TelemetryFrame>(216_001);
 		for (int i = 0; i <= 216_000; i++) frames.Add(new TelemetryFrame(i, i / 60.0, 50, 20, 200, null, 0, 1, 0, 5 + Math.Sin(i / 600.0)));
 
-		var watch = System.Diagnostics.Stopwatch.StartNew();
+		var watch = Stopwatch.StartNew();
 		double?[] smoothed = GpsSpeedSmoothing.Apply(frames);
 		watch.Stop();
 

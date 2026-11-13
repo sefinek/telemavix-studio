@@ -55,8 +55,11 @@ public sealed class ExternalTrackMergeTests
 	[TestMethod]
 	public void Apply_ThePhonesSensorsKeepGoingWhereTheGpsHasNoFix()
 	{
-		ExternalTrackPoint[] fixes = [.. Enumerable.Range(0, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1000, Satellites: 15))),
-			.. Enumerable.Range(20, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1001, Satellites: 15)))];
+		ExternalTrackPoint[] fixes =
+		[
+			.. Enumerable.Range(0, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1000, Satellites: 15))),
+			.. Enumerable.Range(20, 3).Select(i => new ExternalTrackPoint(T0.AddSeconds(i), 53.1 + i * 0.0001, 18.9, 80, 2, Phone: new PhoneReading(PressureHectopascals: 1001, Satellites: 15)))
+		];
 		ExternalPhoneSample[] samples = [.. Enumerable.Range(3, 17).Select(i => new ExternalPhoneSample(T0.AddSeconds(i), new PhoneReading(PressureHectopascals: 1000.5, LightLux: 10 + i, Satellites: 0)))];
 		var track = new ExternalTrack(fixes, phoneSamples: samples);
 

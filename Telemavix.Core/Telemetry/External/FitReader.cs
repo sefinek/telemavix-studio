@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Text;
 
 namespace Telemavix.Core.Telemetry.External;
 
@@ -142,7 +143,6 @@ public static class FitReader
 				continue;
 			}
 
-
 			double? altitude = (Field(definition, data, EnhancedAltitude) ?? Field(definition, data, Altitude)) is { } a ? a / 5.0 - 500 : null;
 			double? speed = (Field(definition, data, EnhancedSpeed) ?? Field(definition, data, Speed)) is { } s ? s / 1000.0 : null;
 			double? temperature = Field(definition, data, Temperature);
@@ -214,7 +214,7 @@ public static class FitReader
 			{
 				ReadOnlySpan<byte> text = data.Slice(at, size);
 				int end = text.IndexOf((byte)0);
-				return System.Text.Encoding.UTF8.GetString(end < 0 ? text : text[..end]);
+				return Encoding.UTF8.GetString(end < 0 ? text : text[..end]);
 			}
 
 			at += size;

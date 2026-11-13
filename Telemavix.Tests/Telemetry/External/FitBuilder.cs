@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Text;
 
 namespace Telemavix.Tests.Telemetry.External;
 
@@ -66,11 +67,11 @@ internal sealed class FitBuilder
 			_data.Add((byte)number);
 			_data.Add((byte)type);
 			byte[] text = new byte[32];
-			System.Text.Encoding.UTF8.GetBytes(name).CopyTo(text, 0);
+			Encoding.UTF8.GetBytes(name).CopyTo(text, 0);
 			_data.AddRange(text);
 		}
 
-		_data.Add((byte)(0x60 | PhoneRecordLocal));
+		_data.Add(0x60 | PhoneRecordLocal);
 		_data.Add(0);
 		_data.Add(0);
 		_data.AddRange(new byte[] { 20, 0 });

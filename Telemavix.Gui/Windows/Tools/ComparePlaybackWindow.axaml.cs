@@ -322,6 +322,7 @@ public partial class ComparePlaybackWindow : Window
 			size.Text = string.Format(Strings.ComparePlay_Size, tile.FileSizeBytes.ToString("N0", CultureInfo.CurrentCulture),
 				FormatHelper.FormatBytes(tile.FileSizeBytes));
 		}
+
 		var error = new TextBlock { FontSize = 12, Foreground = Palette.Danger, TextWrapping = TextWrapping.Wrap, IsVisible = false };
 		player.TileFailed += failed =>
 		{

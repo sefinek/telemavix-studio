@@ -19,7 +19,7 @@ internal static class GpsSpeedSmoothing
 	/// <summary>The smoothed receiver speed of every frame (m/s), null where the frame has none.</summary>
 	public static double?[] Apply(IReadOnlyList<TelemetryFrame> frames)
 	{
-		var result = new double?[frames.Count];
+		double?[] result = new double?[frames.Count];
 		int start = 0;
 		while (start < frames.Count)
 		{

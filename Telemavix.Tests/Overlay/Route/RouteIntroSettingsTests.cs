@@ -21,7 +21,7 @@ public sealed class RouteIntroSettingsTests
 	{
 		var settings = new OverlaySettings { ShowRouteIntro = true };
 
-		Assert.IsTrue(RouteIntroSettings.ForRecording(settings, true, null, false).Enabled);
+		Assert.IsTrue(RouteIntroSettings.ForRecording(settings, true, null).Enabled);
 		Assert.IsFalse(RouteIntroSettings.ForRecording(settings, true, null, true).Enabled, "off by default: the card sums up the ride from its start");
 		Assert.IsTrue(RouteIntroSettings.ForRecording(settings with { RouteIntroWhenTrimmed = true }, true, null, true).Enabled);
 		Assert.IsFalse(new OverlaySettings().RouteIntroWhenTrimmed, "off unless asked for");

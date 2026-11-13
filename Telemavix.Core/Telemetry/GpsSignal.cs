@@ -11,11 +11,15 @@ internal static class GpsSignal
 	{
 		return meters is not { } accuracy || !double.IsFinite(accuracy) || accuracy < 0
 			? null
-			: accuracy <= 3 ? 5
-			: accuracy <= 5 ? 4
-			: accuracy <= 10 ? 3
-			: accuracy <= 20 ? 2
-			: 1;
+			: accuracy <= 3
+				? 5
+				: accuracy <= 5
+					? 4
+					: accuracy <= 10
+						? 3
+						: accuracy <= 20
+							? 2
+							: 1;
 	}
 
 	/// <summary>The phone's level (0 to 4) on five bars, or the bars a strength in dBm makes: -85 or stronger is full, every 10 dBm weaker is one bar less.</summary>

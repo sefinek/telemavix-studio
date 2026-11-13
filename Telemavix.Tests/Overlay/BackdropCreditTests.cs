@@ -80,11 +80,13 @@ public sealed class BackdropCreditTests
 		int right = -1;
 		for (int x = Width - 1; x >= 0 && right < 0; x--)
 		for (int y = 0; y < Height; y++)
+		{
 			if (bgra[(y * Width + x) * 4 + 3] != 0)
 			{
 				right = x;
 				break;
 			}
+		}
 
 		float inset = 12f * Width / OverlayElementBounds.ReferenceWidth;
 		Assert.AreEqual(Width - inset, right, 3, "the credit's last letter is at the margin of the corner");

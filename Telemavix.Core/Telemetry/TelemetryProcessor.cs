@@ -1,5 +1,5 @@
-using Telemavix.Core.Overlay;
 using Telemavix.Core.Cameras;
+using Telemavix.Core.Overlay;
 using Telemavix.Core.Reframe;
 
 namespace Telemavix.Core.Telemetry;
@@ -163,7 +163,7 @@ public static class TelemetryProcessor
 	/// </summary>
 	private static double?[] ReceiverSpeeds(IReadOnlyList<TelemetryFrame> frames)
 	{
-		var speeds = new double?[frames.Count];
+		double?[] speeds = new double?[frames.Count];
 		for (int i = 0; i < speeds.Length; i++) speeds[i] = frames[i].GpsSpeedMs;
 		return speeds;
 	}

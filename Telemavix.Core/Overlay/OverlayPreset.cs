@@ -1,6 +1,5 @@
 using SkiaSharp;
 using Telemavix.Core.Localization;
-using Telemavix.Core.Mapping;
 
 namespace Telemavix.Core.Overlay;
 
@@ -194,11 +193,11 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 
 		Dictionary<OverlayElementType, OverlayElement> column = [];
 		foreach (StyledOverlayElement e in new StyledOverlayElement[]
-		{
-			basis.Elements.OfType<SatellitesElement>().Single() with { ShowAccuracy = true }, basis.Elements.OfType<CellSignalElement>().Single(),
-			basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true, ShowTemperature = true, Label = CoreStrings.Overlay_PhoneBattery },
-			basis.Elements.OfType<PressureElement>().Single(), basis.Elements.OfType<LightElement>().Single()
-		})
+		         {
+			         basis.Elements.OfType<SatellitesElement>().Single() with { ShowAccuracy = true }, basis.Elements.OfType<CellSignalElement>().Single(),
+			         basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true, ShowTemperature = true, Label = CoreStrings.Overlay_PhoneBattery },
+			         basis.Elements.OfType<PressureElement>().Single(), basis.Elements.OfType<LightElement>().Single()
+		         })
 			column[e.Type] = OnRightEdge(e);
 
 		return basis with

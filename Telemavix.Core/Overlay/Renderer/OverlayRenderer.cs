@@ -702,11 +702,11 @@ public sealed partial class OverlayRenderer : IDisposable
 
 	/// <summary>Where the watermark goes, and for how long, in a layout without a watermark widget - the default preset's.</summary>
 	private static readonly WatermarkElement DefaultWatermark =
-		OverlayPreset.CreateDefault("", "").Elements.OfType<WatermarkElement>().First() with { Visible = true };
+		Enumerable.OfType<WatermarkElement>(OverlayPreset.CreateDefault("", "").Elements).First() with { Visible = true };
 
 	/// <summary>Where the credit goes when a map needs it and the layout has no credit widget - the default preset's spot, the bottom-left corner.</summary>
 	private static readonly MapAttributionElement DefaultMapCredit =
-		OverlayPreset.CreateDefault("", "").Elements.OfType<MapAttributionElement>().First() with { Visible = true };
+		Enumerable.OfType<MapAttributionElement>(OverlayPreset.CreateDefault("", "").Elements).First() with { Visible = true };
 
 	/// <summary>The credit of every Map widget visible at `seconds`, one line - null with none on screen or none to credit.</summary>
 	private MapCredit? MapCreditAt(double seconds)

@@ -138,8 +138,8 @@ public sealed class OverlayPresetTests
 	[TestMethod]
 	public void CreateTelemavixGps_IsTheDefaultLayoutForATrackWithoutACamera()
 	{
-		OverlayPreset basis = OverlayPreset.CreateDefault("d", "Default");
-		OverlayPreset gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
+		var basis = OverlayPreset.CreateDefault("d", "Default");
+		var gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
 
 		foreach (OverlayElementType type in new[] { OverlayElementType.RollGauge, OverlayElementType.GMeter })
 			Assert.IsFalse(gps.Elements.Single(e => e.Type == type).Visible, type.ToString());
@@ -151,8 +151,11 @@ public sealed class OverlayPresetTests
 		Assert.IsTrue(battery is { ShowIcon: true, ColorByCharge: true, ShowTemperature: true });
 		Assert.AreEqual(CoreStrings.Overlay_PhoneBattery, battery.Label);
 
-		OverlayElementType[] changed = [OverlayElementType.RollGauge, OverlayElementType.GMeter, OverlayElementType.DeviceBattery,
-			OverlayElementType.Satellites, OverlayElementType.CellSignal, OverlayElementType.Pressure, OverlayElementType.Light, OverlayElementType.GpsAlert];
+		OverlayElementType[] changed =
+		[
+			OverlayElementType.RollGauge, OverlayElementType.GMeter, OverlayElementType.DeviceBattery,
+			OverlayElementType.Satellites, OverlayElementType.CellSignal, OverlayElementType.Pressure, OverlayElementType.Light, OverlayElementType.GpsAlert
+		];
 		foreach (OverlayElement element in basis.Elements.Where(e => !changed.Contains(e.Type)))
 			Assert.AreEqual(element, gps.Elements.Single(e => e.Id == element.Id), element.Type.ToString());
 	}
@@ -160,7 +163,7 @@ public sealed class OverlayPresetTests
 	[TestMethod]
 	public void CreateTelemavixGps_ThePhonesReadingsAreAColumnOnTheRightInTheOrderOfWhatTheySay()
 	{
-		OverlayPreset gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
+		var gps = OverlayPreset.CreateTelemavixGps("x", "Telemavix GPS");
 		OverlayElementType[] column = [OverlayElementType.Satellites, OverlayElementType.CellSignal, OverlayElementType.DeviceBattery, OverlayElementType.Pressure, OverlayElementType.Light];
 		List<OverlayElement> shown = [.. column.Select(type => gps.Elements.Single(e => e.Type == type))];
 

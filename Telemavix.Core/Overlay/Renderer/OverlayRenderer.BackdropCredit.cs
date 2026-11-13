@@ -1,5 +1,3 @@
-using SkiaSharp;
-
 namespace Telemavix.Core.Overlay;
 
 /// <summary>The map the picture itself is (TrackBackdrop) - what its credit is written for.</summary>

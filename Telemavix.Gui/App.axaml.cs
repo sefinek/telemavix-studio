@@ -26,6 +26,7 @@ public class App : Application
 		// main window mirrors into its LOG panel, and marked handled so the window stays usable.
 		Dispatcher.UIThread.UnhandledException += (_, e) =>
 		{
+			CrashReporter.Notify(e.Exception);
 			AppLogger.Error(e.Exception, string.Format(Strings.App_UnexpectedError, e.Exception.Message));
 			e.Handled = true;
 		};

@@ -235,6 +235,8 @@ dotnet run --project Telemavix.Build -- --help         # options: platforms, var
 ```
 Packages for all platforms can be built on any system (Windows, Linux or macOS).
 
+BugSnag reporting is enabled only in Release builds compiled with the `BUGSNAG_API_KEY` environment variable set. The key is embedded at build time; it is not needed on the user's machine. The Release workflow reads it from the repository's `BUGSNAG_API_KEY` Actions secret. Builds without a key, Debug builds and GUI smoke tests do not send reports. Users can disable reporting in Settings > Privacy.
+
 ## Reviews and mentions
 - [Creative Content - Australian Videocamera Magazine](https://cre-8.com.au/2026/10/23/review-osmo-overlay)
 - [Quadricottero News](https://www.quadricottero.com/2026/10/osmooverlay-arriva-il-software-gratuito.html)

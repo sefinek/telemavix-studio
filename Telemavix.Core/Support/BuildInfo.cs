@@ -22,6 +22,8 @@ public static class BuildInfo
 
 	public static string? Commit => Metadata.GetValueOrDefault("Commit");
 
+	internal static string? BugsnagApiKey => Metadata.GetValueOrDefault("BugsnagApiKey");
+
 	/// <summary>The date in the local time zone, with the commit when the build has one: "2026-10-23 14:05 (a1b2c3d)".</summary>
 	public static string Describe()
 	{

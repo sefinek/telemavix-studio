@@ -410,6 +410,16 @@
 					</StackPanel>
 
 					<Border Classes="settingsCard">
+						<Grid Classes="settingRow" ColumnDefinitions="*,Auto">
+							<StackPanel>
+								<TextBlock Text="{x:Static local:Strings.Settings_CrashReports}" Classes="rowTitle" />
+								<TextBlock Text="{x:Static local:Strings.Settings_CrashReportsHint}" Classes="rowHint" />
+							</StackPanel>
+							<ToggleSwitch Grid.Column="1" Name="CrashReportsCheck" />
+						</Grid>
+					</Border>
+
+					<Border Classes="settingsCard">
 						<StackPanel>
 							<Grid Classes="settingRow" ColumnDefinitions="*,Auto">
 								<StackPanel>

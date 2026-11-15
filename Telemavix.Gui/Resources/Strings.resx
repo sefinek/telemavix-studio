@@ -5562,4 +5562,10 @@ GPS points: {2} · timer pauses: {3}</value>
   <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
     <value>DJI API key for reading encrypted flight logs.</value>
   </data>
+  <data name="Settings_CrashReports" xml:space="preserve">
+    <value>Error reports</value>
+  </data>
+  <data name="Settings_CrashReportsHint" xml:space="preserve">
+    <value>Send error reports to BugSnag: the exception and stack trace, app version, OS and .NET runtime version. Recordings, GPS tracks, settings and computer name are not attached. Changing this setting does not require restarting the app.</value>
+  </data>
 </root>

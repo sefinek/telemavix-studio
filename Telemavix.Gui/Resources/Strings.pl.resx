@@ -5562,4 +5562,10 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   <data name="SettingsPage_DronesSubtitle" xml:space="preserve">
     <value>Klucz API DJI do odczytu zaszyfrowanych dzienników lotu.</value>
   </data>
+  <data name="Settings_CrashReports" xml:space="preserve">
+    <value>Raporty błędów</value>
+  </data>
+  <data name="Settings_CrashReportsHint" xml:space="preserve">
+    <value>Wysyłaj raporty błędów do BugSnag: wyjątek i stos wywołań, wersję aplikacji, systemu i środowiska .NET. Bez załączania nagrań, tras GPS, ustawień ani nazwy komputera. Zmiana nie wymaga ponownego uruchomienia aplikacji.</value>
+  </data>
 </root>

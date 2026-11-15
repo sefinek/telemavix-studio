@@ -17,6 +17,7 @@ using Telemavix.Core.Updates;
 using Telemavix.Drones.Dji;
 
 LegacyDataFolder.Migrate();
+CrashReporter.Start(OverlaySettingsStore.Load(), "CLI");
 UiLanguages.Apply(UiLanguages.English);
 
 AppDomain.CurrentDomain.UnhandledException += (_, e) =>

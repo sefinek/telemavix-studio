@@ -26,6 +26,7 @@ internal class Program
 		// Held while the app runs - the installer's AppMutex, so an update waits for the app to close.
 		using var appMutex = new Mutex(false, AppUpdates.MutexName);
 		OverlaySettings settings = OverlaySettingsStore.Load();
+		if (!SmokeTest.Enabled) CrashReporter.Start(settings, "GUI");
 		_ = MapKeyCheck.EnsureAsync(settings.MapApiKeys);
 		StartupKeys.Capture();
 		AppLogger.Verbose = settings.DebugMode || StartupKeys.ShiftHeld;

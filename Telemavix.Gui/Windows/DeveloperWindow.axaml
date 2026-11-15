@@ -112,6 +112,7 @@
 						<Button Content="Log: info" Tag="log:info" Click="OnActionClick" />
 						<Button Content="Log: warning" Tag="log:warn" Click="OnActionClick" />
 						<Button Content="Log: error" Tag="log:error" Click="OnActionClick" />
+						<Button Content="BugSnag: send test error (Release)" Tag="bugsnag-test" Click="OnActionClick" />
 					</WrapPanel>
 					<TextBlock Text="SOUNDS" Classes="sectionLabel" />
 					<WrapPanel>

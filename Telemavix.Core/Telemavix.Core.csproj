@@ -23,6 +23,7 @@
   <ItemGroup>
     <AssemblyMetadata Include="BuildDate" Value="$(BuildStamp)" />
     <AssemblyMetadata Include="Commit" Value="$(BuildCommit)" Condition="'$(BuildCommit)' != ''" />
+    <AssemblyMetadata Include="BugsnagApiKey" Value="$(BUGSNAG_API_KEY)" Condition="'$(BUGSNAG_API_KEY)' != ''" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +50,7 @@
 
   <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" />
+    <PackageReference Include="Bugsnag" />
     <PackageReference Include="NLog" />
     <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="ppy.SDL3-CS" />

@@ -44,6 +44,16 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		float chartY = OverlayElementBounds.ReferenceHeight - m - (OverlayElementBounds.ChartTop + OverlayElementBounds.ChartHeight + 1);
 		float gpsX = width - m - DroneGpsWidth, signalX = gpsX - DroneTopGap - DroneSignalWidth;
 		float sticksX = width - m - (OverlayElementBounds.StickPadSize * 2 + OverlayElementBounds.StickPadGap), dialX = width - m - OverlayElementBounds.DroneDialRadius;
+		DroneBatteryElement droneBattery = basis.Elements.OfType<DroneBatteryElement>().Single() with
+		{
+			X = m, Y = top, Visible = true, ShowIcon = true, ColorByCharge = true, ShowVoltage = true,
+			ShowTemperature = false, ShowCurrent = true, CurrentBesideVoltage = true, ShowCells = false
+		};
+		SKRect batteryBox = OverlayElementBounds.GetBounds(droneBattery.Type, 0, 0, 1, element: droneBattery);
+		OverlayElement distance = basis.Elements.First(e => e is DistanceElement);
+		SKRect distanceBox = OverlayElementBounds.GetBounds(distance.Type, 0, 0, 1, element: distance);
+		float rowGap = StatColumnStep - distanceBox.Height;
+		float distanceY = top + batteryBox.Bottom + rowGap - distanceBox.Top;
 
 		return basis with
 		{
@@ -58,7 +68,7 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 					SpeedGaugeElement speed => speed with { Theme = SpeedGaugeTheme.Modern },
 					ProfileChartElement chart => chart with { Y = chartY, AppearAtSeconds = DroneWatermarkSeconds, Visible = true, Series = ProfileSeries.Height, Axis = ProfileAxis.Time, AutoHeight = true },
 					MapWidgetElement map => map with { MapZoom = 17, MapDynamicZoom = true, MapDynamicZoomMaxFactor = 3, ShowEsriLabels = false, RotateWithHeading = true, DotWhenNotFacingTravel = true },
-					DroneBatteryElement battery => battery with { X = m, Y = top, Visible = true, ShowIcon = true, ColorByCharge = true, ShowVoltage = true, ShowTemperature = false, ShowCurrent = true, CurrentBesideVoltage = true, ShowCells = false },
+					DroneBatteryElement => droneBattery,
 					SignalElement => e with { X = signalX, Y = top, Visible = true },
 					SatellitesElement => e with { X = gpsX, Y = top, Visible = true },
 					FlightAlertsElement alerts => alerts with { Visible = true, ShowSeconds = 5, MaxLines = 2 },
@@ -69,8 +79,8 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 						X = dialX, Y = top + DroneControlsTop + OverlayElementBounds.StickPadSize + 2 * DroneControlsGap + OverlayElementBounds.DroneDialRadius * 3, Visible = true, SpinRotors = true
 					},
 					HeightElement or HomeDistanceElement => e with { Visible = false },
-					DistanceElement => e with { X = m, Y = top + DroneColumnStep },
-					TripStatElement => e with { X = m, Y = top + 2 * DroneColumnStep, Visible = true },
+					DistanceElement => e with { X = m, Y = distanceY },
+					TripStatElement => e with { X = m, Y = distanceY + StatColumnStep, Visible = true },
 					_ => e
 				})
 			]
@@ -215,12 +225,11 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		};
 	}
 
-	// The widest the GPS and the signal widgets get at 4K (measured), the gap between them, and the rhythm of the left column (the battery's own height).
+	// The widest the GPS and the signal widgets get at 4K (measured), and the gap between them.
 	private const float DroneGpsWidth = 240;
 	private const float DroneSignalWidth = 280;
 	private const float DroneTopGap = 60;
 	private const float FpvDateBelowTime = 64, FpvBatteryWidth = 450, FpvSignalWidth = 242, FpvLeftColumnTop = 296, FpvRightColumnTop = 150, FpvRowStep = 160, FpvAlertsBelowTop = 170, FpvDialGap = 60, FpvWatermarkAboveDials = 48;
-	private const float DroneColumnStep = 220;
 	private const float StatColumnStep = 190;
 
 	// The sticks and the two dials stacked down the right edge under the top row: where the first starts, and the gap between them.

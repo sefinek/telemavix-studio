@@ -22,6 +22,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 60
     if: github.ref == 'refs/heads/main'
+    env:
+      BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}

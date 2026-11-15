@@ -152,6 +152,7 @@ public partial class SettingsWindow : Window
 	public void Load(OverlaySettings settings)
 	{
 		LoadSettingsPresets();
+		CrashReportsCheck.IsChecked = settings.CrashReports;
 		SmoothGpsMotionCheck.IsChecked = settings.SmoothGpsMotion;
 		OrientationSourceCombo.SelectedItem = OrientationSourceOptions.FirstOrDefault(o => o.Value == settings.OrientationSource) ?? OrientationSourceOptions[0];
 		SpeedEditor.Load(settings.SpeedCorrectionPercent, RecordingCruisingSpeedKmh);
@@ -165,6 +166,7 @@ public partial class SettingsWindow : Window
 		return RouteIntro.ApplyTo(ApplyExportSettings(settings)) with
 		{
 			SmoothGpsMotion = SmoothGpsMotionCheck.IsChecked == true,
+			CrashReports = CrashReportsCheck.IsChecked == true,
 			OrientationSource = (OrientationSourceCombo.SelectedItem as ChoiceOption<OrientationSource>)?.Value ?? OrientationSource.Accelerometer,
 			SpeedCorrectionPercent = SpeedEditor.Percent
 		};

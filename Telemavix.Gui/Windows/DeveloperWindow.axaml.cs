@@ -165,6 +165,11 @@ public partial class DeveloperWindow : Window
 				else if (argument == "error") AppLogger.Error("Sample error from the developer tools");
 				else AppLogger.Notify("Sample message from the developer tools");
 				break;
+			case "bugsnag-test":
+				SetStatus(CrashReporter.Notify(new InvalidOperationException("Telemavix Studio BugSnag integration test"))
+					? "Test error submitted to BugSnag. Check the dashboard for delivery."
+					: "No report submitted. Check the build-time BUGSNAG_API_KEY and privacy settings. Debug builds and smoke tests do not send reports.");
+				return;
 			case "taskbar" when _main is not null:
 				TaskbarProgress.State state = Enum.Parse<TaskbarProgress.State>(argument);
 				TaskbarProgress.SetState(_main, state);

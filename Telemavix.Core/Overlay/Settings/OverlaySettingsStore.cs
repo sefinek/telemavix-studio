@@ -162,6 +162,7 @@ public sealed record OverlaySettings(
 	bool DisableShadows = false,
 	// The log panel shows everything the file log gets, not just what the app surfaces; holding Shift at startup turns it on for that run.
 	bool DebugMode = false,
+	bool CrashReports = true,
 	// The settings preset (SettingsPreset) whose values the fields it covers hold now; null until the first one is made.
 	string? ActiveSettingsPresetId = null,
 	// The SDK key of the user's DJI Open API app, which DJI's flight record API asks for to give the keys of an encrypted flight log (DjiKeychains). A secret: protected on disk like MapApiKeys.
@@ -224,6 +225,8 @@ public static class RenderSpeedHistory
 /// </summary>
 public static class OverlaySettingsStore
 {
+	public static event Action<OverlaySettings>? Saved;
+
 	private static readonly string StoreDir = Path.Combine(
 		Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Telemavix");
 
@@ -269,6 +272,7 @@ public static class OverlaySettingsStore
 		}
 
 		SettingsPresetStore.Sync(settings);
+		Saved?.Invoke(settings);
 	}
 
 	/// <summary>

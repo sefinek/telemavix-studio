@@ -4539,10 +4539,10 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Natężenie światła mierzone czujnikiem telefonu, w luksach. Zależy od miejsca montażu telefonu, więc nie jest jasnością sceny.</value>
   </data>
   <data name="Widget_CellSignal" xml:space="preserve">
-    <value>Sygnał GSM</value>
+    <value>Sygnał sieci</value>
   </data>
   <data name="Widget_CellSignalDescription" xml:space="preserve">
-    <value>Sygnał sieci komórkowej telefonu: siła w dBm (albo poziom 0-4, gdy telefon nie podaje dBm) i pasek siły sygnału. Im bliżej 0 dBm, tym silniejszy.</value>
+    <value>Siła sygnału sieci komórkowej w dBm: w LTE jest to RSRP, a w 5G SS-RSRP. Słupki pokazują poziom sygnału podany przez telefon. Przy braku pomiaru w dBm wyświetlany jest poziom 0-4.</value>
   </data>
   <data name="Editor_UnavailablePhoneSensor" xml:space="preserve">
     <value>Brak tego odczytu w trasie. Dołącz plik FIT lub GPX nagrany aplikacją Telemavix GPS na telefonie z tym czujnikiem.</value>

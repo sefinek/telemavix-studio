@@ -800,7 +800,7 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
     <value>Światło</value>
   </data>
   <data name="Overlay_CellSignal" xml:space="preserve">
-    <value>Sygnał GSM</value>
+    <value>Sygnał sieci</value>
   </data>
   <data name="Overlay_AudioLevel" xml:space="preserve">
     <value>Poziom dźwięku</value>

@@ -4539,10 +4539,10 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The light measured by the phone&apos;s sensor, in lux. It depends on where the phone is mounted, so it is not the brightness of the scene.</value>
   </data>
   <data name="Widget_CellSignal" xml:space="preserve">
-    <value>GSM signal</value>
+    <value>Mobile signal</value>
   </data>
   <data name="Widget_CellSignalDescription" xml:space="preserve">
-    <value>The phone's mobile network signal: its strength in dBm (or the 0 to 4 level when the phone gives no dBm) and signal bars. The closer to 0 dBm, the stronger.</value>
+    <value>Mobile network signal strength in dBm: RSRP for LTE and SS-RSRP for 5G. The bars show the signal level reported by the phone. When no dBm reading is available, the 0 to 4 level is shown instead.</value>
   </data>
   <data name="Editor_UnavailablePhoneSensor" xml:space="preserve">
     <value>The track has no such reading. Attach a FIT or GPX file recorded by the Telemavix GPS app on a phone that has this sensor.</value>

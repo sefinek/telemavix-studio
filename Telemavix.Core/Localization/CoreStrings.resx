@@ -800,7 +800,7 @@ In Telemavix Studio, open Settings > Behavior > DJI drones and replace the key. 
     <value>Light</value>
   </data>
   <data name="Overlay_CellSignal" xml:space="preserve">
-    <value>GSM signal</value>
+    <value>Mobile signal</value>
   </data>
   <data name="Overlay_AudioLevel" xml:space="preserve">
     <value>Audio level</value>

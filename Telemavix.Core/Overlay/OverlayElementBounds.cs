@@ -251,6 +251,7 @@ public static class OverlayElementBounds
 				OffsetY(MeasureLine(CoreStrings.Overlay_Inactive.ToUpperInvariant(), SmallFontSize, fontFamily), 150)),
 			OverlayElementType.ImageLuma => MeasureStat(label ?? CoreStrings.Overlay_ImageLuma, "255", "/255", fontFamily),
 			OverlayElementType.HeartRate => MeasureStat(label ?? CoreStrings.Overlay_HeartRate, "199", "BPM", fontFamily),
+			OverlayElementType.Cadence => MeasureStat(label ?? CoreStrings.Overlay_Cadence, "199", "SPM", fontFamily),
 			OverlayElementType.Pressure => MeasureStat(label ?? CoreStrings.Overlay_Pressure, "1013.2", "inHg", fontFamily),
 			OverlayElementType.Light => MeasureStat(label ?? CoreStrings.Overlay_Light, "99999", "LX", fontFamily),
 			OverlayElementType.CellSignal => MeasureCellSignal(label ?? CoreStrings.Overlay_CellSignal, (element as CellSignalElement)?.ShowBars ?? true, fontFamily),
@@ -545,13 +546,13 @@ public static class OverlayElementBounds
 	{
 		return element is ElevationElement or GradientElement or DistanceElement or TemperatureElementBase or DeviceDistanceElement or DeviceBatteryElement
 			or ImageLumaElement or HeightElement or HomeDistanceElement or VerticalSpeedElement or TripStatElement
-			or HeartRateElement or PressureElement or LightElement or CellSignalElement;
+			or HeartRateElement or CadenceElement or PressureElement or LightElement or CellSignalElement;
 	}
 
 	/// <summary>The stat widgets whose reading has digits after a decimal point to choose.</summary>
 	public static bool SupportsDecimals(OverlayElement element)
 	{
-		return SupportsStatParts(element) && element is not (DeviceBatteryElement or ImageLumaElement or HeartRateElement or LightElement or CellSignalElement);
+		return SupportsStatParts(element) && element is not (DeviceBatteryElement or ImageLumaElement or HeartRateElement or CadenceElement or LightElement or CellSignalElement);
 	}
 
 	/// <summary>The widgets whose lines of text TextAlign lines up (the rest are one line, or a layout of their own).</summary>
@@ -559,7 +560,7 @@ public static class OverlayElementBounds
 	{
 		return element is ElevationElement or GradientElement or DistanceElement or TemperatureElementBase or DeviceDistanceElement or DeviceBatteryElement or SatellitesElement
 			or ImageLumaElement or HeightElement or HomeDistanceElement or VerticalSpeedElement or TripStatElement or TextElement or ElapsedTimeTextElement
-			or CameraInfoElement or FlightModeElement or HeartRateElement or PressureElement or LightElement or CellSignalElement;
+			or CameraInfoElement or FlightModeElement or HeartRateElement or CadenceElement or PressureElement or LightElement or CellSignalElement;
 	}
 
 	/// <summary>

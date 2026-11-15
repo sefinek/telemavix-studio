@@ -5,7 +5,8 @@ using System.Xml;
 namespace Telemavix.Tracks;
 
 /// <summary>
-///     GPX 1.1 with Garmin's TrackPointExtension v1 (<c>atemp</c>, <c>hr</c>), the dialect bike computers, Strava and Telemavix Studio read.
+///     GPX 1.1 laid out like the files Garmin Connect and Strava export: <c>metadata</c> with the start time, the track's name and <c>type</c>, and Garmin's
+///     TrackPointExtension v1 (<c>atemp</c>, <c>hr</c>), the dialect bike computers, Strava and Telemavix Studio read.
 ///     The standard <c>sat</c> carries the satellite count. What GPX has no field for (pressure, battery, motion, light) goes into
 ///     the extension <see cref="TrackFields.Gpx.Namespace" />, which readers that do not know it skip. A new <c>trkseg</c> starts after every pause or gap.
 ///     Speed is not written: GPX has no field for it, readers derive it from the fixes.
@@ -16,22 +17,35 @@ public static class GpxWriter
 	private const string TrackPointExtensionNamespace = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1";
 	private const string SchemaInstanceNamespace = "http://www.w3.org/2001/XMLSchema-instance";
 
-	public static void Write(Track track, Stream stream, string creator = "Telemavix GPS")
+	/// <summary>The type of the track, the same sport the FIT file declares.</summary>
+	private const string TrackType = "cycling";
+
+	public static void Write(Track track, Stream stream, TrackProducer? producer = null)
 	{
+		producer ??= TrackProducer.Default;
 		var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true, CloseOutput = false };
 		using var writer = XmlWriter.Create(stream, settings);
 
 		writer.WriteStartDocument();
 		writer.WriteStartElement("gpx", GpxNamespace);
 		writer.WriteAttributeString("version", "1.1");
-		writer.WriteAttributeString("creator", creator);
+		writer.WriteAttributeString("creator", producer.Creator);
 		writer.WriteAttributeString("xmlns", "gpxtpx", null, TrackPointExtensionNamespace);
 		writer.WriteAttributeString("xmlns", TrackFields.Gpx.Prefix, null, TrackFields.Gpx.Namespace);
 		writer.WriteAttributeString("xmlns", "xsi", null, SchemaInstanceNamespace);
-		writer.WriteAttributeString("schemaLocation", SchemaInstanceNamespace, $"{GpxNamespace} http://www.topografix.com/GPX/1/1/gpx.xsd");
+		writer.WriteAttributeString("schemaLocation", SchemaInstanceNamespace, $"{GpxNamespace} http://www.topografix.com/GPX/1/1/gpx.xsd {TrackPointExtensionNamespace} http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd");
+
+		if (track.Points.Count > 0)
+		{
+			writer.WriteStartElement("metadata");
+			writer.WriteElementString("time", Timestamp(track.Points[0].Utc));
+			writer.WriteEndElement();
+		}
 
 		writer.WriteStartElement("trk");
-		if (!string.IsNullOrWhiteSpace(track.Name)) writer.WriteElementString("name", track.Name);
+		string name = XmlSafe(track.Name);
+		if (!string.IsNullOrWhiteSpace(name)) writer.WriteElementString("name", name);
+		writer.WriteElementString("type", TrackType);
 
 		bool open = false;
 		foreach (TrackPoint point in track.Points)
@@ -65,7 +79,7 @@ public static class GpxWriter
 		writer.WriteAttributeString("lat", Number(point.Latitude, "0.00000000"));
 		writer.WriteAttributeString("lon", Number(point.Longitude, "0.00000000"));
 		if (point.AltitudeMeters is { } altitude) writer.WriteElementString("ele", Number(altitude, "0.0#"));
-		writer.WriteElementString("time", DateTime.SpecifyKind(point.Utc, DateTimeKind.Utc).ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture));
+		writer.WriteElementString("time", Timestamp(point.Utc));
 		if (phone?.Satellites is { } satellites) writer.WriteElementString("sat", satellites.ToString(CultureInfo.InvariantCulture));
 
 		bool garmin = point.TemperatureCelsius is not null || point.HeartRateBpm is not null;
@@ -125,6 +139,24 @@ public static class GpxWriter
 		writer.WriteAttributeString("y", Number(v.Y, "0.###"));
 		writer.WriteAttributeString("z", Number(v.Z, "0.###"));
 		writer.WriteEndElement();
+	}
+
+	private static string Timestamp(DateTime utc) => DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", CultureInfo.InvariantCulture);
+
+	/// <summary>The text without the characters XML 1.0 cannot hold (control characters, lone surrogates); the writer would otherwise throw on a name typed by the user.</summary>
+	private static string XmlSafe(string? text)
+	{
+		if (string.IsNullOrEmpty(text)) return "";
+
+		var safe = new StringBuilder(text.Length);
+		for (int i = 0; i < text.Length; i++)
+		{
+			char c = text[i];
+			if (char.IsHighSurrogate(c) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1])) safe.Append(c).Append(text[++i]);
+			else if (XmlConvert.IsXmlChar(c)) safe.Append(c);
+		}
+
+		return safe.ToString();
 	}
 
 	private static string Number(double value, string format) => value.ToString(format, CultureInfo.InvariantCulture);

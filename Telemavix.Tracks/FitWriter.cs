@@ -4,16 +4,16 @@ using System.Text;
 namespace Telemavix.Tracks;
 
 /// <summary>
-///     A Garmin FIT activity file laid out the way a Garmin device writes one: file_id, the sport, timer events (start/stop mark pauses), one record per fix,
-///     a lap, a session (with the start position and the bounding box) and an activity. Little endian, CRC in the header and at the end. Speed and altitude are the
+///     A Garmin FIT activity file laid out the way a Garmin device writes one: file_id, file_creator (the app's version), the sport, timer events (start/stop mark pauses), one record per fix,
+///     a lap, a session (with the start position, the bounding box and the heart rate, altitude and temperature statistics) and an activity. Little endian, CRC in the header and at the end. Speed and altitude are the
 ///     enhanced fields (73, 78) with the SDK scales (altitude 5 and offset 500, speed 1000, distance 100), which is what Telemavix Studio, Garmin Connect and Strava read.
 ///     The phone battery goes out as device_info (what Studio shows as the device battery), the GPS accuracy as the standard gps_accuracy, and everything FIT has no field
 ///     for (satellites, pressure, motion, light, ...) as developer fields of index 0 that readers not knowing them skip by size.
 /// </summary>
 public static class FitWriter
 {
-	private const byte FileIdLocal = 0, EventLocal = 1, RecordLocal = 2, LapLocal = 3, SessionLocal = 4, ActivityLocal = 5, DeveloperIdLocal = 6, FieldDescriptionLocal = 7, DeviceInfoLocal = 8, SportLocal = 9;
-	private const ushort FileIdMessage = 0, SportMessage = 12, SessionMessage = 18, LapMessage = 19, RecordMessage = 20, EventMessage = 21, DeviceInfoMessage = 23, ActivityMessage = 34, FieldDescriptionMessage = 206, DeveloperDataIdMessage = 207;
+	private const byte FileIdLocal = 0, EventLocal = 1, RecordLocal = 2, LapLocal = 3, SessionLocal = 4, ActivityLocal = 5, DeveloperIdLocal = 6, FieldDescriptionLocal = 7, DeviceInfoLocal = 8, SportLocal = 9, FileCreatorLocal = 10;
+	private const ushort FileIdMessage = 0, SportMessage = 12, SessionMessage = 18, LapMessage = 19, RecordMessage = 20, EventMessage = 21, DeviceInfoMessage = 23, ActivityMessage = 34, FileCreatorMessage = 49, FieldDescriptionMessage = 206, DeveloperDataIdMessage = 207;
 
 	private const byte EnumType = 0x00, SInt8 = 0x01, UInt8 = 0x02, UInt16Type = 0x84, SInt32 = 0x85, UInt32Type = 0x86, StringType = 0x07, Float32 = 0x88, UInt32Z = 0x8C, ByteArray = 0x0D;
 
@@ -22,12 +22,15 @@ public static class FitWriter
 	/// <summary>The enums a Garmin device writes around a finished activity: event (timer 0, lap 9, session 8, activity 26), event type stop (1), session trigger activity_end (0), lap trigger session_end (7), source type local (5).</summary>
 	private const byte EventTimer = 0, EventSession = 8, EventLap = 9, EventActivity = 26, EventTypeStop = 1, SessionTriggerActivityEnd = 0, LapTriggerSessionEnd = 7, SourceLocal = 5;
 
+	/// <summary>The data of a timer event is the trigger that started or stopped the timer; the app does not tell an auto-pause from a manual one in the track, so it is manual (0), as in the files Garmin writes.</summary>
+	private const uint TimerTriggerManual = 0;
+
 	/// <summary>The size of the name of a sport (the ride's name), in bytes with the closing zero.</summary>
 	private const int SportNameSize = 32;
 
 	private const int InvalidSemicircles = int.MaxValue;
 
-	/// <summary>FIT sport 2: cycling, the sport Strava and Garmin Connect import rides as (the format has no field for the phone's vehicle).</summary>
+	/// <summary>FIT sport 2: cycling, the sport Strava and Garmin Connect import rides as. FIT also has e_biking (21) and motorcycling (22), but the app does not record which vehicle it rides on, so every ride is cycling.</summary>
 	private const byte SportCycling = 2, SubSportGeneric = 0;
 
 	/// <summary>A change smaller than this is GPS noise and not climb. The same threshold as the recorder's default, so the file agrees with the ride list.</summary>
@@ -60,16 +63,21 @@ public static class FitWriter
 		new(14, TrackFields.Fit.CellDbm, "dBm", SInt8, 1)
 	];
 
-	// Identifies the application that defined the developer fields.
+	/// <summary>Identifies the application that defined the developer fields. Never change it: every file already written carries it.</summary>
 	private static readonly byte[] ApplicationId = [0x54, 0x45, 0x4C, 0x45, 0x4D, 0x41, 0x56, 0x49, 0x58, 0x2D, 0x47, 0x50, 0x53, 0x00, 0x00, 0x01];
 
-	public static void Write(Track track, Stream stream)
+	public static void Write(Track track, Stream stream, TrackProducer? producer = null)
 	{
+		producer ??= TrackProducer.Default;
 		List<Entry> timeline = Timeline(track);
 		if (timeline.Count == 0) throw new ArgumentException("A FIT activity needs at least one fix or sample.", nameof(track));
 
-		using var body = new MemoryStream();
+		// A record with the developer fields is about 80 bytes; sizing the buffer up front saves the copies of a growing one on a long ride.
+		using var body = new MemoryStream(timeline.Count * 80 + 4096);
 		DateTime first = timeline[0].Utc, last = timeline[^1].Utc;
+
+		// A device serial must be non-zero (serial_number is uint32z); the app has no hardware number of its own, so it is the start time, the same in file_id and in device_info.
+		uint serial = Seconds(first) | 1;
 
 		Define(body, FileIdLocal, FileIdMessage, null, (0, 1, EnumType), (1, 2, UInt16Type), (2, 2, UInt16Type), (3, 4, UInt32Z), (4, 4, UInt32Type));
 		Data(body, FileIdLocal, w =>
@@ -77,9 +85,12 @@ public static class FitWriter
 			w.Byte(4);
 			w.U16(DevelopmentManufacturer);
 			w.U16(0);
-			w.U32(Seconds(first) | 1);
+			w.U32(serial);
 			w.U32(Seconds(first));
 		});
+
+		Define(body, FileCreatorLocal, FileCreatorMessage, null, (0, 2, UInt16Type));
+		Data(body, FileCreatorLocal, w => w.U16(producer.FitVersion));
 
 		Define(body, SportLocal, SportMessage, null, (3, SportNameSize, StringType), (0, 1, EnumType), (1, 1, EnumType));
 		Data(body, SportLocal, w =>
@@ -89,11 +100,11 @@ public static class FitWriter
 			w.Byte(SubSportGeneric);
 		});
 
-		Define(body, EventLocal, EventMessage, null, (253, 4, UInt32Type), (0, 1, EnumType), (1, 1, EnumType), (4, 1, UInt8));
-		WriteDeveloperDescriptions(body);
+		Define(body, EventLocal, EventMessage, null, (253, 4, UInt32Type), (3, 4, UInt32Type), (0, 1, EnumType), (1, 1, EnumType), (4, 1, UInt8));
+		WriteDeveloperDescriptions(body, producer);
 		Define(body, RecordLocal, RecordMessage, DevFields, (253, 4, UInt32Type), (0, 4, SInt32), (1, 4, SInt32), (5, 4, UInt32Type), (73, 4, UInt32Type), (78, 4, UInt32Type), (13, 1, SInt8), (3, 1, UInt8), (31, 1, UInt8));
-		Define(body, DeviceInfoLocal, DeviceInfoMessage, null, (253, 4, UInt32Type), (2, 2, UInt16Type), (4, 2, UInt16Type), (0, 1, UInt8), (32, 1, UInt8), (25, 1, EnumType));
-		WriteDeviceInfo(body, first, null);
+		Define(body, DeviceInfoLocal, DeviceInfoMessage, null, (253, 4, UInt32Type), (3, 4, UInt32Z), (2, 2, UInt16Type), (4, 2, UInt16Type), (5, 2, UInt16Type), (0, 1, UInt8), (32, 1, UInt8), (25, 1, EnumType));
+		WriteDeviceInfo(body, first, null, producer.FitVersion, serial);
 
 		var events = new List<(DateTime Utc, byte Type)> { (first, TimerStart) };
 		foreach (TrackPause pause in track.Pauses.OrderBy(p => p.FromUtc))
@@ -113,7 +124,7 @@ public static class FitWriter
 
 			if (entry.Phone?.BatteryPercent is { } battery && (lastBattery != battery || entry.Utc - lastDeviceInfo >= DeviceInfoInterval))
 			{
-				WriteDeviceInfo(body, entry.Utc, battery);
+				WriteDeviceInfo(body, entry.Utc, battery, producer.FitVersion, serial);
 				lastBattery = battery;
 				lastDeviceInfo = entry.Utc;
 			}
@@ -153,6 +164,7 @@ public static class FitWriter
 		Data(body, EventLocal, w =>
 		{
 			w.U32(Seconds(e.Utc));
+			w.U32(TimerTriggerManual);
 			w.Byte(EventTimer);
 			w.Byte(e.Type);
 			w.Byte(0);
@@ -172,8 +184,8 @@ public static class FitWriter
 			w.S32(p is null ? int.MaxValue : Semicircles(p.Longitude));
 			w.U32(p?.DistanceMeters is { } d ? ScaledU32(d * 100) : uint.MaxValue);
 			w.U32(p?.SpeedMetersPerSecond is { } s ? ScaledU32(s * 1000) : uint.MaxValue);
-			w.U32(p?.AltitudeMeters is { } a ? ScaledU32((a + 500) * 5) : uint.MaxValue);
-			w.Byte(p?.TemperatureCelsius is { } t ? (byte)(sbyte)Math.Clamp(Math.Round(t), sbyte.MinValue, 126) : (byte)0x7F);
+			w.U32(AltitudeField(p?.AltitudeMeters));
+			w.Byte(TemperatureByte(p?.TemperatureCelsius));
 			w.Byte(p?.HeartRateBpm is { } h ? (byte)Math.Clamp(h, 1, 254) : byte.MaxValue);
 			w.Byte(phone?.AccuracyMeters is { } accuracy && accuracy >= 0 ? (byte)Math.Min(254, Math.Round(accuracy)) : byte.MaxValue);
 
@@ -196,25 +208,29 @@ public static class FitWriter
 	}
 
 	/// <summary>The device the activity was recorded on (index 0, the creator); with a battery level it is the phone's reading at that moment, without it the first message that only names the device.</summary>
-	private static void WriteDeviceInfo(MemoryStream body, DateTime utc, int? battery)
+	private static void WriteDeviceInfo(MemoryStream body, DateTime utc, int? battery, ushort softwareVersion, uint serial)
 	{
 		Data(body, DeviceInfoLocal, w =>
 		{
 			w.U32(Seconds(utc));
+			w.U32(serial);
 			w.U16(DevelopmentManufacturer);
 			w.U16(0);
+			w.U16(softwareVersion);
 			w.Byte(0);
 			w.Byte(battery is { } level ? (byte)Math.Clamp(level, 0, 100) : byte.MaxValue);
 			w.Byte(SourceLocal);
 		});
 	}
 
-	private static void WriteDeveloperDescriptions(MemoryStream body)
+	private static void WriteDeveloperDescriptions(MemoryStream body, TrackProducer producer)
 	{
-		Define(body, DeveloperIdLocal, DeveloperDataIdMessage, null, (1, 16, ByteArray), (3, 1, UInt8));
+		Define(body, DeveloperIdLocal, DeveloperDataIdMessage, null, (1, 16, ByteArray), (2, 2, UInt16Type), (4, 4, UInt32Type), (3, 1, UInt8));
 		Data(body, DeveloperIdLocal, w =>
 		{
 			foreach (byte b in ApplicationId) w.Byte(b);
+			w.U16(DevelopmentManufacturer);
+			w.U32(producer.ApplicationVersion);
 			w.Byte(0);
 		});
 
@@ -237,7 +253,47 @@ public static class FitWriter
 	/// <summary>Where the ride started and ended and the box around it (north-east and south-west corners); all null for a ride without a position.</summary>
 	private readonly record struct Area(Place Start, Place End, Place NorthEast, Place SouthWest);
 
-	private readonly record struct Summary(double ElapsedSeconds, double TimerSeconds, double DistanceMeters, double AverageSpeed, double MaxSpeed, double? Ascent, double? Descent, Area? Area, string? Name);
+	private readonly record struct Summary(double ElapsedSeconds, double TimerSeconds, double DistanceMeters, double AverageSpeed, double MaxSpeed, double? Ascent, double? Descent, Area? Area, string? Name, Measured Stats);
+
+	/// <summary>What a lap and a session report beside the totals: heart rate, altitude and temperature over the fixes that have them (null when none does).</summary>
+	private readonly record struct Measured(int? AverageHeartRate, int? MaxHeartRate, double? AverageAltitude, double? MinAltitude, double? MaxAltitude, double? AverageTemperature, double? MaxTemperature);
+
+	private static Measured Measure(Track track)
+	{
+		double heartSum = 0, altitudeSum = 0, temperatureSum = 0;
+		int heartCount = 0, altitudeCount = 0, temperatureCount = 0, maxHeart = 0;
+		double minAltitude = double.MaxValue, maxAltitude = double.MinValue, maxTemperature = double.MinValue;
+		foreach (TrackPoint point in track.Points)
+		{
+			if (point.HeartRateBpm is { } heart)
+			{
+				int bpm = Math.Clamp(heart, 1, 254);
+				heartSum += bpm;
+				heartCount++;
+				maxHeart = Math.Max(maxHeart, bpm);
+			}
+
+			if (point.AltitudeMeters is { } altitude)
+			{
+				altitudeSum += altitude;
+				altitudeCount++;
+				minAltitude = Math.Min(minAltitude, altitude);
+				maxAltitude = Math.Max(maxAltitude, altitude);
+			}
+
+			if (point.TemperatureCelsius is { } temperature)
+			{
+				temperatureSum += temperature;
+				temperatureCount++;
+				maxTemperature = Math.Max(maxTemperature, temperature);
+			}
+		}
+
+		return new Measured(
+			heartCount > 0 ? (int)Math.Round(heartSum / heartCount) : null, heartCount > 0 ? maxHeart : null,
+			altitudeCount > 0 ? altitudeSum / altitudeCount : null, altitudeCount > 0 ? minAltitude : null, altitudeCount > 0 ? maxAltitude : null,
+			temperatureCount > 0 ? temperatureSum / temperatureCount : null, temperatureCount > 0 ? maxTemperature : null);
+	}
 
 	private static Area? AreaOf(Track track)
 	{
@@ -292,7 +348,7 @@ public static class FitWriter
 		double distance = track.Points.Count > 0 ? track.Points[^1].DistanceMeters ?? 0 : 0;
 		double max = track.Points.Select(p => p.SpeedMetersPerSecond ?? 0).DefaultIfEmpty(0).Max();
 		(double Ascent, double Descent)? elevation = Elevation(track);
-		return new Summary(elapsed, timer, distance, timer > 0 ? distance / timer : 0, max, elevation?.Ascent, elevation?.Descent, AreaOf(track), track.Name);
+		return new Summary(elapsed, timer, distance, timer > 0 ? distance / timer : 0, max, elevation?.Ascent, elevation?.Descent, AreaOf(track), track.Name, Measure(track));
 	}
 
 	private static void WriteSummary(MemoryStream body, Summary s, DateTime first, DateTime last)
@@ -300,7 +356,8 @@ public static class FitWriter
 		Define(body, LapLocal, LapMessage, null,
 			(253, 4, UInt32Type), (2, 4, UInt32Type), (3, 4, SInt32), (4, 4, SInt32), (5, 4, SInt32), (6, 4, SInt32), (7, 4, UInt32Type), (8, 4, UInt32Type), (9, 4, UInt32Type),
 			(27, 4, SInt32), (28, 4, SInt32), (29, 4, SInt32), (30, 4, SInt32), (110, 4, UInt32Type), (111, 4, UInt32Type), (254, 2, UInt16Type), (21, 2, UInt16Type), (22, 2, UInt16Type),
-			(0, 1, EnumType), (1, 1, EnumType), (24, 1, EnumType), (25, 1, EnumType), (39, 1, EnumType));
+			(0, 1, EnumType), (1, 1, EnumType), (24, 1, EnumType), (25, 1, EnumType), (39, 1, EnumType),
+			(15, 1, UInt8), (16, 1, UInt8), (112, 4, UInt32Type), (113, 4, UInt32Type), (114, 4, UInt32Type), (50, 1, SInt8), (51, 1, SInt8));
 		Data(body, LapLocal, w =>
 		{
 			WriteTimes(w, s, first, last, includeEnd: true);
@@ -315,13 +372,15 @@ public static class FitWriter
 			w.Byte(LapTriggerSessionEnd);
 			w.Byte(SportCycling);
 			w.Byte(SubSportGeneric);
+			WriteStats(w, s.Stats);
 		});
 
 		Define(body, SessionLocal, SessionMessage, null,
 			(253, 4, UInt32Type), (2, 4, UInt32Type), (3, 4, SInt32), (4, 4, SInt32), (7, 4, UInt32Type), (8, 4, UInt32Type), (9, 4, UInt32Type),
 			(29, 4, SInt32), (30, 4, SInt32), (31, 4, SInt32), (32, 4, SInt32), (110, SportNameSize, StringType), (124, 4, UInt32Type), (125, 4, UInt32Type),
 			(254, 2, UInt16Type), (22, 2, UInt16Type), (23, 2, UInt16Type), (25, 2, UInt16Type), (26, 2, UInt16Type),
-			(0, 1, EnumType), (1, 1, EnumType), (5, 1, EnumType), (6, 1, EnumType), (28, 1, EnumType));
+			(0, 1, EnumType), (1, 1, EnumType), (5, 1, EnumType), (6, 1, EnumType), (28, 1, EnumType),
+			(16, 1, UInt8), (17, 1, UInt8), (126, 4, UInt32Type), (127, 4, UInt32Type), (128, 4, UInt32Type), (57, 1, SInt8), (58, 1, SInt8));
 		Data(body, SessionLocal, w =>
 		{
 			WriteTimes(w, s, first, last, includeEnd: false);
@@ -339,6 +398,7 @@ public static class FitWriter
 			w.Byte(SportCycling);
 			w.Byte(SubSportGeneric);
 			w.Byte(SessionTriggerActivityEnd);
+			WriteStats(w, s.Stats);
 		});
 
 		Define(body, ActivityLocal, ActivityMessage, null, (253, 4, UInt32Type), (0, 4, UInt32Type), (5, 4, UInt32Type), (1, 2, UInt16Type), (2, 1, EnumType), (3, 1, EnumType), (4, 1, EnumType));
@@ -352,6 +412,18 @@ public static class FitWriter
 			w.Byte(EventActivity);
 			w.Byte(EventTypeStop);
 		});
+	}
+
+	/// <summary>The heart rate, altitude and temperature fields a lap and a session end with, in the order their definitions list them.</summary>
+	private static void WriteStats(FitData w, Measured m)
+	{
+		w.Byte(m.AverageHeartRate is { } average ? (byte)average : byte.MaxValue);
+		w.Byte(m.MaxHeartRate is { } max ? (byte)max : byte.MaxValue);
+		w.U32(AltitudeField(m.AverageAltitude));
+		w.U32(AltitudeField(m.MinAltitude));
+		w.U32(AltitudeField(m.MaxAltitude));
+		w.Byte(TemperatureByte(m.AverageTemperature));
+		w.Byte(TemperatureByte(m.MaxTemperature));
 	}
 
 	/// <summary>The fields a lap and a session start with: the end and the start time, where it started (and, for a lap, where it ended), and the elapsed and timer time and the distance.</summary>
@@ -471,6 +543,12 @@ public static class FitWriter
 			stream.Write(b);
 		}
 	}
+
+	/// <summary>The enhanced altitude: scale 5 and offset 500 m, so a point below sea level still fits; no value is the invalid all ones.</summary>
+	private static uint AltitudeField(double? meters) => meters is { } a ? ScaledU32((a + 500) * 5) : uint.MaxValue;
+
+	/// <summary>FIT temperature is a signed byte in whole degrees; no value is 0x7F.</summary>
+	private static byte TemperatureByte(double? celsius) => celsius is { } t ? (byte)(sbyte)Math.Clamp(Math.Round(t), sbyte.MinValue, 126) : (byte)0x7F;
 
 	private static ushort Scaled(double value) => value < 0 || value >= ushort.MaxValue ? ushort.MaxValue : (ushort)Math.Round(value);
 

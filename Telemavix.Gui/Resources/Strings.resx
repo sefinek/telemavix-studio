@@ -2858,6 +2858,12 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
   <data name="Summary_LogGpsSpeedAll" xml:space="preserve">
     <value>Speed measured by the GPS receiver is available for all {0:N0} frames.</value>
   </data>
+  <data name="Summary_ProxyFileTitle" xml:space="preserve">
+    <value>Preview file</value>
+  </data>
+  <data name="Summary_LogProxyFile" xml:space="preserve">
+    <value>{0} is a low-resolution preview file (proxy), not the original recording. A render from it will have its low resolution. For full quality, open the matching original (.MP4).</value>
+  </data>
   <data name="Summary_LogVideo" xml:space="preserve">
     <value>Video: {0} {1}, {2}×{3}, {4} fps, ~{5} Mbps</value>
   </data>
@@ -4551,7 +4557,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The track has no heart rate. Attach a FIT or GPX file containing this reading.</value>
   </data>
   <data name="Editor_UnavailableSatellites" xml:space="preserve">
-    <value>No satellite count. Add a drone&apos;s flight log or a track from the Telemavix GPS app.</value>
+    <value>No satellite count. Add a track from the Telemavix GPS app or a drone&apos;s flight log.</value>
   </data>
   <data name="Satellites_Accuracy" xml:space="preserve">
     <value>Show accuracy</value>
@@ -5567,5 +5573,77 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="Settings_CrashReportsHint" xml:space="preserve">
     <value>Send error reports to BugSnag: the exception and stack trace, app version, OS and .NET runtime version. Recordings, GPS tracks, settings and computer name are not attached. Changing this setting does not require restarting the app.</value>
+  </data>
+  <data name="Widget_Cadence" xml:space="preserve">
+    <value>Cadence</value>
+  </data>
+  <data name="Widget_CadenceDescription" xml:space="preserve">
+    <value>The cadence saved in the track by a watch or a bike computer: pedal revolutions a minute, or steps a minute for a walk or a run (FIT).</value>
+  </data>
+  <data name="Editor_UnavailableCadence" xml:space="preserve">
+    <value>The track has no cadence. Attach a FIT file containing this reading.</value>
+  </data>
+  <data name="Sensor_HeartRate" xml:space="preserve">
+    <value>Heart rate</value>
+  </data>
+  <data name="Sensor_ColorByZone" xml:space="preserve">
+    <value>Colour the reading by heart rate zone</value>
+  </data>
+  <data name="Sensor_ColorByZoneHint" xml:space="preserve">
+    <value>Five zones as a share of the maximum heart rate saved by the watch (under 60, 70, 80 and 90 %). A track with no maximum keeps the accent colour.</value>
+  </data>
+  <data name="Presets_GarminHint" xml:space="preserve">
+    <value>For activities recorded by a Garmin watch (FIT).</value>
+  </data>
+  <data name="TrackFile_Header" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="TrackFile_Name" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="TrackFile_Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="TrackFile_Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="TrackFile_Activity" xml:space="preserve">
+    <value>Activity</value>
+  </data>
+  <data name="TrackFile_Recorded" xml:space="preserve">
+    <value>Recorded</value>
+  </data>
+  <data name="TrackFile_Points" xml:space="preserve">
+    <value>Fixes</value>
+  </data>
+  <data name="TrackFile_Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="TrackFile_PointsValue" xml:space="preserve">
+    <value>{0} fixes, {1} {2}</value>
+  </data>
+  <data name="TrackFile_Interval" xml:space="preserve">
+    <value>every {0:0.#} s (median)</value>
+  </data>
+  <data name="TrackFile_PhoneSensors" xml:space="preserve">
+    <value>Phone sensors</value>
+  </data>
+  <data name="TrackFile_Sport_running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="TrackFile_Sport_cycling" xml:space="preserve">
+    <value>Cycling</value>
+  </data>
+  <data name="TrackFile_Sport_walking" xml:space="preserve">
+    <value>Walking</value>
+  </data>
+  <data name="TrackFile_Sport_hiking" xml:space="preserve">
+    <value>Hiking</value>
+  </data>
+  <data name="TrackFile_Sport_swimming" xml:space="preserve">
+    <value>Swimming</value>
+  </data>
+  <data name="TrackFile_Sport_training" xml:space="preserve">
+    <value>Training</value>
   </data>
 </root>

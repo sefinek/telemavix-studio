@@ -673,6 +673,9 @@ In Telemavix Studio, open Settings > Behavior > DJI drones and replace the key. 
   <data name="DjiDrone_NeedsLog" xml:space="preserve">
     <value>DJI drone recordings do not contain telemetry. A flight log (FlightRecord) is needed to display the drone's position, height and speed. If you use Windows and an Android phone, connect the phone via USB and use the app's log search instead of finding the file manually. You can also select a log you have copied to your computer. On Android, logs are stored in locations such as Download/product_data/flightRecords.</value>
   </data>
+  <data name="DjiDroneMeta_Source" xml:space="preserve">
+    <value>Telemetry source: native djmd decoder, drone layout (position, height above take-off, speed, ISO, shutter and color temperature). The recording needs no flight log.</value>
+  </data>
   <data name="DjiDrone_Name" xml:space="preserve">
     <value>DJI drone</value>
   </data>
@@ -684,6 +687,9 @@ In Telemavix Studio, open Settings > Behavior > DJI drones and replace the key. 
   </data>
   <data name="Preset_FpvDrones" xml:space="preserve">
     <value>FPV drones</value>
+  </data>
+  <data name="Preset_Garmin" xml:space="preserve">
+    <value>Garmin</value>
   </data>
   <data name="Preset_TelemavixGps" xml:space="preserve">
     <value>Telemavix GPS</value>
@@ -790,6 +796,9 @@ In Telemavix Studio, open Settings > Behavior > DJI drones and replace the key. 
   <data name="Overlay_PhoneBattery" xml:space="preserve">
     <value>Phone battery</value>
   </data>
+  <data name="Overlay_Cadence" xml:space="preserve">
+    <value>Cadence</value>
+  </data>
   <data name="Overlay_HeartRate" xml:space="preserve">
     <value>Heart rate</value>
   </data>
@@ -888,5 +897,14 @@ In Telemavix Studio, open Settings > Behavior > DJI drones and replace the key. 
   </data>
   <data name="Overlay_WatermarkNotice" xml:space="preserve">
     <value>For non-commercial use only</value>
+  </data>
+  <data name="Peak_HighestHeartRate" xml:space="preserve">
+    <value>Highest heart rate</value>
+  </data>
+  <data name="Peak_LowestHeartRate" xml:space="preserve">
+    <value>Lowest heart rate</value>
+  </data>
+  <data name="Peak_HighestCadence" xml:space="preserve">
+    <value>Highest cadence</value>
   </data>
 </root>

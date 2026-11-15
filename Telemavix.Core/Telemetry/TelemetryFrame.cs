@@ -64,7 +64,11 @@ public sealed record TelemetryFrame(
 	// A track's heart rate, and what the phone that recorded it (Telemavix GPS) measured (accuracy, pressure, light, mobile signal, battery, motion - one reference, null for
 	// every camera's frame). The phone's motion and bearing are kept but no widget reads them: the phone's orientation on a bike is unknown.
 	int? HeartRateBpm = null,
-	PhoneReading? Phone = null)
+	PhoneReading? Phone = null,
+	// A track's cadence (pedal revolutions or, with CadenceInSteps, steps a minute) and the maximum heart rate its zones are counted from.
+	double? CadencePerMinute = null,
+	bool CadenceInSteps = false,
+	int? MaxHeartRateBpm = null)
 {
 	public double GForce => Math.Sqrt(AccelX * AccelX + AccelY * AccelY + AccelZ * AccelZ);
 

@@ -218,7 +218,7 @@ public partial class MainWindow
 		static double? Meters(decimal? value) => value is { } v ? (double)v : null;
 		string? warnColor = Color(SensorWarnColorBox.Text), alertColor = Color(SensorAlertColorBox.Text);
 		double? warnAbove = Meters(SensorWarnAboveBox.Value), alertAbove = Meters(SensorAlertAboveBox.Value);
-		bool byCount = SensorColorByCountCheck.IsChecked == true, byMode = SensorColorByModeCheck.IsChecked == true;
+		bool byCount = SensorColorByCountCheck.IsChecked == true, byMode = SensorColorByModeCheck.IsChecked == true, byZone = SensorColorByZoneCheck.IsChecked == true;
 		int warnBelow = (int)(SensorWarnBelowBox.Value ?? 10), alertBelow = (int)(SensorAlertBelowBox.Value ?? 6);
 		string? climb = Color(SensorClimbColorBox.Text), sink = Color(SensorSinkColorBox.Text);
 
@@ -227,6 +227,7 @@ public partial class MainWindow
 			HeightElement h => h with { WarnAboveMeters = warnAbove, AlertAboveMeters = alertAbove, WarnColor = warnColor, AlertColor = alertColor },
 			HomeDistanceElement d => d with { WarnAboveMeters = warnAbove, AlertAboveMeters = alertAbove, WarnColor = warnColor, AlertColor = alertColor },
 			SatellitesElement s => s with { ColorByCount = byCount, WarnBelow = warnBelow, AlertBelow = alertBelow, WarnColor = warnColor, AlertColor = alertColor },
+			HeartRateElement h => h with { ColorByZone = byZone },
 			FlightModeElement f => f with { ColorByMode = byMode, WarnColor = warnColor, AlertColor = alertColor },
 			VerticalSpeedElement v => v with { ClimbColor = climb, SinkColor = sink },
 			_ => el

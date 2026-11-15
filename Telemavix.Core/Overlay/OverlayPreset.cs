@@ -178,8 +178,6 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		const float width = OverlayElementBounds.ReferenceWidth;
 		float top = basis.Elements.First(e => e is DateTimeTextElement).Y;
 
-		const float m = OverlayElementBounds.Margin;
-
 		// The GPS alert is the top center, on the row of the date and the phone's column; the alert's panel is as high as a stat, so nothing sits under it.
 		OverlayElement AtTopCenter(GpsAlertElement alert)
 		{
@@ -187,28 +185,12 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 			return alert with { X = width / 2f - (box.Left + box.Right) / 2, Y = top - box.Top };
 		}
 
-		// The column down the right edge: each widget under the one before it by the gap a plain stat has between two (the column's step less a stat's height).
-		float statHeight = OverlayElementBounds.GetBounds(OverlayElementType.Pressure, 0, 0, 1).Height;
-		float rowGap = StatColumnStep - statHeight;
-		float nextRowTop = top;
-
-		OverlayElement OnRightEdge(StyledOverlayElement e)
-		{
-			StyledOverlayElement aligned = e with { Visible = true, TextAlign = TextAlign.Right };
-			SKRect box = OverlayElementBounds.GetBounds(e.Type, 0, 0, 1, element: aligned);
-			aligned = aligned with { Y = nextRowTop - box.Top };
-			nextRowTop += box.Height + rowGap;
-			return aligned with { X = width - m - OverlayElementBounds.TextBoxRight(aligned) };
-		}
-
-		Dictionary<OverlayElementType, OverlayElement> column = [];
-		foreach (StyledOverlayElement e in new StyledOverlayElement[]
-		         {
-			         basis.Elements.OfType<SatellitesElement>().Single() with { ShowAccuracy = true }, basis.Elements.OfType<CellSignalElement>().Single(),
-			         basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true, ShowTemperature = true, Label = CoreStrings.Overlay_PhoneBattery },
-			         basis.Elements.OfType<PressureElement>().Single(), basis.Elements.OfType<LightElement>().Single()
-		         })
-			column[e.Type] = OnRightEdge(e);
+		Dictionary<OverlayElementType, OverlayElement> column = RightEdgeColumn(top,
+		[
+			basis.Elements.OfType<SatellitesElement>().Single() with { ShowAccuracy = true }, basis.Elements.OfType<CellSignalElement>().Single(),
+			basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true, ShowTemperature = true, Label = CoreStrings.Overlay_PhoneBattery },
+			basis.Elements.OfType<PressureElement>().Single(), basis.Elements.OfType<LightElement>().Single()
+		]);
 
 		return basis with
 		{
@@ -219,6 +201,66 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 					RollGaugeElement or GMeterElement => e with { Visible = false },
 					GpsAlertElement alert => AtTopCenter(alert),
 					SatellitesElement or CellSignalElement or DeviceBatteryElement or PressureElement or LightElement => column[e.Type] with { Id = e.Id },
+					_ => e
+				})
+			]
+		};
+	}
+
+	/// <summary>
+	///     The widgets lined up to the right in a column down the right edge, from `top`: each under the one before it by the gap a plain stat has between two
+	///     (the column's step less a stat's height). Keyed by type, the id is left for the caller.
+	/// </summary>
+	private static Dictionary<OverlayElementType, OverlayElement> RightEdgeColumn(float top, IReadOnlyList<StyledOverlayElement> elements)
+	{
+		const float width = OverlayElementBounds.ReferenceWidth;
+		float statHeight = OverlayElementBounds.GetBounds(OverlayElementType.Pressure, 0, 0, 1).Height;
+		float rowGap = StatColumnStep - statHeight;
+		float nextRowTop = top;
+		Dictionary<OverlayElementType, OverlayElement> column = [];
+		foreach (StyledOverlayElement e in elements)
+		{
+			StyledOverlayElement aligned = e with { Visible = true, TextAlign = TextAlign.Right };
+			SKRect box = OverlayElementBounds.GetBounds(e.Type, 0, 0, 1, element: aligned);
+			aligned = aligned with { Y = nextRowTop - box.Top };
+			nextRowTop += box.Height + rowGap;
+			column[e.Type] = aligned with { X = width - OverlayElementBounds.Margin - OverlayElementBounds.TextBoxRight(aligned) };
+		}
+
+		return column;
+	}
+
+	/// <summary>What a watch's activity has no data for: the camera's (its roll, pitch and G-force, model and settings), the drone's, the phone's and the sound's. The garmin preset leaves them out altogether.</summary>
+	private static readonly HashSet<OverlayElementType> NotForGarmin =
+	[
+		OverlayElementType.CameraInfo, OverlayElementType.CameraModelText, OverlayElementType.RollGauge, OverlayElementType.PitchGauge, OverlayElementType.GMeter,
+		OverlayElementType.AmbientTemperature, OverlayElementType.ImuTemperature, OverlayElementType.AudioLevel, OverlayElementType.WindProcessing, OverlayElementType.ImageLuma,
+		OverlayElementType.DeviceBattery, OverlayElementType.Satellites, OverlayElementType.Pressure, OverlayElementType.Light, OverlayElementType.CellSignal,
+		OverlayElementType.Height, OverlayElementType.HomeDistance, OverlayElementType.VerticalSpeed, OverlayElementType.DroneBattery, OverlayElementType.FlightAlerts,
+		OverlayElementType.Signal, OverlayElementType.FlightMode, OverlayElementType.RcSticks, OverlayElementType.AttitudeIndicator, OverlayElementType.Orientation3D
+	];
+
+	/// <summary>
+	///     The layout for an activity recorded by a Garmin watch (a FIT file): the default one without every widget a watch's activity has no data for (NotForGarmin).
+	///     The watch's own readings are a column down the right edge, where the G-meter was: the heart rate (coloured by its zone) and the cadence;
+	///     the trip's figures and the elevation profile stay off, as in the default layout. A widget with no data behind it is turned off at render time (OverlayDataRequirements).
+	/// </summary>
+	public static OverlayPreset CreateGarmin(string id, string name)
+	{
+		OverlayPreset basis = CreateDefault(id, name);
+		float top = basis.Elements.First(e => e is DateTimeTextElement).Y;
+		Dictionary<OverlayElementType, OverlayElement> column = RightEdgeColumn(top,
+		[
+			basis.Elements.OfType<HeartRateElement>().Single() with { ColorByZone = true }, basis.Elements.OfType<CadenceElement>().Single()
+		]);
+
+		return basis with
+		{
+			Elements =
+			[
+				.. basis.Elements.Where(e => !NotForGarmin.Contains(e.Type)).Select(e => e switch
+				{
+					HeartRateElement or CadenceElement => column[e.Type] with { Id = e.Id },
 					_ => e
 				})
 			]
@@ -364,7 +406,8 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 			new HeartRateElement { X = 1700, Y = 1400, Visible = false },
 			new PressureElement { X = 1200, Y = 2000, Visible = false },
 			new LightElement { X = 3400, Y = 1100, Visible = false },
-			new CellSignalElement { X = 3400, Y = 800, Visible = false }
+			new CellSignalElement { X = 3400, Y = 800, Visible = false },
+			new CadenceElement { X = 2900, Y = 500, Visible = false }
 		];
 
 		// Each type's built-in instance gets a stable id (its own type name) rather than a random Guid, so a

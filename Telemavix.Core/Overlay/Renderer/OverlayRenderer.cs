@@ -817,7 +817,7 @@ public sealed partial class OverlayRenderer : IDisposable
 				DrawDistance(canvas, frame, distance);
 				break;
 			case TemperatureElementBase or DeviceDistanceElement or DeviceBatteryElement or WindProcessingElement or ImageLumaElement or HeightElement or HomeDistanceElement
-				or VerticalSpeedElement or SatellitesElement or HeartRateElement or PressureElement or LightElement or CellSignalElement:
+				or VerticalSpeedElement or SatellitesElement or HeartRateElement or CadenceElement or PressureElement or LightElement or CellSignalElement:
 				DrawSensorStat(canvas, frame, (LabeledStatElement)element);
 				break;
 			case DroneBatteryElement droneBattery:

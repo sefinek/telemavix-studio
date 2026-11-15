@@ -218,4 +218,39 @@ public sealed class FitReaderTests
 		Assert.IsFalse(FitReader.LooksLikeFit("<?xml version=\"1.0\"?>"u8));
 		Assert.IsTrue(FitReader.LooksLikeFit(new FitBuilder().DefineRecord().ToArray()));
 	}
+
+	[TestMethod]
+	public void Read_GarminSmartRecordingStepsAreNotGaps()
+	{
+		static byte[] File(bool garmin)
+		{
+			FitBuilder builder = new();
+			if (garmin) builder.FileId(1);
+			builder.DefineRecord();
+			int[] seconds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
+			foreach (int s in seconds) builder.Record(T0.AddSeconds(s), 50 + s * 1e-5, 20, 100, 2);
+			return builder.ToArray();
+		}
+
+		Assert.AreEqual(30, FitReader.Read(File(true)).GapSeconds);
+		Assert.AreEqual(3, FitReader.Read(File(false)).GapSeconds);
+	}
+
+	[TestMethod]
+	public void Read_CadenceIsStepsForAWalkAndPedalTurnsForARide_AndTheZonesMaximumIsKept()
+	{
+		static ExternalTrack Read(byte sport, byte calculation) => FitReader.Read(new FitBuilder().DefineActivity().ZonesTarget(190, calculation)
+			.CadenceRecord(T0, 50, 20, 120, 40, 64).CadenceRecord(T0.AddSeconds(1), 50.00001, 20, 125, 255, 0).Session(T0.AddSeconds(2), sport).ToArray());
+
+		ExternalTrack walk = Read(11, 1);
+		Assert.IsTrue(walk.CadenceInSteps);
+		Assert.AreEqual(81, walk.Points[0].CadencePerMinute);
+		Assert.IsNull(walk.Points[1].CadencePerMinute, "an invalid cadence is none");
+		Assert.AreEqual(190, walk.MaxHeartRateBpm);
+
+		ExternalTrack ride = Read(2, 2);
+		Assert.IsFalse(ride.CadenceInSteps);
+		Assert.AreEqual(40.5, ride.Points[0].CadencePerMinute);
+		Assert.IsNull(ride.MaxHeartRateBpm, "zones counted from the reserve are not shares of the maximum");
+	}
 }

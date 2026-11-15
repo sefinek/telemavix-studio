@@ -68,6 +68,13 @@ public static class ExternalTrackReader
 		}
 	}
 
+	/// <summary>The name of the format a track file is in: FIT, GPX or a registered format's own name.</summary>
+	public static string FormatName(string path)
+	{
+		(ITrackFormat? format, bool isFit) = Detect(path);
+		return format?.DisplayName ?? (isFit ? "FIT" : "GPX");
+	}
+
 	private static (ITrackFormat? Format, bool IsFit) Detect(string path)
 	{
 		Span<byte> start = stackalloc byte[128];

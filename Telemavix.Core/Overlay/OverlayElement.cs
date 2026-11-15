@@ -71,7 +71,8 @@ public enum OverlayElementType
 	HeartRate,
 	Pressure,
 	Light,
-	CellSignal
+	CellSignal,
+	Cadence
 }
 
 /// <summary>
@@ -142,6 +143,7 @@ public enum OverlayElementType
 [JsonDerivedType(typeof(PressureElement), (int)OverlayElementType.Pressure)]
 [JsonDerivedType(typeof(LightElement), (int)OverlayElementType.Light)]
 [JsonDerivedType(typeof(CellSignalElement), (int)OverlayElementType.CellSignal)]
+[JsonDerivedType(typeof(CadenceElement), (int)OverlayElementType.Cadence)]
 public abstract record OverlayElement
 {
 	[JsonIgnore] public abstract OverlayElementType Type { get; }
@@ -305,6 +307,15 @@ public sealed record DeviceDistanceElement : LabeledStatElement
 public sealed record HeartRateElement : LabeledStatElement
 {
 	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.HeartRate;
+
+	/// <summary>The reading takes the color of its zone (a share of the maximum heart rate the track's device counts them from, as a Garmin watch does); a track with no maximum keeps the accent color.</summary>
+	public bool ColorByZone { get; init; }
+}
+
+/// <summary>The cadence a track carries (a watch, a bike computer): pedal revolutions a minute, or steps a minute for a walk or a run.</summary>
+public sealed record CadenceElement : LabeledStatElement
+{
+	[JsonIgnore] public override OverlayElementType Type => OverlayElementType.Cadence;
 }
 
 /// <summary>The air pressure at the phone (its barometer): hectopascals, or inches of mercury in the imperial units.</summary>

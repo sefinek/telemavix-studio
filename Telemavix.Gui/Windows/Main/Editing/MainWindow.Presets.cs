@@ -231,6 +231,7 @@ public partial class MainWindow
 					OverlayPresetStore.DronePresetId => Strings.Presets_DjiDronesHint,
 					OverlayPresetStore.FpvPresetId => Strings.Presets_FpvDronesHint,
 					OverlayPresetStore.TelemavixGpsPresetId => Strings.Presets_TelemavixGpsHint,
+					OverlayPresetStore.GarminPresetId => Strings.Presets_GarminHint,
 					_ => PresetDatesTooltip(option.Id)
 				};
 				ToolTip.SetTip(text, tip);

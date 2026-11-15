@@ -19,7 +19,9 @@ public sealed record ExternalTrackPoint(
 	string? FlightMode = null,
 	DroneAttitude? Attitude = null,
 	int? HeartRateBpm = null,
-	PhoneReading? Phone = null);
+	PhoneReading? Phone = null,
+	// Revolutions of the pedals a minute, or steps a minute when the track is a walk or a run (ExternalTrack.CadenceInSteps).
+	double? CadencePerMinute = null);
 
 /// <summary>Where a flight began (a drone's take-off point), for the distance from it.</summary>
 public readonly record struct ExternalTrackHome(double Latitude, double Longitude);
@@ -67,7 +69,8 @@ public readonly record struct ExternalTrackSample(
 	int? GpsLevel = null,
 	string? FlightMode = null,
 	DroneAttitude? Attitude = null,
-	int? HeartRateBpm = null);
+	int? HeartRateBpm = null,
+	double? CadencePerMinute = null);
 
 /// <summary>
 ///     A track on its own UTC clock. Gaps and timer pauses preserve elapsed time and do not imply a standstill,
@@ -87,8 +90,12 @@ public sealed class ExternalTrack
 		IEnumerable<ExternalTrackRecording>? recordings = null,
 		ExternalTrackHome? home = null, IEnumerable<ExternalDroneBatteryReading>? droneBatteries = null, IEnumerable<ExternalTrackEvent>? events = null,
 		IEnumerable<ExternalDroneSignalReading>? droneSignals = null, string? deviceName = null, IEnumerable<ExternalDroneSticksReading>? droneSticks = null,
-		IEnumerable<ExternalPhoneSample>? phoneSamples = null)
+		IEnumerable<ExternalPhoneSample>? phoneSamples = null, double? minGapSeconds = null, bool cadenceInSteps = false, int? maxHeartRateBpm = null, string? manufacturer = null, string? sport = null)
 	{
+		Manufacturer = manufacturer;
+		Sport = sport;
+		CadenceInSteps = cadenceInSteps;
+		MaxHeartRateBpm = maxHeartRateBpm is > 0 ? maxHeartRateBpm : null;
 		Home = home;
 		DeviceName = string.IsNullOrWhiteSpace(deviceName) ? null : deviceName.Trim();
 		DroneBatteries = [.. (droneBatteries ?? []).Where(b => double.IsFinite(b.Battery.Percent)).OrderBy(b => b.Utc)];
@@ -109,7 +116,8 @@ public sealed class ExternalTrack
 		Recordings = [.. (recordings ?? []).Where(r => r.EndUtc > r.StartUtc).OrderBy(r => r.StartUtc)];
 		Batteries = [.. (batteries ?? []).Where(b => double.IsFinite(b.Percent) && b.Percent is >= 0 and <= 100).OrderBy(b => b.Utc)];
 		double[] intervals = [.. sorted.Zip(sorted.Skip(1), (a, b) => (b.Utc - a.Utc).TotalSeconds).Order()];
-		GapSeconds = Math.Max(MinGapSeconds, GapIntervals * intervals[intervals.Length / 2]);
+		MedianIntervalSeconds = intervals[intervals.Length / 2];
+		GapSeconds = Math.Max(minGapSeconds ?? MinGapSeconds, GapIntervals * MedianIntervalSeconds);
 
 		_phone = [.. sorted.Where(p => p.Phone is not null).Select(p => (p.Utc, p.Phone!)), .. (phoneSamples ?? []).Where(s => !s.Reading.IsEmpty).Select(s => (s.Utc, s.Reading))];
 		_phone.Sort(static (a, b) => a.Utc.CompareTo(b.Utc));
@@ -117,6 +125,21 @@ public sealed class ExternalTrack
 			? MinGapSeconds
 			: Math.Max(MinGapSeconds, GapIntervals * _phone.Zip(_phone.Skip(1), (a, b) => (b.Utc - a.Utc).TotalSeconds).Order().ElementAt((_phone.Count - 1) / 2));
 	}
+
+	/// <summary>The usual time between two points of the track, in seconds.</summary>
+	public double MedianIntervalSeconds { get; }
+
+	/// <summary>The maker the file's device says it is (a FIT's file_id), null when the file doesn't say or it isn't a known one.</summary>
+	public string? Manufacturer { get; }
+
+	/// <summary>The activity's sport as a key (running, walking, hiking, cycling, swimming, training), null when the file doesn't say or it isn't one of those.</summary>
+	public string? Sport { get; }
+
+	/// <summary>The cadence is steps a minute (a walk, a run) and not pedal revolutions: what the activity's sport says.</summary>
+	public bool CadenceInSteps { get; }
+
+	/// <summary>The maximum heart rate the device's zones are counted from (a watch's zones_target), null when the file has none.</summary>
+	public int? MaxHeartRateBpm { get; }
 
 	private readonly List<(DateTime Utc, PhoneReading Reading)> _phone;
 
@@ -261,7 +284,7 @@ public sealed class ExternalTrack
 		double? distance = to.DistanceMeters >= from.DistanceMeters ? Interpolate(from.DistanceMeters, to.DistanceMeters, fraction) : null;
 		double? height = Interpolate(from.HeightMeters, to.HeightMeters, fraction);
 		return new ExternalTrackSample(ExternalTrackState.Fix, latitude, longitude, altitude, speed, temperature, distance, height,
-			Interpolate(from.VerticalSpeedMs, to.VerticalSpeedMs, fraction), from.Satellites, from.GpsLevel, from.FlightMode, Interpolate(from.Attitude, to.Attitude, fraction), from.HeartRateBpm);
+			Interpolate(from.VerticalSpeedMs, to.VerticalSpeedMs, fraction), from.Satellites, from.GpsLevel, from.FlightMode, Interpolate(from.Attitude, to.Attitude, fraction), from.HeartRateBpm, from.CadencePerMinute);
 	}
 
 	private ExternalTrackSample FixAt(int index)
@@ -280,7 +303,7 @@ public sealed class ExternalTrack
 		}
 
 		return new ExternalTrackSample(ExternalTrackState.Fix, point.Latitude, point.Longitude, point.AltitudeMeters, speed, point.TemperatureCelsius, point.DistanceMeters, point.HeightMeters,
-			point.VerticalSpeedMs, point.Satellites, point.GpsLevel, point.FlightMode, point.Attitude, point.HeartRateBpm);
+			point.VerticalSpeedMs, point.Satellites, point.GpsLevel, point.FlightMode, point.Attitude, point.HeartRateBpm, point.CadencePerMinute);
 	}
 
 	private static double? Interpolate(double? from, double? to, double fraction) => from is { } a && to is { } b ? a + (b - a) * fraction : null;

@@ -44,7 +44,7 @@ namespace Telemavix.Cameras.Dji;
 ///     index / fps to floating-point rounding, not a hardware timestamp - so we compute it the same
 ///     way, using the video's real frame rate from ffprobe.
 /// </summary>
-internal static class DjiMetaTelemetryParser
+internal static partial class DjiMetaTelemetryParser
 {
 	private const int ParallelReads = 8;
 

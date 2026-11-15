@@ -15,6 +15,7 @@ public static class FitReader
 {
 	private const int RecordMessage = 20;
 	private const int FieldDescriptionMessage = 206;
+	private const int FileIdMessage = 0, ZonesTargetMessage = 7, SessionMessage = 18;
 	private const int EventMessage = 21;
 	private const int BatteryMessage = 104;
 	private const int DeviceInfoMessage = 23;
@@ -30,7 +31,53 @@ public static class FitReader
 	private const int Latitude = 0, Longitude = 1, Altitude = 2, HeartRate = 3, Distance = 5, Speed = 6, Temperature = 13, GpsAccuracy = 31, EnhancedSpeed = 73, EnhancedAltitude = 78;
 	private const int DescriptionDeveloperIndex = 0, DescriptionNumber = 1, DescriptionName = 3;
 	private const int EventNumber = 0, EventType = 1;
+	private const int FileIdManufacturer = 1, Cadence = 4, FractionalCadence = 53, SessionSport = 5, ZonesMaxHeartRate = 1, ZonesCalculation = 5;
+	private const long PercentOfMaxHeartRate = 1;
 	private const int BatteryCapacity = 2, DeviceIndex = 0, DeviceBatteryLevel = 32;
+
+	// Garmin's "smart recording" writes a record only when direction, speed or heart rate changed enough, so a 4-20 s step is normal there and not a lost fix.
+	private const double SmartRecordingGapSeconds = 30;
+
+	private static bool IsGarmin(long? manufacturer) => manufacturer is 1 or 13 or 15;
+
+	private static string? ManufacturerName(long? manufacturer)
+	{
+		return manufacturer switch
+		{
+			1 or 13 or 15 => "Garmin",
+			23 => "Suunto",
+			32 => "Wahoo Fitness",
+			123 => "Polar",
+			294 => "Coros",
+			_ => null
+		};
+	}
+
+	private static string? SportKey(long? sport)
+	{
+		return sport switch
+		{
+			1 => "running",
+			2 => "cycling",
+			5 => "swimming",
+			10 => "training",
+			11 => "walking",
+			17 => "hiking",
+			_ => null
+		};
+	}
+
+	// The sports whose cadence the FIT profile counts per leg (running, walking, hiking): a step a minute is twice that.
+	private static bool CountsStepsPerLeg(long? sport) => sport is 1 or 11 or 17;
+
+	/// <summary>What a file says about the whole activity, found after or between its records.</summary>
+	private sealed class Activity
+	{
+		public bool Garmin;
+		public long? Manufacturer;
+		public long? Sport;
+		public int? MaxHeartRate;
+	}
 
 	public static bool LooksLikeFit(ReadOnlySpan<byte> start)
 	{
@@ -49,11 +96,15 @@ public static class FitReader
 		List<ExternalBatteryReading> batteries = [];
 		List<ExternalPhoneSample> samples = [];
 		int at = 0;
+		Activity activity = new();
 		while (at + 12 <= file.Length && LooksLikeFit(file.AsSpan(at)))
-			at = ReadFile(file, at, points, timer, batteries, samples);
+			at = ReadFile(file, at, points, timer, batteries, samples, activity);
 
 		if (at == 0) throw new InvalidDataException("Not a FIT file.");
-		return new ExternalTrack(points, Pauses(timer), batteries, phoneSamples: samples);
+		bool steps = CountsStepsPerLeg(activity.Sport);
+		if (steps) points = [.. points.Select(p => p with { CadencePerMinute = p.CadencePerMinute is { } perLeg ? perLeg * 2 : null })];
+		return new ExternalTrack(points, Pauses(timer), batteries, phoneSamples: samples, minGapSeconds: activity.Garmin ? SmartRecordingGapSeconds : null,
+			cadenceInSteps: steps, maxHeartRateBpm: activity.MaxHeartRate, manufacturer: ManufacturerName(activity.Manufacturer), sport: SportKey(activity.Sport));
 	}
 
 	private sealed record Definition(bool BigEndian, int Message, (int Number, int Size, int BaseType)[] Fields, (int Number, int Size, int Index)[] Developer)
@@ -61,7 +112,7 @@ public static class FitReader
 		public int Size => Fields.Sum(f => f.Size) + Developer.Sum(f => f.Size);
 	}
 
-	private static int ReadFile(byte[] file, int start, List<ExternalTrackPoint> points, List<(DateTime, byte)> timer, List<ExternalBatteryReading> batteries, List<ExternalPhoneSample> samples)
+	private static int ReadFile(byte[] file, int start, List<ExternalTrackPoint> points, List<(DateTime, byte)> timer, List<ExternalBatteryReading> batteries, List<ExternalPhoneSample> samples, Activity activity)
 	{
 		int headerSize = file[start];
 		long dataSize = BinaryPrimitives.ReadUInt32LittleEndian(file.AsSpan(start + 4));
@@ -114,6 +165,26 @@ public static class FitReader
 				continue;
 			}
 
+			if (definition.Message == FileIdMessage)
+			{
+				long? maker = Field(definition, data, FileIdManufacturer);
+				if (IsGarmin(maker)) activity.Garmin = true;
+				activity.Manufacturer ??= maker;
+				continue;
+			}
+
+			if (definition.Message == ZonesTargetMessage)
+			{
+				if (Field(definition, data, ZonesCalculation) == PercentOfMaxHeartRate && Field(definition, data, ZonesMaxHeartRate) is { } max and > 0) activity.MaxHeartRate ??= (int)max;
+				continue;
+			}
+
+			if (definition.Message == SessionMessage)
+			{
+				activity.Sport ??= Field(definition, data, SessionSport);
+				continue;
+			}
+
 			if (definition.Message is not (RecordMessage or EventMessage or BatteryMessage or DeviceInfoMessage) || stamp is not { } seconds) continue;
 
 			DateTime utc = Epoch.AddSeconds(seconds);
@@ -148,9 +219,10 @@ public static class FitReader
 			double? speed = (Field(definition, data, EnhancedSpeed) ?? Field(definition, data, Speed)) is { } s ? s / 1000.0 : null;
 			double? temperature = Field(definition, data, Temperature);
 			double? distance = Field(definition, data, Distance) is { } d ? d / 100.0 : null;
+			double? cadence = Field(definition, data, Cadence) is { } rpm ? rpm + (Field(definition, data, FractionalCadence) ?? 0) / 128.0 : null;
 			int? heartRate = Field(definition, data, HeartRate) is { } bpm and > 0 ? (int)bpm : null;
 			points.Add(new ExternalTrackPoint(utc, lat * SemicirclesToDegrees, lon * SemicirclesToDegrees, altitude, speed,
-				TemperatureCelsius: temperature, DistanceMeters: distance, Satellites: satellites, HeartRateBpm: heartRate, Phone: reading.IsEmpty ? null : reading));
+				TemperatureCelsius: temperature, DistanceMeters: distance, Satellites: satellites, HeartRateBpm: heartRate, Phone: reading.IsEmpty ? null : reading, CadencePerMinute: cadence));
 		}
 
 		return (int)end + 2;

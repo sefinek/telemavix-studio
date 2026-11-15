@@ -27,7 +27,7 @@ AppDomain.CurrentDomain.UnhandledException += (_, e) =>
 foreach (string line in AppBanner.BuildLines("CLI"))
 	AppLogger.Info(line);
 
-CameraFormats.Register(new DjiOsmoFormat(), new GoProFormat(), new Insta360Format(), new DjiDroneFormat());
+CameraFormats.Register(new DjiDroneMetaFormat(), new DjiOsmoFormat(), new GoProFormat(), new Insta360Format(), new DjiDroneFormat());
 ExternalTrackReader.Register(new DjiFlightLogFormat());
 string[] options =
 [

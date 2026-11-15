@@ -121,7 +121,7 @@ public partial class QueueWindow : Window
 			AllowMultiple = true,
 			FileTypeFilter =
 			[
-				new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.MP4", "*.insv", "*.INSV", "*.lrv", "*.LRV"] },
+				new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.MP4", "*.insv", "*.INSV"] },
 				new FilePickerFileType(Strings.Common_AllFiles) { Patterns = ["*"] }
 			]
 		});

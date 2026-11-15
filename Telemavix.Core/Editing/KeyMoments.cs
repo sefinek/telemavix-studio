@@ -17,7 +17,10 @@ public enum PeakKind
 	SteepestDescent,
 	MaxLean,
 	FastestAscent,
-	FastestDescent
+	FastestDescent,
+	HighestHeartRate,
+	LowestHeartRate,
+	HighestCadence
 }
 
 /// <summary>Where a peak of the telemetry is: its frame and the value there, in km/h, meters, G, percent or degrees.</summary>
@@ -49,6 +52,9 @@ public static class KeyMoments
 			PeakKind.MaxLean => CoreStrings.Peak_MaxLean,
 			PeakKind.FastestAscent => CoreStrings.Peak_FastestAscent,
 			PeakKind.FastestDescent => CoreStrings.Peak_FastestDescent,
+			PeakKind.HighestHeartRate => CoreStrings.Peak_HighestHeartRate,
+			PeakKind.LowestHeartRate => CoreStrings.Peak_LowestHeartRate,
+			PeakKind.HighestCadence => CoreStrings.Peak_HighestCadence,
 			_ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
 		};
 	}
@@ -77,8 +83,10 @@ public static class KeyMoments
 		if (flight && kind is PeakKind.SteepestClimb or PeakKind.SteepestDescent or PeakKind.LowestPoint) return [];
 		if (!flight && kind is PeakKind.FastestAscent or PeakKind.FastestDescent) return [];
 
-		bool gpsKind = kind is not (PeakKind.StrongestG or PeakKind.MaxLean);
-		bool[]? riding = ridingFromKmh is { } kmh && !gpsKind ? TripStats.Riding(frames, kmh) : null;
+		bool rideKind = kind is PeakKind.StrongestG or PeakKind.MaxLean;
+		// A watch's heart rate and cadence are the track's own readings, kept where the GPS lost its fix.
+		bool gpsKind = !rideKind && kind is not (PeakKind.HighestHeartRate or PeakKind.LowestHeartRate or PeakKind.HighestCadence);
+		bool[]? riding = ridingFromKmh is { } kmh && rideKind ? TripStats.Riding(frames, kmh) : null;
 		// The G-meter's own reading (dynamic acceleration against its baseline), so the peak is the number the widget shows there.
 		(double Lateral, double Longitudinal)[]? deltas = kind == PeakKind.StrongestG ? GMeterDeltas.Compute(frames) : null;
 		double[]? slopes = kind is PeakKind.SteepestClimb or PeakKind.SteepestDescent
@@ -108,7 +116,7 @@ public static class KeyMoments
 			if (times.Any(t => Math.Abs(t - time) < MinPeakSeparationSeconds)) continue;
 
 			times.Add(time);
-			double shown = kind is PeakKind.LowestPoint or PeakKind.SteepestDescent or PeakKind.FastestDescent ? -value : value;
+			double shown = kind is PeakKind.LowestPoint or PeakKind.SteepestDescent or PeakKind.FastestDescent or PeakKind.LowestHeartRate ? -value : value;
 			peaks.Add(new Peak(Math.Clamp((long)Math.Round(time * fps), 0, totalFrames - 1), shown));
 			if (peaks.Count == count) break;
 		}
@@ -131,7 +139,7 @@ public static class KeyMoments
 			PeakKind.SteepestClimb or PeakKind.SteepestDescent => value >= MinGradientPercent,
 			PeakKind.MaxLean => value >= MinLeanDegrees,
 			PeakKind.FastestAscent or PeakKind.FastestDescent => value >= MinClimbRateMs,
-			PeakKind.StrongestG => value > 0,
+			PeakKind.StrongestG or PeakKind.HighestCadence => value > 0,
 			_ => true
 		};
 	}
@@ -182,6 +190,9 @@ public static class KeyMoments
 			PeakKind.FastestAscent => frame.Raw.VerticalSpeedMs ?? double.NaN,
 			PeakKind.FastestDescent => -frame.Raw.VerticalSpeedMs ?? double.NaN,
 			PeakKind.MaxLean => Math.Abs(frame.RollDegrees),
+			PeakKind.HighestHeartRate => frame.Raw.HeartRateBpm is > 0 and { } high ? high : double.NaN,
+			PeakKind.LowestHeartRate => frame.Raw.HeartRateBpm is > 0 and { } low ? -low : double.NaN,
+			PeakKind.HighestCadence => frame.Raw.CadencePerMinute ?? double.NaN,
 			_ => double.NaN
 		};
 	}

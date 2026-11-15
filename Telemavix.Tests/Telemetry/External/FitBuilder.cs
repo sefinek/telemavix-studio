@@ -26,6 +26,47 @@ internal sealed class FitBuilder
 		return this;
 	}
 
+	public FitBuilder FileId(ushort manufacturer)
+	{
+		Define(3, 0, false, false, (1, 2, 0x84));
+		_data.Add(3);
+		Number(manufacturer, 2, false);
+		return this;
+	}
+
+	public FitBuilder DefineActivity()
+	{
+		Define(6, 20, false, false, (253, 4, 6), (0, 4, 5), (1, 4, 5), (3, 1, 2), (4, 1, 2), (53, 1, 2));
+		Define(7, 18, false, false, (253, 4, 6), (5, 1, 0));
+		Define(8, 7, false, false, (1, 1, 2), (5, 1, 0));
+		return this;
+	}
+
+	public FitBuilder CadenceRecord(DateTime utc, double lat, double lon, byte heartRate, byte cadence, byte fraction)
+	{
+		_data.Add(6);
+		Number(Seconds(utc), 4, false);
+		Number((uint)(int)Math.Round(lat / 180.0 * 2147483648.0), 4, false);
+		Number((uint)(int)Math.Round(lon / 180.0 * 2147483648.0), 4, false);
+		_data.AddRange([heartRate, cadence, fraction]);
+		return this;
+	}
+
+	public FitBuilder Session(DateTime utc, byte sport)
+	{
+		_data.Add(7);
+		Number(Seconds(utc), 4, false);
+		_data.Add(sport);
+		return this;
+	}
+
+	public FitBuilder ZonesTarget(byte maxHeartRate, byte calculation)
+	{
+		_data.Add(8);
+		_data.AddRange([maxHeartRate, calculation]);
+		return this;
+	}
+
 	public FitBuilder DefineEvent()
 	{
 		Define(EventLocal, 21, false, false, (253, 4, 6), (0, 1, 0), (1, 1, 0));

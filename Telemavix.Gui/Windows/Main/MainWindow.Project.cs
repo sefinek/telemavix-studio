@@ -364,7 +364,7 @@ public partial class MainWindow
 		string wanted = summary.CameraFormat?.PreferredPresetId ?? OverlayPresetStore.DefaultPresetId;
 		if (!OverlayPresetStore.IsBuiltIn(_activePresetId) || _activePresetId == wanted || _overlayPresets.All(p => p.Id != wanted)) return;
 		if (OverlayPresetStore.IsDronePreset(_activePresetId) && OverlayPresetStore.IsDronePreset(wanted)) return;
-		if (_activePresetId == OverlayPresetStore.TelemavixGpsPresetId && wanted == OverlayPresetStore.DefaultPresetId) return;
+		if (_activePresetId is OverlayPresetStore.TelemavixGpsPresetId or OverlayPresetStore.GarminPresetId && wanted == OverlayPresetStore.DefaultPresetId) return;
 
 		SwitchToPreset(wanted);
 	}

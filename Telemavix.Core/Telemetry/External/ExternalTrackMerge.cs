@@ -42,6 +42,9 @@ public static class ExternalTrackMerge
 				GpsSatellites = phone?.Satellites ?? (reading is { State: ExternalTrackState.Fix } counted ? counted.Satellites : null),
 				HeartRateBpm = reading is { State: ExternalTrackState.Fix } pulse ? pulse.HeartRateBpm : null,
 				Phone = phone,
+				CadencePerMinute = reading is { State: ExternalTrackState.Fix } pedaling ? pedaling.CadencePerMinute : null,
+				CadenceInSteps = track.CadenceInSteps,
+				MaxHeartRateBpm = track.MaxHeartRateBpm,
 				DistanceFromHomeMeters = reading is { State: ExternalTrackState.Fix } at && track.Home is { } home
 					? TelemetryMath.HaversineMeters(home.Latitude, home.Longitude, at.Latitude, at.Longitude)
 					: null

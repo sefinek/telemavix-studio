@@ -276,6 +276,8 @@ public partial class KeyMomentsEditor : UserControl
 			PeakKind.StrongestG => $"{value.ToString("0.00", c)} G",
 			PeakKind.SteepestClimb or PeakKind.SteepestDescent => $"{value.ToString("0.0", c)}%",
 			PeakKind.MaxLean => $"{value.ToString("0", c)}°",
+			PeakKind.HighestHeartRate or PeakKind.LowestHeartRate => $"{value.ToString("0", c)} bpm",
+			PeakKind.HighestCadence => $"{value.ToString("0", c)} /min",
 			PeakKind.FastestAscent or PeakKind.FastestDescent => units.Altitude == UnitSystem.Imperial ? $"{(value * 3.28084).ToString("0.0", c)} ft/s" : $"{value.ToString("0.0", c)} m/s",
 			_ => value.ToString("0.##", c)
 		};

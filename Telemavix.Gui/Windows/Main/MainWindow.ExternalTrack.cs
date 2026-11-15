@@ -287,6 +287,7 @@ public partial class MainWindow
 			_measuredSpeeds = null;
 			await Task.Run(() => RecordingSpeeds(summary));
 			PopulateTelemetryInfo(summary);
+			ShowTrackFileInfo(path, track);
 			SetPhase(UiPhase.SummaryReady);
 			SetRenderButtons(true);
 			LoadOverlayPresets();
@@ -314,6 +315,57 @@ public partial class MainWindow
 		{
 			TaskbarProgress.SetState(this, TaskbarProgress.State.NoProgress);
 		}
+	}
+
+	/// <summary>The card of a track opened on its own: what the file is - its format, the device and activity it names, how long and how often it was sampled, and which readings it carries.</summary>
+	private void ShowTrackFileInfo(string path, ExternalTrack track)
+	{
+		static void Row(Grid row, TextBlock value, string? text)
+		{
+			row.IsVisible = !string.IsNullOrWhiteSpace(text);
+			value.Text = text;
+		}
+
+		IReadOnlyList<ExternalTrackPoint> points = track.Points;
+		string format = ExternalTrackReader.FormatName(path);
+		string? device = track.Manufacturer ?? track.DeviceName;
+		string? activity = track.Sport switch
+		{
+			"running" => Strings.TrackFile_Sport_running,
+			"cycling" => Strings.TrackFile_Sport_cycling,
+			"walking" => Strings.TrackFile_Sport_walking,
+			"hiking" => Strings.TrackFile_Sport_hiking,
+			"swimming" => Strings.TrackFile_Sport_swimming,
+			"training" => Strings.TrackFile_Sport_training,
+			_ => null
+		};
+		TimeSpan length = track.EndUtc - track.StartUtc;
+		string interval = string.Format(CultureInfo.CurrentCulture, Strings.TrackFile_Interval, track.MedianIntervalSeconds);
+
+		List<string> data = [];
+		void Has(bool present, string name)
+		{
+			if (present) data.Add(name);
+		}
+
+		Has(points.Any(p => p.AltitudeMeters is not null), Strings.Main_Altitude);
+		Has(points.Any(p => p.SpeedMs is not null), Strings.Common_Speed);
+		Has(points.Any(p => p.DistanceMeters is not null), Strings.Main_Distance);
+		Has(points.Any(p => p.HeartRateBpm is > 0), Strings.Widget_HeartRate);
+		Has(points.Any(p => p.CadencePerMinute is > 0), Strings.Widget_Cadence);
+		Has(points.Any(p => p.TemperatureCelsius is not null), Strings.Widget_AmbientTemperature);
+		Has(points.Any(p => p.Satellites is not null), Strings.Widget_Satellites);
+		Has(track.Batteries.Count > 0, Strings.Widget_DeviceBattery);
+		Has(points.Any(p => p.Phone is not null), Strings.TrackFile_PhoneSensors);
+		Has(points.Any(p => p.Attitude is not null), Strings.Widget_Attitude);
+
+		Row(TrackFileNameRow, TrackFileName, Path.GetFileName(path));
+		Row(TrackFileFormatRow, TrackFileFormat, format);
+		Row(TrackFileDeviceRow, TrackFileDevice, device);
+		Row(TrackFileActivityRow, TrackFileActivity, activity);
+		Row(TrackFileRecordedRow, TrackFileRecorded, $"{track.StartUtc.ToLocalFromUtc():yyyy-MM-dd HH:mm:ss}");
+		Row(TrackFilePointsRow, TrackFilePoints, string.Format(CultureInfo.CurrentCulture, Strings.TrackFile_PointsValue, points.Count, length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture), interval));
+		Row(TrackFileDataRow, TrackFileData, string.Join(", ", data));
 	}
 
 	private void ShowExternalTrackInfo(ExternalTrack track)

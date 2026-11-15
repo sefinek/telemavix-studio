@@ -46,7 +46,7 @@ public partial class SpeedCalibrationPreviewWindow : Window
 		{
 			Title = Strings.Main_PickRecordings,
 			AllowMultiple = false,
-			FileTypeFilter = [new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.insv", "*.lrv"] }]
+			FileTypeFilter = [new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.insv"] }]
 		});
 		if (files.Count == 0 || files[0].TryGetLocalPath() is not { } path) return;
 

@@ -36,7 +36,8 @@ public readonly record struct OverlayAvailability(
 	bool HeartRate = false,
 	bool Pressure = false,
 	bool Light = false,
-	bool CellSignal = false)
+	bool CellSignal = false,
+	bool Cadence = false)
 {
 	public static OverlayAvailability Of(IReadOnlyList<TelemetryFrame> frames, bool containerTime, ICameraFormat? camera)
 	{
@@ -63,7 +64,8 @@ public readonly record struct OverlayAvailability(
 			frames.Any(f => f.HeartRateBpm is > 0),
 			frames.Any(f => f.Phone?.PressureHectopascals is > 0),
 			frames.Any(f => f.Phone?.LightLux is >= 0),
-			frames.Any(f => f.Phone is { CellSignalDbm: not null } or { CellSignalLevel: not null }));
+			frames.Any(f => f.Phone is { CellSignalDbm: not null } or { CellSignalLevel: not null }),
+			frames.Any(f => f.CadencePerMinute is > 0));
 	}
 
 	public IReadOnlyList<OverlayElement> Apply(IReadOnlyList<OverlayElement> layout)
@@ -119,6 +121,7 @@ public static class OverlayDataRequirements
 			OverlayElementType.Pressure => data.Pressure,
 			OverlayElementType.Light => data.Light,
 			OverlayElementType.CellSignal => data.CellSignal,
+			OverlayElementType.Cadence => data.Cadence,
 			// Text and Image need no data.
 			_ => true
 		};

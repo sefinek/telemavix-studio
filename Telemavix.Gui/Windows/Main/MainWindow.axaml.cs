@@ -84,6 +84,7 @@ public partial class MainWindow : Window
 	private (FileSummary Summary, IReadOnlyList<GpsAnomaly> Anomalies, IReadOnlyList<(double Start, double End)> LossRanges)? _gpsFindings;
 	// The input set SupportNotice was last shown for (ShowSupportNoticeAsync).
 	private string? _supportNoticeShownFor;
+	private string? _proxyNoticeShownFor;
 	private bool _suppressOverlayEvents;
 	// Every widget panel's shadow controls, set up in the constructor (LockShadowEditors).
 	private readonly ElementShadowEditor[] _shadowEditors;
@@ -367,7 +368,7 @@ public partial class MainWindow : Window
 			AllowMultiple = true,
 			FileTypeFilter =
 			[
-				new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.MP4", "*.insv", "*.INSV", "*.lrv", "*.LRV"] },
+				new FilePickerFileType(Strings.Main_CameraRecordings) { Patterns = ["*.mp4", "*.MP4", "*.insv", "*.INSV"] },
 				new FilePickerFileType(Strings.Common_AllFiles) { Patterns = ["*"] }
 			]
 		});
@@ -691,6 +692,7 @@ public partial class MainWindow : Window
 		FileInfoCard.IsVisible = phase == UiPhase.SummaryReady && !_trackOnly;
 		TelemetryCard.IsVisible = phase == UiPhase.SummaryReady && _summary?.Telemetry is not null;
 		TrackMapCard.IsVisible = phase == UiPhase.SummaryReady && _trackOnly;
+		TrackFileCard.IsVisible = phase == UiPhase.SummaryReady && _trackOnly;
 		bool overlayReady = summaryVisible && _summary?.HasTelemetry == true && _overlayPresetsLoaded;
 		OverlayContent.IsVisible = overlayReady;
 		OverlayPlaceholder.IsVisible = !overlayReady;

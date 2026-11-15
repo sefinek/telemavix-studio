@@ -122,6 +122,8 @@ public partial class MainWindow
 			AppLogger.Info(
 				$"ffprobe: {summary.Video.CodecName} {summary.Video.Profile}, {summary.Video.Width}x{summary.Video.Height}, " +
 				$"{FormatFps(summary.Video.Fps)} fps, {summary.Video.PixFmt}, ~{summary.Video.BitRate / 1_000_000} Mbps");
+			foreach (string proxy in ProxyFileNames(summary.InputPaths))
+				AppendLog(string.Format(Strings.Summary_LogProxyFile, proxy), LogLevel.Warn);
 			AppendLog(string.Format(Strings.Summary_LogVideo, summary.Video.CodecName.ToUpperInvariant(), summary.Video.Profile,
 				summary.Video.Width, summary.Video.Height, FormatFps(summary.Video.Fps), summary.Video.BitRate / 1_000_000));
 			AppLogger.Info(
@@ -284,6 +286,13 @@ public partial class MainWindow
 		return found;
 	}
 
+	/// <summary>Names of the low-resolution preview files (DJI .LRF, GoPro and Insta360 .LRV) among the inputs.</summary>
+	private static IEnumerable<string> ProxyFileNames(IEnumerable<string> paths)
+	{
+		return paths.Where(p => Path.GetExtension(p).Equals(".lrf", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(p).Equals(".lrv", StringComparison.OrdinalIgnoreCase))
+			.Select(p => Path.GetFileName(p));
+	}
+
 	/// <summary>
 	///     Once per set of files (not again when the same recording is read again): the camera's SupportNotice, or else what the
 	///     recording lacks - no telemetry at all, or no GPS fix - since the log alone is easy to miss. A camera with a
@@ -291,9 +300,17 @@ public partial class MainWindow
 	/// </summary>
 	private async Task ShowSupportNoticeAsync(FileSummary summary, List<string> inputPaths)
 	{
+		string key = string.Join('|', inputPaths);
+		if (key != _proxyNoticeShownFor)
+		{
+			_proxyNoticeShownFor = key;
+			string[] proxies = [.. ProxyFileNames(inputPaths)];
+			if (proxies.Length > 0)
+				await ConfirmDialog.ShowAsync(this, Strings.Summary_ProxyFileTitle, string.Format(Strings.Summary_LogProxyFile, string.Join(", ", proxies)), kind: DialogKind.Warning);
+		}
+
 		if (summary.CameraFormat?.IsDrone == true && _externalTrackApplied) return;
 
-		string key = string.Join('|', inputPaths);
 		if (key == _supportNoticeShownFor) return;
 		_supportNoticeShownFor = key;
 
@@ -466,8 +483,8 @@ public partial class MainWindow
 
 		TeleSamples.Text = $"{t.SampleCount}";
 		TeleDuration.Text = TimeSpan.FromSeconds(t.DurationSeconds).ToString(@"hh\:mm\:ss");
-		TeleMaxG.Text = $"{t.MaxGForce:0.00} G";
-		TeleRecordedAt.Text = t.RecordedAtUtc is { } utc ? utc.ToLocalFromUtc().ToString("yyyy-MM-dd HH:mm:ss") : Strings.Common_UnknownCapital;
+		TeleMaxG.Text = _availability.CameraAxes ? $"{t.MaxGForce:0.00} G" : "-";
+		TeleRecordedAt.Text = (t.RecordedAtUtc ?? summary.ContainerRecordingStartUtc) is { } utc ? utc.ToLocalFromUtc().ToString("yyyy-MM-dd HH:mm:ss") : Strings.Common_UnknownCapital;
 
 		// Without a GPS fix there's nothing to measure: a dash, not a "0.00 km" that reads like a recording that never moved.
 		bool hasGps = _availability.GpsFix;

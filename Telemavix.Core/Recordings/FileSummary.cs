@@ -87,7 +87,7 @@ public static class FileSummaryReader
 		{
 			AppLogger.Info($"Summary: cache hit in {stopwatch.ElapsedMilliseconds} ms ({inputPaths.Count} file(s))");
 			onCacheEvent?.Invoke(new FileSummaryCacheEvent(FileSummaryCacheEventKind.Hit, CurrentCacheFormatVersion));
-			return (cached with { FromCache = true }, null);
+			return (cached with { FromCache = true, InputPaths = inputPaths }, null);
 		}
 
 		onCacheEvent?.Invoke(staleFormatVersion is { } previous

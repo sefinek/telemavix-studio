@@ -31,7 +31,7 @@ internal class Program
 		StartupKeys.Capture();
 		AppLogger.Verbose = settings.DebugMode || StartupKeys.ShiftHeld;
 		UiLanguages.Apply(settings.UiLanguage);
-		CameraFormats.Register(new DjiOsmoFormat(), new GoProFormat(), new Insta360Format(), new DjiDroneFormat());
+		CameraFormats.Register(new DjiDroneMetaFormat(), new DjiOsmoFormat(), new GoProFormat(), new Insta360Format(), new DjiDroneFormat());
 		ExternalTrackReader.Register(new DjiFlightLogFormat());
 		UiScale.Initialize();
 		return BuildAvaloniaApp()

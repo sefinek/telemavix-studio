@@ -5,7 +5,7 @@
     <RootNamespace>Telemavix.Cameras.Dji</RootNamespace>
 
     <AssemblyTitle>Telemavix Studio DJI</AssemblyTitle>
-    <Description>DJI Osmo Action support for Telemavix Studio: djmd telemetry (native, exiftool as the fallback), the camera's tilt axes and copying its own metadata into a render.</Description>
+    <Description>DJI Osmo Action and Lito X1 support for Telemavix Studio: djmd telemetry (native, exiftool as the fallback), the camera's tilt axes and copying its own metadata into a render.</Description>
   </PropertyGroup>
 
   <ItemGroup>

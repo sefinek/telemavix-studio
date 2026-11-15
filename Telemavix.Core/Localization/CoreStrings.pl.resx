@@ -673,6 +673,9 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   <data name="DjiDrone_NeedsLog" xml:space="preserve">
     <value>Nagrania z dronów DJI nie zawierają telemetrii. Aby wyświetlić pozycję, wysokość i prędkość drona, potrzebny jest dziennik lotu (FlightRecord). Jeśli używasz Windows i telefonu z Androidem, podłącz telefon przez USB i skorzystaj z wyszukiwania dzienników w aplikacji, zamiast szukać pliku ręcznie. Możesz też samodzielnie wskazać dziennik skopiowany na komputer. Na Androidzie jest on zapisywany m.in. w folderze Pobrane/product_data/flightRecords.</value>
   </data>
+  <data name="DjiDroneMeta_Source" xml:space="preserve">
+    <value>Źródło telemetrii: natywny dekoder djmd, układ drona (pozycja, wysokość nad punktem startu, prędkość, ISO, migawka i temperatura barwowa). Nagranie nie wymaga dziennika lotu.</value>
+  </data>
   <data name="DjiDrone_Name" xml:space="preserve">
     <value>Drony DJI</value>
   </data>
@@ -684,6 +687,9 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   </data>
   <data name="Preset_FpvDrones" xml:space="preserve">
     <value>Drony FPV</value>
+  </data>
+  <data name="Preset_Garmin" xml:space="preserve">
+    <value>Garmin</value>
   </data>
   <data name="Preset_TelemavixGps" xml:space="preserve">
     <value>Telemavix GPS</value>
@@ -790,6 +796,9 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   <data name="Overlay_PhoneBattery" xml:space="preserve">
     <value>Bateria telefonu</value>
   </data>
+  <data name="Overlay_Cadence" xml:space="preserve">
+    <value>Kadencja</value>
+  </data>
   <data name="Overlay_HeartRate" xml:space="preserve">
     <value>Tętno</value>
   </data>
@@ -888,5 +897,14 @@ W Telemavix Studio otwórz Ustawienia > Zachowanie > Drony DJI i zastąp wpisany
   </data>
   <data name="Overlay_WatermarkNotice" xml:space="preserve">
     <value>Tylko do użytku niekomercyjnego</value>
+  </data>
+  <data name="Peak_HighestHeartRate" xml:space="preserve">
+    <value>Najwyższe tętno</value>
+  </data>
+  <data name="Peak_LowestHeartRate" xml:space="preserve">
+    <value>Najniższe tętno</value>
+  </data>
+  <data name="Peak_HighestCadence" xml:space="preserve">
+    <value>Najwyższa kadencja</value>
   </data>
 </root>

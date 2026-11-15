@@ -268,6 +268,7 @@ public partial class MainWindow
 			OverlayElementType.ImageLuma => Strings.Editor_UnavailableImageLuma,
 			OverlayElementType.Satellites => Strings.Editor_UnavailableSatellites,
 			OverlayElementType.HeartRate => Strings.Editor_UnavailableHeartRate,
+			OverlayElementType.Cadence => Strings.Editor_UnavailableCadence,
 			OverlayElementType.Pressure or OverlayElementType.Light or OverlayElementType.CellSignal => Strings.Editor_UnavailablePhoneSensor,
 			OverlayElementType.Height or OverlayElementType.HomeDistance or OverlayElementType.VerticalSpeed or OverlayElementType.DroneBattery
 				or OverlayElementType.FlightAlerts or OverlayElementType.Signal or OverlayElementType.FlightMode or OverlayElementType.RcSticks
@@ -296,6 +297,7 @@ public partial class MainWindow
 			OverlayElementType.DeviceDistance => DeviceDistanceListItem,
 			OverlayElementType.DeviceBattery => DeviceBatteryListItem,
 			OverlayElementType.HeartRate => HeartRateListItem,
+			OverlayElementType.Cadence => CadenceListItem,
 			OverlayElementType.Pressure => PressureListItem,
 			OverlayElementType.Light => LightListItem,
 			OverlayElementType.CellSignal => CellSignalListItem,
@@ -879,6 +881,7 @@ public partial class MainWindow
 			case OverlayElementType.WindProcessing:
 			case OverlayElementType.ImageLuma:
 			case OverlayElementType.HeartRate:
+			case OverlayElementType.Cadence:
 			case OverlayElementType.Pressure:
 			case OverlayElementType.Light:
 			case OverlayElementType.CellSignal:
@@ -914,6 +917,7 @@ public partial class MainWindow
 				SensorLimitsGroup.IsVisible = el is RangeLimitedElement;
 				SensorGpsGroup.IsVisible = el is SatellitesElement;
 				SensorModeGroup.IsVisible = el is FlightModeElement;
+				SensorHeartGroup.IsVisible = el is HeartRateElement;
 				SensorClimbGroup.IsVisible = el is VerticalSpeedElement;
 				SensorStateColorsGroup.IsVisible = el is ThresholdStatElement;
 				switch (el)
@@ -929,6 +933,9 @@ public partial class MainWindow
 						break;
 					case FlightModeElement mode:
 						SensorColorByModeCheck.IsChecked = mode.ColorByMode;
+						break;
+					case HeartRateElement heart:
+						SensorColorByZoneCheck.IsChecked = heart.ColorByZone;
 						break;
 					case VerticalSpeedElement vertical:
 						SensorClimbColorBox.Text = vertical.ClimbColor;
@@ -953,6 +960,7 @@ public partial class MainWindow
 					WindProcessingElement => Strings.Widget_WindProcessingDescription,
 					ImageLumaElement => Strings.Widget_ImageLumaDescription,
 					HeartRateElement => Strings.Widget_HeartRateDescription,
+					CadenceElement => Strings.Widget_CadenceDescription,
 					PressureElement => Strings.Widget_PressureDescription,
 					LightElement => Strings.Widget_LightDescription,
 					CellSignalElement => Strings.Widget_CellSignalDescription,

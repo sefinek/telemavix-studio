@@ -620,6 +620,42 @@
 								</StackPanel>
 							</Border>
 
+							<Border Classes="card" Name="TrackFileCard" IsVisible="False">
+								<StackPanel Spacing="4">
+									<StackPanel Classes="cardTitle">
+										<TextBlock Classes="cardTitleText" Text="{x:Static local:Strings.TrackFile_Header}" />
+									</StackPanel>
+									<Grid Name="TrackFileNameRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Name}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileName" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileFormatRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Format}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileFormat" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileDeviceRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Device}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileDevice" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileActivityRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Activity}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileActivity" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileRecordedRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Recorded}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileRecorded" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFilePointsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Points}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFilePoints" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileDataRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Data}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileData" TextWrapping="Wrap" />
+									</Grid>
+								</StackPanel>
+							</Border>
+
 							<Border Classes="card" Name="TelemetryCard" IsVisible="False">
 								<StackPanel Spacing="4">
 									<StackPanel Classes="cardTitle">
@@ -2549,6 +2585,11 @@
 											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
 												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_HeartRate}" />
 											</Border>
+											<Border Name="CadenceListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.Cadence}"
+											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
+											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
+												<TextBlock Classes="overlayListItemText" Text="{x:Static local:Strings.Widget_Cadence}" />
+											</Border>
 											<Border Name="PressureListItem" Classes="overlayListItem" Tag="{x:Static core:OverlayElementType.Pressure}"
 											        PointerPressed="OnWidgetItemPointerPressed" PointerMoved="OnWidgetItemPointerMoved"
 											        PointerReleased="OnWidgetItemPointerEnded" PointerCaptureLost="OnWidgetItemPointerEnded">
@@ -2656,6 +2697,13 @@
 														<TextBlock Text="{x:Static local:Strings.Sensor_FlightMode}" Classes="settingsGroupTitle" />
 														<CheckBox Name="SensorColorByModeCheck" Content="{x:Static local:Strings.Sensor_ColorByMode}" Click="OnSensorThresholdClick" />
 														<TextBlock Classes="infoLabel checkHint" Text="{x:Static local:Strings.Sensor_ColorByModeHint}" />
+													</StackPanel>
+												</Border>
+												<Border Name="SensorHeartGroup" Classes="settingsGroup" IsVisible="False">
+													<StackPanel Spacing="8">
+														<TextBlock Text="{x:Static local:Strings.Sensor_HeartRate}" Classes="settingsGroupTitle" />
+														<CheckBox Name="SensorColorByZoneCheck" Content="{x:Static local:Strings.Sensor_ColorByZone}" Click="OnSensorThresholdClick" />
+														<TextBlock Classes="infoLabel checkHint" Text="{x:Static local:Strings.Sensor_ColorByZoneHint}" />
 													</StackPanel>
 												</Border>
 												<Border Name="SensorStateColorsGroup" Classes="settingsGroup" IsVisible="False">

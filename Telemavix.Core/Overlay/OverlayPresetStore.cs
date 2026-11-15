@@ -28,9 +28,12 @@ public static class OverlayPresetStore
 	/// <summary>Id of the fourth built-in preset, for rides recorded with Telemavix GPS (OverlayPreset.CreateTelemavixGps) - read-only like the others.</summary>
 	public const string TelemavixGpsPresetId = "telemavix-gps";
 
+	/// <summary>Id of the fifth built-in preset, for activities recorded by a Garmin watch (OverlayPreset.CreateGarmin) - read-only like the others.</summary>
+	public const string GarminPresetId = "garmin";
+
 	public static bool IsBuiltIn(string? id)
 	{
-		return id is DefaultPresetId or DronePresetId or FpvPresetId or TelemavixGpsPresetId;
+		return id is DefaultPresetId or DronePresetId or FpvPresetId or TelemavixGpsPresetId or GarminPresetId;
 	}
 
 	/// <summary>The built-in layouts for a drone's footage.</summary>
@@ -48,7 +51,8 @@ public static class OverlayPresetStore
 			units.ApplyTo(OverlayPreset.CreateDefault(DefaultPresetId, CoreStrings.Preset_ActionCameras)),
 			units.ApplyTo(OverlayPreset.CreateDrone(DronePresetId, CoreStrings.Preset_DjiDrones)),
 			units.ApplyTo(OverlayPreset.CreateFpv(FpvPresetId, CoreStrings.Preset_FpvDrones)),
-			units.ApplyTo(OverlayPreset.CreateTelemavixGps(TelemavixGpsPresetId, CoreStrings.Preset_TelemavixGps))
+			units.ApplyTo(OverlayPreset.CreateTelemavixGps(TelemavixGpsPresetId, CoreStrings.Preset_TelemavixGps)),
+			units.ApplyTo(OverlayPreset.CreateGarmin(GarminPresetId, CoreStrings.Preset_Garmin))
 		];
 	}
 

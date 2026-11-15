@@ -213,7 +213,9 @@ public partial class MainWindow : Window
 		WireTrackMap();
 		WireCompare();
 		WireReframe();
+#if DEBUG
 		WireDeveloperWindow();
+#endif
 
 		_previewPlayer.FrameReady += OnPreviewFrameReady;
 		_previewPlayer.PlaybackStarted += OnPreviewPlaybackStarted;

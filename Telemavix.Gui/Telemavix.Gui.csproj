@@ -14,6 +14,11 @@
     <Description>Telemetry HUD overlay renderer for DJI Osmo Action, GoPro and Insta360 footage.</Description>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Compile Remove="Windows\DeveloperWindow.axaml.cs;Windows\Main\MainWindow.Developer.cs" />
+    <AvaloniaXaml Remove="Windows\DeveloperWindow.axaml" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />

@@ -178,7 +178,7 @@ Projects in `Telemavix.slnx` (net10.0):
 
 ## Developer tools
 
-Ctrl+Shift+D opens `DeveloperWindow`: every `ConfirmDialog` kind, notifications, sounds, log lines, taskbar states and the first-run windows. A new dialog or notification gets a button there. `DebugMode` (Shift at startup for one run) makes `AppLogger.Info` also raise `Notified` as `Debug`.
+In Debug builds, Ctrl+Shift+D opens `DeveloperWindow`: every `ConfirmDialog` kind, notifications, sounds, log lines, taskbar states and the first-run windows. Release builds exclude the window and its shortcut. A new dialog or notification gets a button there. `DebugMode` (Shift at startup for one run) makes `AppLogger.Info` also raise `Notified` as `Debug`.
 
 ## Conventions
 

@@ -5545,7 +5545,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Privacy</value>
   </data>
   <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
-    <value>Metadata and information saved in the exported video.</value>
+    <value>Error reporting and data sent by the app.</value>
   </data>
   <data name="SettingsPage_Telemetry" xml:space="preserve">
     <value>Telemetry</value>

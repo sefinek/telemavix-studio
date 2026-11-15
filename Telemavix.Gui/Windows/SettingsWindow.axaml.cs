@@ -127,7 +127,7 @@ public partial class SettingsWindow : Window
 		// The preview's own switch has nothing to change while every shadow is off.
 		DisableShadowsCheck.IsCheckedChanged += (_, _) => PreviewShadowsCheck.IsEnabled = DisableShadowsCheck.IsChecked != true;
 		CacheCleanupCombo.ItemsSource = CacheCleanupOptions;
-		_pages = [PresetsPanel, RenderingPanel, PrivacyPanel, TelemetryPanel, SpeedPanel, RouteIntroPanel, InterfacePanel, PreviewPanel, BehaviorPanel, DronesPanel, AboutPanel];
+		_pages = [PresetsPanel, TelemetryPanel, SpeedPanel, RouteIntroPanel, RenderingPanel, InterfacePanel, PreviewPanel, BehaviorPanel, PrivacyPanel, DronesPanel, AboutPanel];
 		RouteIntroMapSource.SelectionChanged += provider => _routeIntroProvider = provider;
 
 		string appVersion = AppUpdates.CurrentVersion.Version.ToString(3);
@@ -458,7 +458,7 @@ public partial class SettingsWindow : Window
 	///     Each category is its own ScrollViewer stacked in the same Grid cell (see SettingsWindow.axaml)
 	///     - switching category just swaps which one is visible instead of reparenting content.
 	///     CategoryList's SelectedIndex="0" in XAML fires this event during InitializeComponent, before
-	///     the pages are known - harmless to skip then, since RenderingPanel is already the one visible by
+	///     the pages are known - harmless to skip then, since PresetsPanel is already the one visible by
 	///     default in XAML (every other panel starts with IsVisible="False"), matching SelectedIndex 0.
 	/// </summary>
 	private void OnCategoryChanged(object? sender, SelectionChangedEventArgs e)

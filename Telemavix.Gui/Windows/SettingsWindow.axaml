@@ -176,18 +176,6 @@
 							</ListBoxItem>
 							<ListBoxItem Theme="{StaticResource SidebarItem}">
 								<StackPanel Orientation="Horizontal" Spacing="12">
-									<local:IconView Data="{StaticResource IconDisplay}" Width="16" Height="16" />
-									<TextBlock Text="{x:Static local:Strings.Settings_Rendering}" />
-								</StackPanel>
-							</ListBoxItem>
-							<ListBoxItem Theme="{StaticResource SidebarItem}">
-								<StackPanel Orientation="Horizontal" Spacing="12">
-									<local:IconView Data="{StaticResource IconLock}" Width="16" Height="16" />
-									<TextBlock Text="{x:Static local:Strings.SettingsPage_Privacy}" />
-								</StackPanel>
-							</ListBoxItem>
-							<ListBoxItem Theme="{StaticResource SidebarItem}">
-								<StackPanel Orientation="Horizontal" Spacing="12">
 									<local:IconView Data="{StaticResource IconCamera}" Width="16" Height="16" />
 									<TextBlock Text="{x:Static local:Strings.SettingsPage_Telemetry}" />
 								</StackPanel>
@@ -202,6 +190,12 @@
 								<StackPanel Orientation="Horizontal" Spacing="12">
 									<local:IconView Data="{StaticResource IconFlag}" Width="16" Height="16" />
 									<TextBlock Text="{x:Static local:Strings.Settings_RouteIntro}" />
+								</StackPanel>
+							</ListBoxItem>
+							<ListBoxItem Theme="{StaticResource SidebarItem}">
+								<StackPanel Orientation="Horizontal" Spacing="12">
+									<local:IconView Data="{StaticResource IconDisplay}" Width="16" Height="16" />
+									<TextBlock Text="{x:Static local:Strings.Settings_Rendering}" />
 								</StackPanel>
 							</ListBoxItem>
 						</ListBox>
@@ -223,6 +217,12 @@
 								<StackPanel Orientation="Horizontal" Spacing="12">
 									<local:IconView Data="{StaticResource IconGear}" Width="16" Height="16" />
 									<TextBlock Text="{x:Static local:Strings.Settings_Behavior}" />
+								</StackPanel>
+							</ListBoxItem>
+							<ListBoxItem Theme="{StaticResource SidebarItem}">
+								<StackPanel Orientation="Horizontal" Spacing="12">
+									<local:IconView Data="{StaticResource IconLock}" Width="16" Height="16" />
+									<TextBlock Text="{x:Static local:Strings.SettingsPage_Privacy}" />
 								</StackPanel>
 							</ListBoxItem>
 							<ListBoxItem Theme="{StaticResource SidebarItem}">
@@ -397,28 +397,6 @@
 							</Grid>
 						</StackPanel>
 					</Border>
-					<TextBlock Classes="link" HorizontalAlignment="Left" Text="{x:Static local:Strings.Settings_FindWhatIsFaster}"
-					           PointerPressed="OnBenchmarkClick" />
-				</StackPanel>
-			</ScrollViewer>
-
-			<ScrollViewer Name="PrivacyPanel" IsVisible="False" VerticalScrollBarVisibility="Auto">
-				<StackPanel Margin="28,22,28,28" Spacing="14">
-					<StackPanel>
-						<TextBlock Text="{x:Static local:Strings.SettingsPage_Privacy}" Classes="pageTitle" />
-						<TextBlock Classes="pageSubtitle" Text="{x:Static local:Strings.SettingsPage_PrivacySubtitle}" />
-					</StackPanel>
-
-					<Border Classes="settingsCard">
-						<Grid Classes="settingRow" ColumnDefinitions="*,Auto">
-							<StackPanel>
-								<TextBlock Text="{x:Static local:Strings.Settings_CrashReports}" Classes="rowTitle" />
-								<TextBlock Text="{x:Static local:Strings.Settings_CrashReportsHint}" Classes="rowHint" />
-							</StackPanel>
-							<ToggleSwitch Grid.Column="1" Name="CrashReportsCheck" />
-						</Grid>
-					</Border>
-
 					<Border Classes="settingsCard">
 						<StackPanel>
 							<Grid Classes="settingRow" ColumnDefinitions="*,Auto">
@@ -468,6 +446,27 @@
 								<ToggleSwitch Grid.Column="1" Name="TagExportedVideoCheck" IsChecked="True" IsEnabled="False" />
 							</Grid>
 						</StackPanel>
+					</Border>
+					<TextBlock Classes="link" HorizontalAlignment="Left" Text="{x:Static local:Strings.Settings_FindWhatIsFaster}"
+					           PointerPressed="OnBenchmarkClick" />
+				</StackPanel>
+			</ScrollViewer>
+
+			<ScrollViewer Name="PrivacyPanel" IsVisible="False" VerticalScrollBarVisibility="Auto">
+				<StackPanel Margin="28,22,28,28" Spacing="14">
+					<StackPanel>
+						<TextBlock Text="{x:Static local:Strings.SettingsPage_Privacy}" Classes="pageTitle" />
+						<TextBlock Classes="pageSubtitle" Text="{x:Static local:Strings.SettingsPage_PrivacySubtitle}" />
+					</StackPanel>
+
+					<Border Classes="settingsCard">
+						<Grid Classes="settingRow" ColumnDefinitions="*,Auto">
+							<StackPanel>
+								<TextBlock Text="{x:Static local:Strings.Settings_CrashReports}" Classes="rowTitle" />
+								<TextBlock Text="{x:Static local:Strings.Settings_CrashReportsHint}" Classes="rowHint" />
+							</StackPanel>
+							<ToggleSwitch Grid.Column="1" Name="CrashReportsCheck" />
+						</Grid>
 					</Border>
 				</StackPanel>
 			</ScrollViewer>

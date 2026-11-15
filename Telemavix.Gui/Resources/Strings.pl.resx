@@ -5545,7 +5545,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Prywatność</value>
   </data>
   <data name="SettingsPage_PrivacySubtitle" xml:space="preserve">
-    <value>Metadane i informacje zapisywane w eksportowanym filmie.</value>
+    <value>Raportowanie błędów i dane wysyłane przez aplikację.</value>
   </data>
   <data name="SettingsPage_Telemetry" xml:space="preserve">
     <value>Telemetria</value>

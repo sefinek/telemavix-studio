@@ -641,6 +641,17 @@ public sealed partial class OverlayRenderer
 	}
 
 	/// <summary>
+	///     What the card's altitude figures and curve are measured in: a drone's height above its take-off (its altitude is that plus a barometer's reference,
+	///     not a height above sea level), everything else's elevation. Null for a frame with no fix, or a flight's frame with no height.
+	/// </summary>
+	private static double? RouteIntroAltitude(DerivedFrame frame, bool flight)
+	{
+		if (!frame.Raw.HasGpsFix) return null;
+		if (!flight) return frame.Raw.AltitudeMeters;
+		return frame.Raw.HeightAboveHomeMeters is { } height && double.IsFinite(height) ? height : null;
+	}
+
+	/// <summary>
 	///     The whole ride's elevation over distance (the Profile chart widget's own curve) under the stats, fitted into the
 	///     room left down to `bottom`, in the card's accent. Left out for a recording with no elevation at all (its camera or
 	///     track gave none) and when there is too little room to read.
@@ -649,21 +660,22 @@ public sealed partial class OverlayRenderer
 	{
 		const float gap = 24f;
 		const float labelHeight = 50f;
+		bool flight = KeyMoments.IsFlight(_allFrames);
 		double? low = null, high = null;
 		foreach (DerivedFrame frame in _allFrames)
 		{
-			if (!frame.Raw.HasGpsFix) continue;
-			low = low is { } l ? Math.Min(l, frame.Raw.AltitudeMeters) : frame.Raw.AltitudeMeters;
-			high = high is { } h ? Math.Max(h, frame.Raw.AltitudeMeters) : frame.Raw.AltitudeMeters;
+			if (RouteIntroAltitude(frame, flight) is not { } altitude) continue;
+			low = low is { } l ? Math.Min(l, altitude) : altitude;
+			high = high is { } h ? Math.Max(h, altitude) : altitude;
 		}
 
-		if (high - low is not >= RouteIntroElevationMinSpanMeters || Profile(ProfileSeries.Elevation, ProfileAxis.Distance) is not { } profile) return;
+		if (high - low is not >= RouteIntroElevationMinSpanMeters || Profile(flight ? ProfileSeries.Height : ProfileSeries.Elevation, ProfileAxis.Distance) is not { } profile) return;
 
 		y += gap;
 		float panelHeight = Math.Min(width * RouteIntroElevationAspect, bottom - y - labelHeight);
 		if (panelHeight < 150) return;
 
-		DrawOutlined(canvas, CoreStrings.Overlay_Elevation.ToUpperInvariant(), x, y + 30, _routeIntroLabelFont, White);
+		DrawOutlined(canvas, (flight ? CoreStrings.Overlay_Height : CoreStrings.Overlay_Elevation).ToUpperInvariant(), x, y + 30, _routeIntroLabelFont, White);
 
 		var panel = new SKRect(x, y + labelHeight, x + width, y + labelHeight + panelHeight);
 		_panelFillPaint.Color = new SKColor(0, 0, 0, 90);
@@ -696,6 +708,7 @@ public sealed partial class OverlayRenderer
 
 		UnitPreferences units = RouteIntro.Units;
 		int last = _tripStats.Count - 1;
+		bool flight = KeyMoments.IsFlight(_allFrames);
 		string value = stat switch
 		{
 			RouteIntroStats.Distance => Joined(FormatDistance(_totalDistanceMeters, units.Distance)),
@@ -713,7 +726,7 @@ public sealed partial class OverlayRenderer
 			RouteIntroStats.CameraModel => _cameraModel ?? "--",
 			_ => "--"
 		};
-		return (RouteIntro.LabelOf(stat, stat == RouteIntroStats.CameraModel && KeyMoments.IsFlight(_allFrames)), value);
+		return (RouteIntro.LabelOf(stat, stat == RouteIntroStats.CameraModel && flight), value);
 
 		static string Joined((string Value, string Unit) formatted)
 		{
@@ -725,8 +738,8 @@ public sealed partial class OverlayRenderer
 			double? extreme = null;
 			foreach (DerivedFrame frame in _allFrames)
 			{
-				if (frame.Raw.HasGpsFix)
-					extreme = extreme is { } e ? pick(e, frame.Raw.AltitudeMeters) : frame.Raw.AltitudeMeters;
+				if (RouteIntroAltitude(frame, flight) is { } altitude)
+					extreme = extreme is { } e ? pick(e, altitude) : altitude;
 			}
 
 			return extreme is { } meters ? Joined(FormatAltitude(meters, units.Altitude)) : "--";

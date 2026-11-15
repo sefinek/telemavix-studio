@@ -5,8 +5,8 @@ namespace Telemavix.Tests.Ffmpeg;
 [TestClass]
 public sealed class HevcEncodingLimitsTests
 {
-	private static VideoInfo Source(int level, bool? highTier) =>
-		new("hevc", "Main", 3840, 2160, "60000/1001", "yuv420p", "bt709", "bt709", "bt709", "tv", 0, level, HighTier: highTier);
+	private static VideoInfo Source(int level, bool? highTier, int width = 3840, int height = 2160) =>
+		new("hevc", "Main", width, height, "60000/1001", "yuv420p", "bt709", "bt709", "bt709", "tv", 0, level, HighTier: highTier);
 
 	[TestMethod]
 	public void MainTierAboveItsLimit_GoesToHighTierOfTheSameLevel()
@@ -49,10 +49,20 @@ public sealed class HevcEncodingLimitsTests
 	public void LevelsWithoutAHighTier_SkipToOneThatHasIt()
 	{
 		// Level 3.1 has no High Tier and holds 10 Mbps in Main; 12 Mbps needs level 4.0.
-		VideoInfo result = HevcEncodingLimits.For(Source(93, false), 12_000_000);
+		VideoInfo result = HevcEncodingLimits.For(Source(93, false, 1280, 720), 12_000_000);
 
 		Assert.AreEqual(120, result.Level);
 		Assert.AreEqual(false, result.HighTier);
+	}
+
+	[TestMethod]
+	public void ALevelTooLowForThePicture_GoesToOneThatHoldsIt()
+	{
+		// Lito X1 declares level 5.0 for 3840x2160 at 59.94 fps (497 Msamples/s, 5.0 allows 267): NVENC rejects it as Invalid Level.
+		VideoInfo result = HevcEncodingLimits.For(Source(150, false), 89_900_000);
+
+		Assert.AreEqual(153, result.Level);
+		Assert.AreEqual(true, result.HighTier);
 	}
 
 	[TestMethod]

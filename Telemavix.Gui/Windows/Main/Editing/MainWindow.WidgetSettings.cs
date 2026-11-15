@@ -227,7 +227,7 @@ public partial class MainWindow
 			HeightElement h => h with { WarnAboveMeters = warnAbove, AlertAboveMeters = alertAbove, WarnColor = warnColor, AlertColor = alertColor },
 			HomeDistanceElement d => d with { WarnAboveMeters = warnAbove, AlertAboveMeters = alertAbove, WarnColor = warnColor, AlertColor = alertColor },
 			SatellitesElement s => s with { ColorByCount = byCount, WarnBelow = warnBelow, AlertBelow = alertBelow, WarnColor = warnColor, AlertColor = alertColor },
-			HeartRateElement h => h with { ColorByZone = byZone },
+			HeartRateElement h => h with { ColorByZone = byZone, MaxHeartRateBpm = SensorMaxHeartRateBox.Value is { } maxHr ? (int)maxHr : null },
 			FlightModeElement f => f with { ColorByMode = byMode, WarnColor = warnColor, AlertColor = alertColor },
 			VerticalSpeedElement v => v with { ClimbColor = climb, SinkColor = sink },
 			_ => el

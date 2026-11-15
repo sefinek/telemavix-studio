@@ -936,6 +936,7 @@ public partial class MainWindow
 						break;
 					case HeartRateElement heart:
 						SensorColorByZoneCheck.IsChecked = heart.ColorByZone;
+						SensorMaxHeartRateBox.Value = heart.MaxHeartRateBpm;
 						break;
 					case VerticalSpeedElement vertical:
 						SensorClimbColorBox.Text = vertical.ClimbColor;

@@ -291,7 +291,7 @@ public sealed partial class OverlayRenderer
 				return BatteryColor(battery, charge);
 			case SatellitesElement { ColorByCount: true } gps when frame.Raw.GpsSatellites is >= 0 and { } count:
 				return ThresholdColor(gps, count < gps.AlertBelow ? 2 : count < gps.WarnBelow ? 1 : 0);
-			case HeartRateElement { ColorByZone: true } when frame.Raw.HeartRateBpm is > 0 and { } bpm && frame.Raw.MaxHeartRateBpm is > 0 and { } max:
+			case HeartRateElement { ColorByZone: true } heart when frame.Raw.HeartRateBpm is > 0 and { } bpm && (heart.MaxHeartRateBpm ?? frame.Raw.MaxHeartRateBpm) is > 0 and { } max:
 				return HeartRateZoneColor(bpm * 100.0 / max);
 			case VerticalSpeedElement { } vertical when frame.Raw.VerticalSpeedMs is { } rate && double.IsFinite(rate):
 				return Math.Abs(rate) < 0.05 ? null : rate > 0 ? ParseColor(vertical.ClimbColor) : ParseColor(vertical.SinkColor);
@@ -300,7 +300,7 @@ public sealed partial class OverlayRenderer
 		}
 	}
 
-	private static readonly SKColor[] HeartRateZoneColors = [SKColor.Parse("#9E9E9E"), SKColor.Parse("#2196F3"), SKColor.Parse("#4CAF50"), SKColor.Parse("#FF9800"), SKColor.Parse("#F44336")];
+	private static readonly SKColor[] HeartRateZoneColors = [SKColor.Parse("#DDE3EB"), SKColor.Parse("#53B7FF"), SKColor.Parse("#5FE16F"), SKColor.Parse("#FFB13D"), SKColor.Parse("#FF5964")];
 
 	/// <summary>Garmin's five zones as shares of the maximum heart rate: under 60 %, to 70, to 80, to 90 and above.</summary>
 	public static SKColor HeartRateZoneColor(double percentOfMax)

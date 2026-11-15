@@ -309,7 +309,6 @@ public partial class MainWindow
 				await ConfirmDialog.ShowAsync(this, Strings.Summary_ProxyFileTitle, string.Format(Strings.Summary_LogProxyFile, string.Join(", ", proxies)), kind: DialogKind.Warning);
 		}
 
-		if (summary.CameraFormat?.IsDrone == true && _externalTrackApplied) return;
 
 		if (key == _supportNoticeShownFor) return;
 		_supportNoticeShownFor = key;

@@ -2704,6 +2704,8 @@
 														<TextBlock Text="{x:Static local:Strings.Sensor_HeartRate}" Classes="settingsGroupTitle" />
 														<CheckBox Name="SensorColorByZoneCheck" Content="{x:Static local:Strings.Sensor_ColorByZone}" Click="OnSensorThresholdClick" />
 														<TextBlock Classes="infoLabel checkHint" Text="{x:Static local:Strings.Sensor_ColorByZoneHint}" />
+														<TextBlock Text="{x:Static local:Strings.Sensor_MaxHeartRate}" Classes="infoLabel" Margin="0" />
+														<NumericUpDown Name="SensorMaxHeartRateBox" Minimum="100" Maximum="250" Increment="1" FormatString="0" HorizontalAlignment="Stretch" PlaceholderText="{x:Static local:Strings.Sensor_MaxHeartRateFromTrack}" ValueChanged="OnSensorThresholdNumberChanged" />
 													</StackPanel>
 												</Border>
 												<Border Name="SensorStateColorsGroup" Classes="settingsGroup" IsVisible="False">

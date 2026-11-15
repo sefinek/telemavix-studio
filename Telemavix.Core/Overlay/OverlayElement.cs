@@ -310,6 +310,9 @@ public sealed record HeartRateElement : LabeledStatElement
 
 	/// <summary>The reading takes the color of its zone (a share of the maximum heart rate the track's device counts them from, as a Garmin watch does); a track with no maximum keeps the accent color.</summary>
 	public bool ColorByZone { get; init; }
+
+	/// <summary>The maximum heart rate the zones are counted from; null takes the track's own (a watch saves it, a phone does not).</summary>
+	public int? MaxHeartRateBpm { get; init; }
 }
 
 /// <summary>The cadence a track carries (a watch, a bike computer): pedal revolutions a minute, or steps a minute for a walk or a run.</summary>

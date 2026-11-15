@@ -5590,7 +5590,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Koloruj odczyt strefą tętna</value>
   </data>
   <data name="Sensor_ColorByZoneHint" xml:space="preserve">
-    <value>Pięć stref jako udział maksymalnego tętna zapisanego przez zegarek (poniżej 60, 70, 80 i 90 %). Trasa bez maksymalnego tętna zostaje w kolorze akcentu.</value>
+    <value>Pięć stref jako udział maksymalnego tętna zapisanego przez zegarek (poniżej 60, 70, 80 i 90 %). Własne maksimum (np. 196) ustawisz niżej; bez niego trasa bez maksymalnego tętna zostaje w kolorze akcentu.</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>Do aktywności nagranych zegarkiem Garmin (FIT).</value>
@@ -5645,5 +5645,11 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="TrackFile_Sport_training" xml:space="preserve">
     <value>Trening</value>
+  </data>
+  <data name="Sensor_MaxHeartRate" xml:space="preserve">
+    <value>Maksymalne tętno (bpm)</value>
+  </data>
+  <data name="Sensor_MaxHeartRateFromTrack" xml:space="preserve">
+    <value>Z trasy</value>
   </data>
 </root>

@@ -5590,7 +5590,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Colour the reading by heart rate zone</value>
   </data>
   <data name="Sensor_ColorByZoneHint" xml:space="preserve">
-    <value>Five zones as a share of the maximum heart rate saved by the watch (under 60, 70, 80 and 90 %). A track with no maximum keeps the accent colour.</value>
+    <value>Five zones as a share of the maximum heart rate saved by the watch (under 60, 70, 80 and 90 %). Set the maximum below to use your own (e.g. 196); with none, a track that has no maximum keeps the accent colour.</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>For activities recorded by a Garmin watch (FIT).</value>
@@ -5645,5 +5645,11 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="TrackFile_Sport_training" xml:space="preserve">
     <value>Training</value>
+  </data>
+  <data name="Sensor_MaxHeartRate" xml:space="preserve">
+    <value>Maximum heart rate (bpm)</value>
+  </data>
+  <data name="Sensor_MaxHeartRateFromTrack" xml:space="preserve">
+    <value>From the track</value>
   </data>
 </root>

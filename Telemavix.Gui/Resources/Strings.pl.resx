@@ -2643,7 +2643,7 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
     <value>Ponownie otwiera przewodnik konfiguracji kamer, narzędzi, map, korekty prędkości, folderu wyjściowego i plików projektów.</value>
   </data>
   <data name="Settings_TheGpsReportsAFew" xml:space="preserve">
-    <value>Mapa i kompas poruszają się płynniej, a wskazania prędkości są stabilniejsze. Opcja ogranicza skokowe zmiany wynikające z odczytów GPS. Zmiana ustawienia od razu przeładowuje otwarty podgląd.</value>
+    <value>Po włączeniu ruch mapy i śladu trasy w kompasie będzie płynniejszy, a wskazania prędkości będą mniej skakać. Po zmianie tej opcji podgląd przeładuje się po zamknięciu ustawień.</value>
   </data>
   <data name="Settings_Theme" xml:space="preserve">
     <value>Motyw</value>
@@ -4115,7 +4115,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Plik {0} z {1}: {2}, od {3} do {4}.</value>
   </data>
   <data name="Timeline_FileAfterGap" xml:space="preserve">
-    <value>Nagrywanie wznowiono po przerwie. Prędkość, dystans i trasa nie są liczone przez przerwę między tym plikiem a poprzednim.</value>
+    <value>Nagrywanie wznowiono po przerwie. Przerwa między plikami nie zwiększa dystansu, a prędkość dla brakującego fragmentu nie jest wyliczana.</value>
   </data>
   <data name="Timeline_GpsAnomalyTip" xml:space="preserve">
     <value>Anomalia GPS: {0} - {1}, {2}. Aplikacja ją poprawiła: wartości w tym miejscu są wyliczone z odczytów przed nią i po niej.</value>
@@ -4374,7 +4374,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Prędkość pionowa drona, obliczana ze zmian wysokości w dzienniku lotu DJI w przedziale około sekundy. Wartości dodatnie oznaczają wznoszenie, a ujemne opadanie.</value>
   </data>
   <data name="Widget_SatellitesDescription" xml:space="preserve">
-    <value>Liczba satelitów widocznych dla odbiornika oraz pasek siły sygnału GPS. W dronie to poziom GPS z dziennika lotu DJI, a w trasie z telefonu (Telemavix GPS) poziom wyliczony z dokładności pozycji. Opcjonalnie pod liczbą pokazuje dokładność pozycji.</value>
+    <value>Pokazuje liczbę satelitów widocznych dla odbiornika oraz paski sygnału GPS. Dla drona poziom sygnału pochodzi z dziennika lotu DJI, a dla trasy z aplikacji Telemavix GPS jest szacowany na podstawie dokładności pozycji. Pod liczbą satelitów możesz też wyświetlić dokładność pozycji.</value>
   </data>
   <data name="Widget_DroneBattery" xml:space="preserve">
     <value>Akumulator drona</value>
@@ -4422,7 +4422,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Kolor krytycznego poziomu</value>
   </data>
   <data name="DroneBattery_LevelsHint" xml:space="preserve">
-    <value>Kolor ikony i wartości procentowej zmienia się płynnie wraz z poziomem naładowania: od zielonego przez żółty do kolorów niskiego i krytycznego poziomu przy ustawionych progach. Przy poziomie krytycznym i niższym pozostaje kolor krytyczny. Puste pola kolorów oznaczają domyślny pomarańczowy i czerwony.</value>
+    <value>Kolor ikony i wartości procentowej będzie zmieniał się płynnie wraz z poziomem naładowania: od zielonego przez żółty do kolorów ustawionych dla niskiego i krytycznego poziomu baterii. Przy poziomie krytycznym lub niższym będzie używany kolor krytyczny. Pozostaw pola kolorów puste, aby użyć domyślnego pomarańczowego i czerwonego.</value>
   </data>
   <data name="Widget_Signal" xml:space="preserve">
     <value>Sygnał</value>
@@ -4434,7 +4434,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Tryb lotu, w którym jest dron (P-GPS, Sport...), z dziennika lotu DJI.</value>
   </data>
   <data name="Signal_Hint" xml:space="preserve">
-    <value>Jakość łączy radiowych drona z dziennika lotu DJI, w procentach, z kreskami dla ich średniej. Nie potwierdzono jeszcze w aplikacji DJI, która linia jest łączem w górę, a która w dół.</value>
+    <value>Pokazuje jakość łączy radiowych drona na podstawie dziennika lotu DJI. Wartości procentowe dotyczą poszczególnych łączy, a paski pokazują średnią z dostępnych odczytów dla łączy włączonych w tym widżecie. Nie potwierdzono jeszcze przez porównanie z aplikacją DJI, która linia odpowiada za połączenie do drona, a która za połączenie od drona.</value>
   </data>
   <data name="Signal_Uplink" xml:space="preserve">
     <value>Łącze w górę</value>
@@ -4518,7 +4518,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Dystans zapisany przez urządzenie GPS w pliku FIT. Obejmuje także odcinek sprzed początku filmu i fragmenty wycięte z nagrania.</value>
   </data>
   <data name="Widget_DeviceBatteryDescription" xml:space="preserve">
-    <value>Ostatni zapisany poziom baterii urządzenia, które nagrało trasę (zegarek GPS albo telefon z Telemavix GPS), z ikoną i, jeśli trasa ma te dane, temperaturą baterii i znakiem ładowania. To osobna wartość od baterii kamery.</value>
+    <value>Pokazuje ostatni zapisany poziom baterii urządzenia, które nagrało trasę: zegarka GPS lub telefonu z aplikacją Telemavix GPS. Możesz włączyć ikonę baterii oraz odczyt jej temperatury, jeśli trasa go zawiera. Podczas ładowania na ikonie pojawi się błyskawica, jeśli telefon zapisał taką informację. Ten odczyt nie dotyczy baterii kamery.</value>
   </data>
   <data name="Widget_AudioLevel" xml:space="preserve">
     <value>Poziom dźwięku</value>
@@ -5416,7 +5416,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Podążaj za pozycją</value>
   </data>
   <data name="TrackMap_FollowHint" xml:space="preserve">
-    <value>Mapa przybliża się, gdy poruszasz się powoli, i oddala wraz z prędkością. Wyłączone pokazuje całą trasę naraz.</value>
+    <value>Po włączeniu mapa będzie podążać za pozycją na trasie, przybliżać się przy małej prędkości i oddalać przy większej. Po wyłączeniu będzie pokazywać całą trasę.</value>
   </data>
   <data name="TrackMap_MaxZoom" xml:space="preserve">
     <value>Największe przybliżenie (2-19)</value>
@@ -5524,7 +5524,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Do wbudowanego presetu nie można dodać muzyki. Najpierw go zduplikuj.</value>
   </data>
   <data name="Editor_SingleMapCredit" xml:space="preserve">
-    <value>Już na nakładce: jeden podpis mapy obejmuje wszystkie widżety Mapa, więc drugi nigdy by się nie pojawił.</value>
+    <value>Podpis mapy jest już na nakładce i obejmuje wszystkie widżety Mapa. Nie można dodać kolejnego.</value>
   </data>
   <data name="Tools_CompareSmoothing" xml:space="preserve">
     <value>Porównaj wygładzanie GPS...</value>
@@ -5590,7 +5590,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Koloruj odczyt strefą tętna</value>
   </data>
   <data name="Sensor_ColorByZoneHint" xml:space="preserve">
-    <value>Pięć stref jako udział maksymalnego tętna zapisanego przez zegarek (poniżej 60, 70, 80 i 90 %). Własne maksimum (np. 196) ustawisz niżej; bez niego trasa bez maksymalnego tętna zostaje w kolorze akcentu.</value>
+    <value>Po włączeniu kolor odczytu będzie zależał od strefy tętna. Pięć stref wyznaczają progi 60%, 70%, 80% i 90% tętna maksymalnego zapisanego w trasie. Własne tętno maksymalne (np. 196) możesz podać poniżej. Jeśli nie ma go w trasie i nie podasz go ręcznie, odczyt będzie miał kolor akcentu.</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>Do aktywności nagranych zegarkiem Garmin (FIT).</value>

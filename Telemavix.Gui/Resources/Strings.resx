@@ -2643,7 +2643,7 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
     <value>Reopens the setup guide for cameras, tools, maps, speed correction, the output folder and project files.</value>
   </data>
   <data name="Settings_TheGpsReportsAFew" xml:space="preserve">
-    <value>Makes map and compass movement smoother and speed readings steadier. Reduces abrupt changes caused by GPS readings. Changing this setting immediately reloads the open preview.</value>
+    <value>When enabled, movement of the map and the compass trail will be smoother, and speed readings will fluctuate less. After changing this option, the preview will reload when you close Settings.</value>
   </data>
   <data name="Settings_Theme" xml:space="preserve">
     <value>Theme</value>
@@ -4115,7 +4115,7 @@ Note: Telemavix Studio is provided free of charge. If someone asks you to pay fo
     <value>File {0} of {1}: {2}, from {3} to {4}.</value>
   </data>
   <data name="Timeline_FileAfterGap" xml:space="preserve">
-    <value>Recording resumed after a pause. Speed, distance and the route are not calculated across the gap between this file and the previous one.</value>
+    <value>Recording resumed after a pause. The gap between files does not add to the distance, and speed is not calculated for the missing section.</value>
   </data>
   <data name="Timeline_GpsAnomalyTip" xml:space="preserve">
     <value>GPS anomaly: {0} - {1}, {2}. The app corrected it using readings from before and after the anomaly.</value>
@@ -4374,7 +4374,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The drone&apos;s vertical speed, calculated from height changes in the DJI flight log over about one second. Positive values indicate ascent; negative values indicate descent.</value>
   </data>
   <data name="Widget_SatellitesDescription" xml:space="preserve">
-    <value>The number of satellites the receiver sees and the GPS signal bars. For a drone they are the GPS level from the DJI flight log, for a phone's track (Telemavix GPS) a level worked out from the fix's accuracy. Optionally the accuracy is shown under the count.</value>
+    <value>Shows the number of satellites visible to the receiver and GPS signal bars. For drones, the signal level comes from the DJI flight log. For tracks from the Telemavix GPS app, it is estimated from position accuracy. You can also show position accuracy below the satellite count.</value>
   </data>
   <data name="Widget_DroneBattery" xml:space="preserve">
     <value>Drone battery</value>
@@ -4422,7 +4422,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Critical color</value>
   </data>
   <data name="DroneBattery_LevelsHint" xml:space="preserve">
-    <value>The icon and percentage change color smoothly with the charge level: from green through yellow to the low and critical colors at the selected thresholds. At or below the critical threshold, the critical color stays. Leave the color fields blank to use the default orange and red.</value>
+    <value>The icon and percentage will change color smoothly with the charge level: from green through yellow to the colors set for low and critical battery levels. At or below the critical threshold, they will use the critical color. Leave the color fields blank to use the default orange and red.</value>
   </data>
   <data name="Widget_Signal" xml:space="preserve">
     <value>Signal</value>
@@ -4434,7 +4434,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The flight mode the drone is in (P-GPS, Sport...), from the DJI flight log.</value>
   </data>
   <data name="Signal_Hint" xml:space="preserve">
-    <value>The quality of the drone&apos;s radio links from the DJI flight log, in percent, with bars for their average. Which line is the uplink and which the downlink has not been confirmed against the DJI app.</value>
+    <value>Shows the quality of the drone's radio links from the DJI flight log. The percentages describe each link. The bars show the average of the available readings for links enabled in this widget. Which line represents the uplink and which represents the downlink has not yet been verified against the DJI app.</value>
   </data>
   <data name="Signal_Uplink" xml:space="preserve">
     <value>Uplink</value>
@@ -4518,7 +4518,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>The original distance counter from the FIT file. Includes the route before the video and any parts cut out.</value>
   </data>
   <data name="Widget_DeviceBatteryDescription" xml:space="preserve">
-    <value>The last recorded battery level of the device that recorded the track (a GPS watch or a phone with Telemavix GPS), with an icon and, when the track has them, the battery's temperature and a charging bolt. This is separate from the camera's battery.</value>
+    <value>Shows the last recorded battery level of the device that recorded the track: a GPS watch or a phone running Telemavix GPS. You can enable a battery icon and a temperature reading if the track contains it. A lightning bolt will appear on the icon while charging if the phone recorded that information. This reading is separate from the camera's battery level.</value>
   </data>
   <data name="Widget_AudioLevel" xml:space="preserve">
     <value>Audio level</value>
@@ -5416,7 +5416,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Follow the position</value>
   </data>
   <data name="TrackMap_FollowHint" xml:space="preserve">
-    <value>The map closes in while you move slowly and zooms out as you speed up. Off shows the whole track at once.</value>
+    <value>When enabled, the map will follow the position along the track, zooming in at low speeds and out at higher speeds. When disabled, it will show the entire track.</value>
   </data>
   <data name="TrackMap_MaxZoom" xml:space="preserve">
     <value>Closest zoom (2-19)</value>
@@ -5524,7 +5524,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Music can't be added to a built-in preset. Duplicate it first.</value>
   </data>
   <data name="Editor_SingleMapCredit" xml:space="preserve">
-    <value>Already on the overlay: one map credit covers every Map widget, so a second one would never be drawn.</value>
+    <value>A map credit is already on the overlay and covers all Map widgets. Another cannot be added.</value>
   </data>
   <data name="Tools_CompareSmoothing" xml:space="preserve">
     <value>Compare GPS smoothing...</value>
@@ -5590,7 +5590,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Colour the reading by heart rate zone</value>
   </data>
   <data name="Sensor_ColorByZoneHint" xml:space="preserve">
-    <value>Five zones as a share of the maximum heart rate saved by the watch (under 60, 70, 80 and 90 %). Set the maximum below to use your own (e.g. 196); with none, a track that has no maximum keeps the accent colour.</value>
+    <value>When enabled, the reading's color will depend on the heart rate zone. Five zones are defined by thresholds of 60%, 70%, 80% and 90% of the maximum heart rate stored in the track. You can enter your own maximum below (e.g. 196). If the track has no maximum and you do not enter one, the reading will use the accent color.</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>For activities recorded by a Garmin watch (FIT).</value>

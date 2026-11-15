@@ -343,6 +343,7 @@ public partial class MainWindow
 		string interval = string.Format(CultureInfo.CurrentCulture, Strings.TrackFile_Interval, track.MedianIntervalSeconds);
 
 		List<string> data = [];
+
 		void Has(bool present, string name)
 		{
 			if (present) data.Add(name);

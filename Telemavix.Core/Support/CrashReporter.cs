@@ -3,6 +3,7 @@ using Bugsnag.Payload;
 using Telemavix.Core.Logging;
 using Telemavix.Core.Overlay;
 using Telemavix.Core.Updates;
+using Exception = System.Exception;
 
 namespace Telemavix.Core;
 
@@ -51,13 +52,13 @@ public static class CrashReporter
 			_client = client;
 			OverlaySettingsStore.Saved += saved => Enabled = saved.CrashReports;
 		}
-		catch (System.Exception ex)
+		catch (Exception ex)
 		{
 			AppLogger.Info($"Crash reporting could not be initialized: {ex}");
 		}
 	}
 
-	public static bool Notify(System.Exception exception)
+	public static bool Notify(Exception exception)
 	{
 		if (!Enabled || _client is not { } client || exception is OperationCanceledException) return false;
 
@@ -66,7 +67,7 @@ public static class CrashReporter
 			client.Notify(exception, Severity.Warning);
 			return true;
 		}
-		catch (System.Exception ex)
+		catch (Exception ex)
 		{
 			AppLogger.Info($"Crash report could not be submitted: {ex}");
 			return false;
@@ -93,7 +94,8 @@ public static class CrashReporter
 		{
 			exception["message"] = AppLogger.Scrub(exception.ErrorMessage);
 			foreach (StackTraceLine line in exception.StackTrace)
-				if (line.FileName is { } file) line.FileName = AppLogger.Scrub(file);
+				if (line.FileName is { } file)
+					line.FileName = AppLogger.Scrub(file);
 		}
 	}
 }

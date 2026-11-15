@@ -10,12 +10,18 @@
     <Description>Telemetry processing, HUD rendering, 360 reframing and the ffmpeg pipeline - the camera formats plug in (Telemavix.Cameras.*).</Description>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BuildStamp Condition="'$(BUILD_DATE)' != ''">$(BUILD_DATE)</BuildStamp>
+    <!-- A local build is stamped with the day only: a stamp that changes every second would rebuild this project and everything above it on every build. -->
+    <BuildStamp Condition="'$(BuildStamp)' == ''">$([System.DateTime]::UtcNow.ToString('yyyy-MM-ddT00:00:00Z'))</BuildStamp>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(GITHUB_SHA)' != ''">
     <BuildCommit>$(GITHUB_SHA.Substring(0, 7))</BuildCommit>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(BUILD_DATE)' != ''">
-    <AssemblyMetadata Include="BuildDate" Value="$(BUILD_DATE)" />
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildDate" Value="$(BuildStamp)" />
     <AssemblyMetadata Include="Commit" Value="$(BuildCommit)" Condition="'$(BuildCommit)' != ''" />
   </ItemGroup>
 

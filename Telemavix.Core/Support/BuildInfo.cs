@@ -4,9 +4,9 @@ using System.Reflection;
 namespace Telemavix.Core;
 
 /// <summary>
-///     When (and from which commit) this build was made. The release workflow sets BUILD_DATE, which Core's project writes
-///     into the assembly (BuildDate, plus Commit from GITHUB_SHA); a local build has no stamp, so the Core library's own
-///     file time stands in - there it is the time of the compile.
+///     When (and from which commit) this build was made. The project stamps the assembly at compile time (BuildDate; the release
+///     workflow passes BUILD_DATE and GITHUB_SHA for Commit). A file time is not used: on Android the assembly has no file.
+///     Telemavix GPS has the same class and the same project stamp, keep them in step.
 /// </summary>
 public static class BuildInfo
 {
@@ -14,19 +14,11 @@ public static class BuildInfo
 		.GetCustomAttributes<AssemblyMetadataAttribute>()
 		.ToDictionary(a => a.Key, a => a.Value);
 
-	/// <summary>Null when neither a stamp nor the file is there (a single-file publish without one).</summary>
-	public static DateTime? BuiltAtUtc
-	{
-		get
-		{
-			if (Metadata.TryGetValue("BuildDate", out string? stamp) &&
-			    DateTime.TryParse(stamp, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out DateTime date))
-				return date;
-
-			string path = typeof(BuildInfo).Assembly.Location;
-			return path.Length > 0 && File.Exists(path) ? File.GetLastWriteTimeUtc(path) : null;
-		}
-	}
+	public static DateTime? BuiltAtUtc =>
+		Metadata.TryGetValue("BuildDate", out string? stamp) &&
+		DateTime.TryParse(stamp, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out DateTime date)
+			? date
+			: null;
 
 	public static string? Commit => Metadata.GetValueOrDefault("Commit");
 

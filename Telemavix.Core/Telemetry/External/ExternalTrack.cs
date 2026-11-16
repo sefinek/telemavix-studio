@@ -83,6 +83,10 @@ public sealed class ExternalTrack
 
 	private const double MinGapSeconds = 3;
 
+	// A device that writes a record at a steady pace of a second or so (a phone, a watch recording every second) and misses one has lost the signal for that second: with at
+	// least this share of the records within SteadyTolerance of the usual interval, a step of LostStepIntervals of it is a loss, though shorter than MinGapSeconds.
+	private const double SteadyShare = 0.98, SteadyTolerance = 0.1, LostStepIntervals = 1.5, MinSteadyIntervalSeconds = 0.5;
+
 	// Two stick readings further apart than this are not one movement (the log wrote nothing between them).
 	private const double MaxStickSpanSeconds = 0.35;
 
@@ -90,10 +94,11 @@ public sealed class ExternalTrack
 		IEnumerable<ExternalTrackRecording>? recordings = null,
 		ExternalTrackHome? home = null, IEnumerable<ExternalDroneBatteryReading>? droneBatteries = null, IEnumerable<ExternalTrackEvent>? events = null,
 		IEnumerable<ExternalDroneSignalReading>? droneSignals = null, string? deviceName = null, IEnumerable<ExternalDroneSticksReading>? droneSticks = null,
-		IEnumerable<ExternalPhoneSample>? phoneSamples = null, double? minGapSeconds = null, bool cadenceInSteps = false, int? maxHeartRateBpm = null, string? manufacturer = null, string? sport = null)
+		IEnumerable<ExternalPhoneSample>? phoneSamples = null, double? minGapSeconds = null, bool cadenceInSteps = false, int? maxHeartRateBpm = null, string? manufacturer = null,
+		TrackCreator? creator = null)
 	{
 		Manufacturer = manufacturer;
-		Sport = sport;
+		Creator = creator;
 		CadenceInSteps = cadenceInSteps;
 		MaxHeartRateBpm = maxHeartRateBpm is > 0 ? maxHeartRateBpm : null;
 		Home = home;
@@ -119,7 +124,10 @@ public sealed class ExternalTrack
 		double[] intervals = [.. rhythm.Zip(rhythm.Skip(1), (a, b) => (b - a).TotalSeconds).Order()];
 		MedianIntervalSeconds = intervals[intervals.Length / 2];
 		GapSeconds = Math.Max(minGapSeconds ?? MinGapSeconds, GapIntervals * MedianIntervalSeconds);
+		bool steady = MedianIntervalSeconds >= MinSteadyIntervalSeconds && intervals.Count(i => Math.Abs(i - MedianIntervalSeconds) <= SteadyTolerance * MedianIntervalSeconds) >= SteadyShare * intervals.Length;
+		_lostStepSeconds = steady ? Math.Min(GapSeconds, LostStepIntervals * MedianIntervalSeconds) : GapSeconds;
 
+		_withoutPosition = [.. (phoneSamples ?? []).Where(s => !s.Reading.IsEmpty).Select(s => s.Utc).Order()];
 		_phone = [.. sorted.Where(p => p.Phone is not null).Select(p => (p.Utc, p.Phone!)), .. (phoneSamples ?? []).Where(s => !s.Reading.IsEmpty).Select(s => (s.Utc, s.Reading))];
 		_phone.Sort(static (a, b) => a.Utc.CompareTo(b.Utc));
 		PhoneStaleSeconds = _phone.Count < 2
@@ -133,8 +141,11 @@ public sealed class ExternalTrack
 	/// <summary>The maker the file's device says it is (a FIT's file_id), null when the file doesn't say or it isn't a known one.</summary>
 	public string? Manufacturer { get; }
 
-	/// <summary>The activity's sport as a key (running, walking, hiking, cycling, swimming, training), null when the file doesn't say or it isn't one of those.</summary>
-	public string? Sport { get; }
+	/// <summary>The program the file says it was written by; null when it doesn't say (see TrackCreator).</summary>
+	public TrackCreator? Creator { get; }
+
+	/// <summary>Every phone reading of the track, from a fix or from a moment with none, in time order.</summary>
+	public IEnumerable<PhoneReading> PhoneReadings => _phone.Select(p => p.Reading);
 
 	/// <summary>The cadence is steps a minute (a walk, a run) and not pedal revolutions: what the activity's sport says.</summary>
 	public bool CadenceInSteps { get; }
@@ -142,6 +153,8 @@ public sealed class ExternalTrack
 	/// <summary>The maximum heart rate the device's zones are counted from (a watch's zones_target), null when the file has none.</summary>
 	public int? MaxHeartRateBpm { get; }
 
+	private readonly DateTime[] _withoutPosition;
+	private readonly double _lostStepSeconds;
 	private readonly List<(DateTime Utc, PhoneReading Reading)> _phone;
 
 	/// <summary>How long a phone reading is held without a newer one before it is taken to be gone (the same reasoning as GapSeconds, on the sensors' own rhythm).</summary>
@@ -318,8 +331,32 @@ public sealed class ExternalTrack
 			AngleMath.LerpDegrees(a.YawDegrees, b.YawDegrees, fraction));
 	}
 
-	private bool Connected(ExternalTrackPoint from, ExternalTrackPoint to) => !to.StartsAfterGap &&
-	                                                                          (to.Utc - from.Utc).TotalSeconds <= GapSeconds && !Pauses.Any(p => p.FromUtc < to.Utc && p.ToUtc > from.Utc);
+	/// <summary>
+	///     Whether the position can be carried from one fix to the next: no new stretch, no pause, no longer than the track's lost step (GapSeconds, or a step and a half of a steady pace) - and no record of the device that had no position
+	///     between them (Telemavix GPS writes one for every second its GPS has no signal, so even a drop of a second is known, not guessed from the interval).
+	/// </summary>
+	private bool Connected(ExternalTrackPoint from, ExternalTrackPoint to) => !to.StartsAfterGap && (to.Utc - from.Utc).TotalSeconds <= _lostStepSeconds &&
+	                                                                          !Pauses.Any(p => p.FromUtc < to.Utc && p.ToUtc > from.Utc) && !HasRecordWithoutPosition(from.Utc, to.Utc);
+
+	private bool HasRecordWithoutPosition(DateTime from, DateTime to)
+	{
+		int index = Array.BinarySearch(_withoutPosition, from);
+		index = index < 0 ? ~index : index + 1;
+		return index < _withoutPosition.Length && _withoutPosition[index] < to;
+	}
+
+	/// <summary>The time the track has no fix for that isn't a pause: what the timelines mark as a loss of the GPS signal.</summary>
+	public TimeSpan TimeWithoutFix()
+	{
+		TimeSpan lost = TimeSpan.Zero;
+		for (int i = 1; i < Points.Count; i++)
+		{
+			ExternalTrackPoint from = Points[i - 1], to = Points[i];
+			if (!Connected(from, to) && !Pauses.Any(p => p.FromUtc < to.Utc && p.ToUtc > from.Utc)) lost += to.Utc - from.Utc;
+		}
+
+		return lost;
+	}
 
 	private static double Displacement(ExternalTrackPoint a, ExternalTrackPoint b)
 	{

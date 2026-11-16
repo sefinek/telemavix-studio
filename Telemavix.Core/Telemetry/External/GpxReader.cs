@@ -29,9 +29,11 @@ public static class GpxReader
 
 		List<ExternalTrackPoint> points = [];
 		bool startsSegment = false, hasTrackPoints = false, hasRoute = false;
+		TrackCreator? creator = null;
 		while (reader.Read())
 		{
 			if (reader.NodeType != XmlNodeType.Element) continue;
+			if (reader.LocalName == "gpx") creator ??= TrackCreator.FromGpx(reader.GetAttribute("creator"));
 			if (reader.LocalName == "trkseg") startsSegment = true;
 			if (reader.LocalName is "rte" or "rtept") hasRoute = true;
 			if (reader.LocalName != "trkpt") continue;
@@ -43,7 +45,7 @@ public static class GpxReader
 		}
 
 		// A planned route (rte) is where to go, not when the camera was there; its points' times, when it has any, are not a ride's.
-		return points.Count < 2 ? throw new InvalidDataException(hasTrackPoints ? CoreStrings.ExternalTrack_GpxNoTimes : hasRoute ? CoreStrings.ExternalTrack_GpxRouteOnly : CoreStrings.ExternalTrack_GpxEmpty) : new ExternalTrack(points);
+		return points.Count < 2 ? throw new InvalidDataException(hasTrackPoints ? CoreStrings.ExternalTrack_GpxNoTimes : hasRoute ? CoreStrings.ExternalTrack_GpxRouteOnly : CoreStrings.ExternalTrack_GpxEmpty) : new ExternalTrack(points, creator: creator);
 	}
 
 	private static ExternalTrackPoint? ReadPoint(XmlReader reader)

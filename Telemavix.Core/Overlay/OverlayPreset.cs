@@ -230,19 +230,9 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		return column;
 	}
 
-	/// <summary>What a watch's activity has no data for: the camera's (its roll, pitch and G-force, model and settings), the drone's, the phone's and the sound's. The garmin preset leaves them out altogether.</summary>
-	private static readonly HashSet<OverlayElementType> NotForGarmin =
-	[
-		OverlayElementType.CameraInfo, OverlayElementType.CameraModelText, OverlayElementType.RollGauge, OverlayElementType.PitchGauge, OverlayElementType.GMeter,
-		OverlayElementType.AmbientTemperature, OverlayElementType.ImuTemperature, OverlayElementType.AudioLevel, OverlayElementType.WindProcessing, OverlayElementType.ImageLuma,
-		OverlayElementType.DeviceBattery, OverlayElementType.Satellites, OverlayElementType.Pressure, OverlayElementType.Light, OverlayElementType.CellSignal,
-		OverlayElementType.Height, OverlayElementType.HomeDistance, OverlayElementType.VerticalSpeed, OverlayElementType.DroneBattery, OverlayElementType.FlightAlerts,
-		OverlayElementType.Signal, OverlayElementType.FlightMode, OverlayElementType.RcSticks, OverlayElementType.AttitudeIndicator, OverlayElementType.Orientation3D
-	];
-
 	/// <summary>
-	///     The layout for an activity recorded by a Garmin watch (a FIT file): the default one without every widget a watch's activity has no data for (NotForGarmin).
-	///     The watch's own readings are a column down the right edge, where the G-meter was: the heart rate (coloured by its zone) and the cadence;
+	///     The layout for an activity recorded by a Garmin watch (a FIT file): the default one: a widget a watch's activity has no data for is switched off by OverlayDataRequirements like for any file.
+	///     The watch's own readings are a column down the right edge, where the G-meter was: the heart rate (coloured by its zone), the cadence and the battery;
 	///     the trip's figures and the elevation profile stay off, as in the default layout. A widget with no data behind it is turned off at render time (OverlayDataRequirements).
 	/// </summary>
 	public static OverlayPreset CreateGarmin(string id, string name)
@@ -251,16 +241,17 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 		float top = basis.Elements.First(e => e is DateTimeTextElement).Y;
 		Dictionary<OverlayElementType, OverlayElement> column = RightEdgeColumn(top,
 		[
-			basis.Elements.OfType<HeartRateElement>().Single() with { ColorByZone = true }, basis.Elements.OfType<CadenceElement>().Single()
+			basis.Elements.OfType<HeartRateElement>().Single() with { ColorByZone = true }, basis.Elements.OfType<CadenceElement>().Single(),
+			basis.Elements.OfType<DeviceBatteryElement>().Single() with { ShowIcon = true, ColorByCharge = true }
 		]);
 
 		return basis with
 		{
 			Elements =
 			[
-				.. basis.Elements.Where(e => !NotForGarmin.Contains(e.Type)).Select(e => e switch
+				.. basis.Elements.Select(e => e switch
 				{
-					HeartRateElement or CadenceElement => column[e.Type] with { Id = e.Id },
+					HeartRateElement or CadenceElement or DeviceBatteryElement => column[e.Type] with { Id = e.Id },
 					_ => e
 				})
 			]

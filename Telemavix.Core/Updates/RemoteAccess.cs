@@ -46,7 +46,7 @@ public static class RemoteAccess
 	private static HttpClient CreateHttpClient()
 	{
 		var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd($"Telemavix/{AppUpdates.CurrentVersionLabel} (+{AppUpdates.RepositoryUrl})");
+		client.DefaultRequestHeaders.UserAgent.ParseAdd($"TelemavixStudio/{AppUpdates.CurrentVersionLabel} (+{AppUpdates.RepositoryUrl})");
 		return client;
 	}
 

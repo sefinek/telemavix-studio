@@ -9,6 +9,9 @@ public static class TrackFields
 	/// <summary>Names of the FIT developer fields (field_description's field_name).</summary>
 	public static class Fit
 	{
+		/// <summary>Identifies the application that defined the developer fields (developer_data_id's application_id). Never change it: every file already written carries it, and readers know the app by it.</summary>
+		public static ReadOnlySpan<byte> ApplicationId => [0x54, 0x45, 0x4C, 0x45, 0x4D, 0x41, 0x56, 0x49, 0x58, 0x2D, 0x47, 0x50, 0x53, 0x00, 0x00, 0x01];
+
 		public const string Satellites = "satellites";
 		public const string Pressure = "pressure";
 		public const string BatteryPercent = "battery_percent";

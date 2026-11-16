@@ -52,7 +52,7 @@ public static class AppUpdates
 	private static HttpClient CreateHttpClient()
 	{
 		var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd($"Telemavix/{CurrentVersionLabel} (+{RepositoryUrl})");
+		client.DefaultRequestHeaders.UserAgent.ParseAdd($"TelemavixStudio/{CurrentVersionLabel} (+{RepositoryUrl})");
 		client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
 		return client;
 	}

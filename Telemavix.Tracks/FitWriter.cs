@@ -63,9 +63,6 @@ public static class FitWriter
 		new(14, TrackFields.Fit.CellDbm, "dBm", SInt8, 1)
 	];
 
-	/// <summary>Identifies the application that defined the developer fields. Never change it: every file already written carries it.</summary>
-	private static readonly byte[] ApplicationId = [0x54, 0x45, 0x4C, 0x45, 0x4D, 0x41, 0x56, 0x49, 0x58, 0x2D, 0x47, 0x50, 0x53, 0x00, 0x00, 0x01];
-
 	public static void Write(Track track, Stream stream, TrackProducer? producer = null)
 	{
 		producer ??= TrackProducer.Default;
@@ -228,7 +225,7 @@ public static class FitWriter
 		Define(body, DeveloperIdLocal, DeveloperDataIdMessage, null, (1, 16, ByteArray), (2, 2, UInt16Type), (4, 4, UInt32Type), (3, 1, UInt8));
 		Data(body, DeveloperIdLocal, w =>
 		{
-			foreach (byte b in ApplicationId) w.Byte(b);
+			foreach (byte b in TrackFields.Fit.ApplicationId) w.Byte(b);
 			w.U16(DevelopmentManufacturer);
 			w.U32(producer.ApplicationVersion);
 			w.Byte(0);

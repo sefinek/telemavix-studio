@@ -21,29 +21,133 @@ public sealed class TrackCameraTests
 		return frames;
 	}
 
-	[TestMethod]
-	public void Spread_IsClosestWhileSlowAndWidestAtTheTracksPace()
-	{
-		List<DerivedFrame> frames = Frames(i => i < 300 ? 0 : 40);
-		double reference = TrackCamera.ReferenceKmh(frames);
+	private const double MinMeters = 100, MaxMeters = 4000;
 
-		Assert.AreEqual(40, reference, 1e-9);
-		Assert.AreEqual(0, TrackCamera.At(frames, 10, reference)!.Value.Spread, 1e-9);
-		Assert.AreEqual(1, TrackCamera.At(frames, 55, reference)!.Value.Spread, 1e-9);
+	private static TrackCamera.Shot? At(List<DerivedFrame> frames, double seconds)
+	{
+		return TrackCamera.Plan.Build(frames, 16 / 9.0, MinMeters, MaxMeters).At(seconds);
+	}
+
+	// 10 Hz for `seconds`, the position (meters east and north of a start) given by the time.
+	private static List<DerivedFrame> Track(double seconds, Func<double, (double East, double North)> at, Func<double, bool>? gap = null)
+	{
+		List<DerivedFrame> frames = [];
+		bool lastGap = false;
+		for (int i = 0; i <= seconds * 10; i++)
+		{
+			double t = i / 10.0;
+			(double east, double north) = at(t);
+			bool startsAfterGap = gap?.Invoke(t) == true && !lastGap;
+			lastGap = gap?.Invoke(t) == true;
+			var raw = new TelemetryFrame(i, t, 50 + north / 111320, 20 + east / (111320 * Math.Cos(50 * Math.PI / 180)), 0, null, 0, 0, 1, HasGpsFix: true, StartsAfterGap: startsAfterGap);
+			frames.Add(new DerivedFrame(raw, 0, 0, 0, 0, 0, 0, default, 0, 0, 1, 0, 0));
+		}
+
+		return frames;
 	}
 
 	[TestMethod]
-	public void Spread_ChangesGraduallyAcrossASpeedChange()
+	public void Width_IsClosestWhileStandingAndWidestOnAFastRun()
 	{
-		List<DerivedFrame> frames = Frames(i => i < 300 ? 0 : 40);
-		double reference = TrackCamera.ReferenceKmh(frames);
+		Assert.AreEqual(MinMeters, At(Track(300, _ => (0, 0)), 150)!.Value.WidthMeters, 1e-6);
+		Assert.IsGreaterThan(MaxMeters * 0.5, At(Track(300, t => (t * 30, 0)), 150)!.Value.WidthMeters);
+	}
 
-		double before = TrackCamera.At(frames, 24, reference)!.Value.Spread;
-		double at = TrackCamera.At(frames, 30, reference)!.Value.Spread;
-		double after = TrackCamera.At(frames, 36, reference)!.Value.Spread;
+	[TestMethod]
+	public void Width_StaysCloseWhileCirclingRoundOneSpot()
+	{
+		List<DerivedFrame> frames = Track(600, t => (4 * Math.Cos(t / 8), 4 * Math.Sin(t / 8)));
 
-		Assert.IsTrue(before < at && at < after, $"{before} {at} {after}");
-		Assert.AreEqual(0.5, at, 0.05);
+		foreach (double t in new[] { 60.0, 300, 540 }) Assert.AreEqual(MinMeters, At(frames, t)!.Value.WidthMeters, 1e-6);
+	}
+
+	[TestMethod]
+	public void Width_IsWiderOnALoopTheBiggerItIs()
+	{
+		double Loop(double radius) => At(Track(600, t => (radius * Math.Cos(t / 20), radius * Math.Sin(t / 20))), 300)!.Value.WidthMeters;
+
+		Assert.IsTrue(Loop(60) < Loop(150) && Loop(150) < Loop(400), $"{Loop(60)} {Loop(150)} {Loop(400)}");
+	}
+
+	[TestMethod]
+	public void Width_IgnoresAShortSlowdownInTheMiddleOfARun()
+	{
+		// 10 m/s with a 5 s stop at 100 s.
+		List<DerivedFrame> frames = Track(200, t => (t < 100 ? t * 10 : t < 105 ? 1000 : 1000 + (t - 105) * 10, 0));
+
+		double before = At(frames, 70)!.Value.WidthMeters, during = At(frames, 102.5)!.Value.WidthMeters;
+
+		Assert.AreEqual(before, during, before * 0.15);
+	}
+
+	[TestMethod]
+	public void Width_OpensBeforeAStandstillEndsInARun_AndChangesGradually()
+	{
+		List<DerivedFrame> frames = Track(600, t => (t < 400 ? 0 : (t - 400) * 10, 0));
+
+		double[] widths = [.. new[] { 40.0, 300, 360, 400, 440, 500 }.Select(t => At(frames, t)!.Value.WidthMeters)];
+
+		Assert.AreEqual(MinMeters, widths[0], 1e-6);
+		for (int i = 1; i < widths.Length; i++) Assert.IsTrue(widths[i] >= widths[i - 1] - 1e-9, string.Join(" ", widths));
+		Assert.IsGreaterThan(MinMeters * 1.5, widths[3]);
+	}
+
+	[TestMethod]
+	public void Width_ClosesInOnALongSlowStretch_EvenWithAFastOneAhead()
+	{
+		List<DerivedFrame> frames = Track(700, t => t < 300 ? (t * 10, 0) : t < 420 ? (3000 + (t - 300), 0) : (3120 + (t - 420) * 10, 0));
+
+		double fast = At(frames, 150)!.Value.WidthMeters, slow = At(frames, 360)!.Value.WidthMeters;
+
+		Assert.IsLessThan(fast * 0.6, slow, $"{fast} {slow}");
+	}
+
+	[TestMethod]
+	public void TheLastSeconds_ShowTheWholeRoute()
+	{
+		List<DerivedFrame> frames = Track(300, t => (t * 20, 0));
+		var plan = TrackCamera.Plan.Build(frames, 16 / 9.0, MinMeters, MaxMeters);
+
+		TrackCamera.Shot middle = plan.At(150)!.Value, end = plan.At(300)!.Value;
+
+		Assert.AreEqual(6000 * 1.25, end.WidthMeters, 1);
+		Assert.AreEqual(20 + 3000 / (111320 * Math.Cos(50 * Math.PI / 180)), end.Longitude, 1e-6);
+		Assert.IsLessThan(end.WidthMeters, middle.WidthMeters);
+		Assert.AreEqual(plan.At(295)!.Value.WidthMeters, end.WidthMeters, 1e-6);
+	}
+
+	[TestMethod]
+	public void ATrackTooShortForAFinale_KeepsItsShot()
+	{
+		List<DerivedFrame> frames = Track(20, t => (t * 10, 0));
+
+		TrackCamera.Shot end = At(frames, 20)!.Value;
+
+		Assert.AreEqual(20 + 200 / (111320 * Math.Cos(50 * Math.PI / 180)), end.Longitude, 5e-4);
+	}
+
+	[TestMethod]
+	public void Width_NeverFramesWhatLiesAcrossAGap()
+	{
+		List<DerivedFrame> frames = Track(300, t => t < 150 ? (4 * Math.Cos(t / 8), 4 * Math.Sin(t / 8)) : (100000 + 4 * Math.Cos(t / 8), 4 * Math.Sin(t / 8)), t => t >= 150);
+
+		Assert.AreEqual(MinMeters, At(frames, 140)!.Value.WidthMeters, 1e-6);
+		Assert.AreEqual(MinMeters, At(frames, 160)!.Value.WidthMeters, 1e-6);
+	}
+
+	[TestMethod]
+	public void Width_IsSmooth()
+	{
+		List<DerivedFrame> frames = Track(300, t => (t < 150 ? 0 : (t - 150) * 30, 0));
+		var plan = TrackCamera.Plan.Build(frames, 16 / 9.0, MinMeters, MaxMeters);
+
+		double previous = plan.At(0)!.Value.WidthMeters;
+		for (double t = 0.1; t <= 300; t += 0.1)
+		{
+			double width = plan.At(t)!.Value.WidthMeters;
+			Assert.IsLessThan(1.06, Math.Max(width / previous, previous / width), $"{t}: {previous} -> {width}");
+			previous = width;
+		}
 	}
 
 	[TestMethod]
@@ -51,7 +155,7 @@ public sealed class TrackCameraTests
 	{
 		List<DerivedFrame> frames = Frames(_ => 10);
 
-		TrackCamera.Shot shot = TrackCamera.At(frames, 30, 10)!.Value;
+		TrackCamera.Shot shot = At(frames, 30)!.Value;
 
 		Assert.AreEqual(50, shot.Latitude, 1e-9);
 		Assert.AreEqual(20 + 300 * 0.0001, shot.Longitude, 1e-6);
@@ -62,8 +166,8 @@ public sealed class TrackCameraTests
 	{
 		List<DerivedFrame> frames = Frames(_ => 10);
 
-		Assert.AreEqual(20, TrackCamera.At(frames, -5, 10)!.Value.Longitude, 1e-3);
-		Assert.AreEqual(20 + 600 * 0.0001, TrackCamera.At(frames, 500, 10)!.Value.Longitude, 1e-3);
+		Assert.AreEqual(20, At(frames, -5)!.Value.Longitude, 1e-3);
+		Assert.AreEqual(20 + 600 * 0.0001, TrackCamera.PositionAt(frames, 500)!.Value.Longitude, 1e-3);
 	}
 
 	[TestMethod]
@@ -71,7 +175,7 @@ public sealed class TrackCameraTests
 	{
 		List<DerivedFrame> frames = Frames(_ => 10, i => i < 100 || i > 400);
 
-		TrackCamera.Shot shot = TrackCamera.At(frames, 25, 10)!.Value;
+		TrackCamera.Shot shot = At(frames, 25)!.Value;
 
 		Assert.AreEqual(20 + 99 * 0.0001, shot.Longitude, 2e-4);
 	}
@@ -79,8 +183,8 @@ public sealed class TrackCameraTests
 	[TestMethod]
 	public void WithNoFixAtAll_ThereIsNoShot()
 	{
-		Assert.IsNull(TrackCamera.At(Frames(_ => 10, _ => false), 10, 10));
-		Assert.IsNull(TrackCamera.At([], 10, 10));
+		Assert.IsNull(At(Frames(_ => 10, _ => false), 10));
+		Assert.IsNull(At([], 10));
 	}
 
 	[TestMethod]
@@ -95,11 +199,11 @@ public sealed class TrackCameraTests
 	{
 		List<DerivedFrame> frames = Frames(i => i % 100);
 
-		TrackCamera.Shot first = TrackCamera.At(frames, 33.3, 40)!.Value;
-		TrackCamera.At(frames, 5, 40);
-		TrackCamera.At(frames, 58, 40);
+		TrackCamera.Shot first = At(frames, 33.3)!.Value;
+		At(frames, 5);
+		At(frames, 58);
 
-		Assert.AreEqual(first, TrackCamera.At(frames, 33.3, 40)!.Value);
+		Assert.AreEqual(first, At(frames, 33.3)!.Value);
 	}
 
 	[TestMethod]
@@ -107,9 +211,9 @@ public sealed class TrackCameraTests
 	{
 		List<DerivedFrame> frames = Frames(_ => 10);
 
-		double before = TrackCamera.At(frames, 30.0, 10)!.Value.Longitude;
-		double quarter = TrackCamera.At(frames, 30.025, 10)!.Value.Longitude;
-		double half = TrackCamera.At(frames, 30.05, 10)!.Value.Longitude;
+		double before = At(frames, 30.0)!.Value.Longitude;
+		double quarter = At(frames, 30.025)!.Value.Longitude;
+		double half = At(frames, 30.05)!.Value.Longitude;
 
 		Assert.AreEqual(0.00005, half - before, 1e-9);
 		Assert.AreEqual(0.000025, quarter - before, 1e-9);

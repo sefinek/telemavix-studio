@@ -4,10 +4,10 @@ namespace Telemavix.Core.Overlay;
 
 /// <summary>
 ///     The map behind a GPS track viewed with no recording (TrackBackdrop). Follow keeps the picture on the position and
-///     widens it with the speed (TrackCamera); off shows the whole track at once. MaxZoom is the closest tile level used - the
+///     sizes it by the stretch around it (TrackCamera.Plan); off shows the whole track at once. MaxZoom is the closest tile level used - the
 ///     map backs off by itself where a long track would need too many tiles. The line is drawn like the Map and Compass widgets'
 ///     (color, by speed or not, width in pixels of a 1080-pixel-high picture), the part still ahead dimmed when ShowAhead; MarkerScale
-///     sizes the aircraft or the dot.
+///     sizes the aircraft or the heading arrow. GpsLossJoin is how the line crosses a stretch without a fix, as on the Map widget.
 /// </summary>
 public sealed record TrackMapSettings(
 	string? ProviderId = null,
@@ -19,7 +19,8 @@ public sealed record TrackMapSettings(
 	string? TrailColor = null,
 	float TrailWidth = 3,
 	bool ShowAhead = true,
-	float MarkerScale = 1.3f)
+	float MarkerScale = 1.3f,
+	RouteJoin GpsLossJoin = RouteJoins.Default)
 {
 	/// <summary>In pixels of a 1080-pixel-high picture; the line scales with the picture.</summary>
 	public const float DefaultTrailWidth = 3, DefaultMarkerScale = 1.3f;
@@ -40,7 +41,8 @@ public sealed record TrackMapSettings(
 		{
 			MaxZoom = Math.Clamp(MaxZoom, RouteMapMosaic.MinZoom, RouteMapMosaic.MaxZoom),
 			TrailWidth = float.IsFinite(TrailWidth) ? Math.Clamp(TrailWidth, MinTrailWidth, MaxTrailWidth) : DefaultTrailWidth,
-			MarkerScale = float.IsFinite(MarkerScale) ? Math.Clamp(MarkerScale, MinMarkerScale, MaxMarkerScale) : DefaultMarkerScale
+			MarkerScale = float.IsFinite(MarkerScale) ? Math.Clamp(MarkerScale, MinMarkerScale, MaxMarkerScale) : DefaultMarkerScale,
+			GpsLossJoin = Enum.IsDefined(GpsLossJoin) ? GpsLossJoin : RouteJoins.Default
 		};
 	}
 }

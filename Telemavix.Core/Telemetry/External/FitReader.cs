@@ -14,7 +14,8 @@ namespace Telemavix.Core.Telemetry.External;
 public static class FitReader
 {
 	private const int RecordMessage = 20;
-	private const int FieldDescriptionMessage = 206;
+	private const int FieldDescriptionMessage = 206, DeveloperDataIdMessage = 207;
+	private const int DeveloperApplicationId = 1, DeveloperApplicationVersion = 4;
 	private const int FileIdMessage = 0, ZonesTargetMessage = 7, SessionMessage = 18;
 	private const int EventMessage = 21;
 	private const int BatteryMessage = 104;
@@ -53,20 +54,6 @@ public static class FitReader
 		};
 	}
 
-	private static string? SportKey(long? sport)
-	{
-		return sport switch
-		{
-			1 => "running",
-			2 => "cycling",
-			5 => "swimming",
-			10 => "training",
-			11 => "walking",
-			17 => "hiking",
-			_ => null
-		};
-	}
-
 	// The sports whose cadence the FIT profile counts per leg (running, walking, hiking): a step a minute is twice that.
 	private static bool CountsStepsPerLeg(long? sport) => sport is 1 or 11 or 17;
 
@@ -77,6 +64,7 @@ public static class FitReader
 		public long? Manufacturer;
 		public long? Sport;
 		public int? MaxHeartRate;
+		public TrackCreator? Creator;
 	}
 
 	public static bool LooksLikeFit(ReadOnlySpan<byte> start)
@@ -104,7 +92,7 @@ public static class FitReader
 		bool steps = CountsStepsPerLeg(activity.Sport);
 		if (steps) points = [.. points.Select(p => p with { CadencePerMinute = p.CadencePerMinute is { } perLeg ? perLeg * 2 : null })];
 		return new ExternalTrack(points, Pauses(timer), batteries, phoneSamples: samples, minGapSeconds: activity.Garmin ? SmartRecordingGapSeconds : null,
-			cadenceInSteps: steps, maxHeartRateBpm: activity.MaxHeartRate, manufacturer: ManufacturerName(activity.Manufacturer), sport: SportKey(activity.Sport));
+			cadenceInSteps: steps, maxHeartRateBpm: activity.MaxHeartRate, manufacturer: ManufacturerName(activity.Manufacturer), creator: activity.Creator);
 	}
 
 	private sealed record Definition(bool BigEndian, int Message, (int Number, int Size, int BaseType)[] Fields, (int Number, int Size, int Index)[] Developer)
@@ -157,6 +145,13 @@ public static class FitReader
 			uint? stamp = null;
 			if (compressed is { } offset) stamp = lastTimestamp = Roll(lastTimestamp ?? throw new InvalidDataException("A compressed FIT timestamp has no time reference."), offset);
 			else if (Field(definition, data, Timestamp) is { } full) stamp = lastTimestamp = (uint)full;
+
+			if (definition.Message == DeveloperDataIdMessage)
+			{
+				if (Bytes(definition, data, DeveloperApplicationId).SequenceEqual(TrackFields.Fit.ApplicationId))
+					activity.Creator ??= new TrackCreator(TrackProducer.ApplicationName, TrackProducer.DecodeApplicationVersion((uint)(Field(definition, data, DeveloperApplicationVersion) ?? 0)).ToString(3));
+				continue;
+			}
 
 			if (definition.Message == FieldDescriptionMessage)
 			{
@@ -276,6 +271,20 @@ public static class FitReader
 	}
 
 	private static readonly PhoneReading NoReading = new();
+
+	/// <summary>The raw bytes of a field, empty when the message doesn't have it.</summary>
+	private static ReadOnlySpan<byte> Bytes(Definition definition, ReadOnlySpan<byte> data, int number)
+	{
+		int at = 0;
+		foreach ((int fieldNumber, int size, _) in definition.Fields)
+		{
+			if (fieldNumber == number) return data.Slice(at, size);
+
+			at += size;
+		}
+
+		return [];
+	}
 
 	/// <summary>A string field (field_description's name): the bytes up to the first zero, null when the message doesn't have it.</summary>
 	private static string? Text(Definition definition, ReadOnlySpan<byte> data, int number)

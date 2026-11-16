@@ -4136,7 +4136,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Poprawiono {0} anomalię GPS (skok pozycji lub prędkości niemożliwy dla pojazdu)|Poprawiono {0} anomalie GPS (skoki pozycji lub prędkości niemożliwe dla pojazdu)|Poprawiono {0} anomalii GPS (skoków pozycji lub prędkości niemożliwych dla pojazdu)</value>
   </data>
   <data name="Main_GpsAlert" xml:space="preserve">
-    <value>Alert GPS</value>
+    <value>Alert</value>
   </data>
   <data name="GpsAlert_Hint" xml:space="preserve">
     <value>Informuje o szukaniu pierwszego sygnału GPS, utracie sygnału trwającej co najmniej sekundę, jego odzyskaniu oraz korekcie błędnej pozycji lub prędkości. Przez pozostały czas jest ukryty. Aby zobaczyć go w podglądzie, przejdź do jednego ze zdarzeń GPS oznaczonych na osi czasu kolorem żółtym lub pomarańczowym.</value>
@@ -4232,7 +4232,7 @@ To skrót. Wiążący jest pełny regulamin DJI, który może się zmieniać.</v
     <value>Tryb debugowania wyłączony.</value>
   </data>
   <data name="Timeline_LockedGpsAlert" xml:space="preserve">
-    <value>Czas wyświetlania alertu GPS zależy od zdarzeń GPS i jest ustalany automatycznie. Nie można go zmienić ręcznie.</value>
+    <value>Czas wyświetlania alertu zależy od jego zdarzeń i jest ustalany automatycznie. Nie można go zmienić ręcznie.</value>
   </data>
   <data name="Timeline_LockedMapCredit" xml:space="preserve">
     <value>Podpis mapy musi być widoczny przez cały czas jej wyświetlania. Aplikacja ustala ten czas automatycznie zgodnie z wymogiem dostawcy.</value>
@@ -4494,7 +4494,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Dystans licznika</value>
   </data>
   <data name="Widget_DeviceBattery" xml:space="preserve">
-    <value>Bateria urządzenia GPS</value>
+    <value>Bateria urządzenia</value>
   </data>
   <data name="Editor_UnavailableAmbientTemperature" xml:space="preserve">
     <value>Brak temperatury w danych nagrania. Dołącz trasę FIT lub GPX zawierającą pomiary temperatury.</value>
@@ -4506,7 +4506,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Brak dystansu zapisanego przez licznik. Dołącz plik FIT z tym pomiarem.</value>
   </data>
   <data name="Editor_UnavailableDeviceBattery" xml:space="preserve">
-    <value>Brak poziomu baterii urządzenia GPS. Dołącz plik FIT zawierający te dane.</value>
+    <value>Brak poziomu baterii urządzenia. Dołącz plik FIT zawierający te dane.</value>
   </data>
   <data name="Widget_AmbientTemperatureDescription" xml:space="preserve">
     <value>Temperatura zapisana przez urządzenie GPS w pliku FIT lub GPX.</value>
@@ -5599,16 +5599,10 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Plik</value>
   </data>
   <data name="TrackFile_Name" xml:space="preserve">
-    <value>Plik</value>
-  </data>
-  <data name="TrackFile_Format" xml:space="preserve">
-    <value>Format</value>
+    <value>Nazwa</value>
   </data>
   <data name="TrackFile_Device" xml:space="preserve">
     <value>Urządzenie</value>
-  </data>
-  <data name="TrackFile_Activity" xml:space="preserve">
-    <value>Aktywność</value>
   </data>
   <data name="TrackFile_Recorded" xml:space="preserve">
     <value>Nagrano</value>
@@ -5626,25 +5620,61 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>co {0:0.#} s (mediana)</value>
   </data>
   <data name="TrackFile_PhoneSensors" xml:space="preserve">
-    <value>Czujniki telefonu</value>
+    <value>Czujniki</value>
   </data>
-  <data name="TrackFile_Sport_running" xml:space="preserve">
-    <value>Bieganie</value>
+  <data name="TrackFile_Source" xml:space="preserve">
+    <value>Źródło</value>
   </data>
-  <data name="TrackFile_Sport_cycling" xml:space="preserve">
-    <value>Jazda na rowerze</value>
+  <data name="TrackFile_PhoneApp" xml:space="preserve">
+    <value>{0} (aplikacja na telefon)</value>
   </data>
-  <data name="TrackFile_Sport_walking" xml:space="preserve">
-    <value>Chodzenie</value>
+  <data name="TrackFile_Pauses" xml:space="preserve">
+    <value>Przerwy</value>
   </data>
-  <data name="TrackFile_Sport_hiking" xml:space="preserve">
-    <value>Wędrówka</value>
+  <data name="TrackFile_PausesValue" xml:space="preserve">
+    <value>{0} (razem {1})</value>
   </data>
-  <data name="TrackFile_Sport_swimming" xml:space="preserve">
-    <value>Pływanie</value>
+  <data name="TrackFile_GpsLost" xml:space="preserve">
+    <value>Utrata GPS</value>
   </data>
-  <data name="TrackFile_Sport_training" xml:space="preserve">
-    <value>Trening</value>
+  <data name="TrackFile_Gps" xml:space="preserve">
+    <value>GPS</value>
+  </data>
+  <data name="TrackFile_Accuracy" xml:space="preserve">
+    <value>dokładność ±{0:0} m (mediana)</value>
+  </data>
+  <data name="TrackFile_SatellitesRange" xml:space="preserve">
+    <value>satelity {0}-{1}</value>
+  </data>
+  <data name="TrackFile_Battery" xml:space="preserve">
+    <value>Bateria</value>
+  </data>
+  <data name="TrackFile_BatteryValue" xml:space="preserve">
+    <value>{0:0}% → {1:0}%</value>
+  </data>
+  <data name="TrackFile_Sensor_Pressure" xml:space="preserve">
+    <value>Ciśnienie</value>
+  </data>
+  <data name="TrackFile_Sensor_Light" xml:space="preserve">
+    <value>Światło</value>
+  </data>
+  <data name="TrackFile_Sensor_Acceleration" xml:space="preserve">
+    <value>Akcelerometr</value>
+  </data>
+  <data name="TrackFile_Sensor_AngularVelocity" xml:space="preserve">
+    <value>Żyroskop</value>
+  </data>
+  <data name="TrackFile_Sensor_Bearing" xml:space="preserve">
+    <value>Kierunek</value>
+  </data>
+  <data name="TrackFile_Sensor_CellSignal" xml:space="preserve">
+    <value>Sygnał sieci</value>
+  </data>
+  <data name="TrackFile_Sensor_BatteryTemperature" xml:space="preserve">
+    <value>Temperatura baterii</value>
+  </data>
+  <data name="TrackFile_Sensor_Charging" xml:space="preserve">
+    <value>Ładowanie</value>
   </data>
   <data name="Sensor_MaxHeartRate" xml:space="preserve">
     <value>Maksymalne tętno (bpm)</value>

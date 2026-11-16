@@ -28,7 +28,7 @@ public static class MapTileFetcher
 	private static HttpClient CreateHttpClient()
 	{
 		var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd($"Telemavix/{AppUpdates.CurrentVersion} (+{AppUpdates.RepositoryUrl})");
+		client.DefaultRequestHeaders.UserAgent.ParseAdd($"TelemavixStudio/{AppUpdates.CurrentVersion} (+{AppUpdates.RepositoryUrl})");
 		return client;
 	}
 

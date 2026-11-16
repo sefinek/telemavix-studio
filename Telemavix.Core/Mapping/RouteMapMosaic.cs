@@ -83,10 +83,11 @@ public sealed class RouteMapMosaic : IDisposable
 	public static async Task<RouteMapMosaic?> BuildAsync(IReadOnlyList<(double Lat, double Lon)> points,
 		string urlTemplate, int requestedZoom, int paddingTiles, CancellationToken ct,
 		Action<int, int>? onProgress = null, double? targetAspectRatio = null, TimeSpan? cacheMaxAge = null, string? labelsUrlTemplate = null,
-		(double Width, double Height)? minSize = null, double coverage = 1)
+		(double Width, double Height)? minSize = null, double coverage = 1, int? maxTiles = null)
 	{
 		if (points.Count == 0) return null;
 
+		int tileBudget = maxTiles ?? MaxTiles;
 		(double minLat, double maxLat, double minLon, double maxLon) = GeoBounds.Of(points);
 
 		int zoom = Math.Clamp(requestedZoom, MinZoom, MaxZoom);
@@ -139,13 +140,13 @@ public sealed class RouteMapMosaic : IDisposable
 					double extraY = viewHeight * (reach - 1) / 2;
 					(minTileX, minTileY) = WebMercator.WorldPixelToTile(viewLeft - extraX, viewTop - extraY);
 					(maxTileX, maxTileY) = WebMercator.WorldPixelToTile(viewLeft + viewWidth + extraX, viewTop + viewHeight + extraY);
-					if (reach <= 1 || (long)(maxTileX - minTileX + 1) * (maxTileY - minTileY + 1) <= MaxTiles) break;
+					if (reach <= 1 || (long)(maxTileX - minTileX + 1) * (maxTileY - minTileY + 1) <= tileBudget) break;
 					reach = Math.Max(1, reach * 0.9);
 				}
 			}
 
 			long tileCount = (long)(maxTileX - minTileX + 1) * (maxTileY - minTileY + 1);
-			if (tileCount <= MaxTiles || zoom <= 2) break;
+			if (tileCount <= tileBudget || zoom <= 2) break;
 			zoom--;
 		}
 

@@ -26,15 +26,17 @@ public sealed class TrackBackdropTests
 	}
 
 	// 10 Hz for a minute, moving east across the map; the aircraft's attitude only where asked for.
-	private static List<DerivedFrame> Frames(bool aircraft)
+	private static List<DerivedFrame> Frames(bool aircraft, bool loss = false)
 	{
 		List<DerivedFrame> frames = [];
 		for (int i = 0; i <= 600; i++)
 		{
+			if (loss && i is >= 300 and < 350) continue;
+
 			double n = 256 * Math.Pow(2, Zoom);
 			double lon = (800 + i * 0.6) / n * 360 - 180;
 			double lat = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * 1024 / n))) * 180 / Math.PI;
-			var raw = new TelemetryFrame(i, i / 10.0, lat, lon, 0, null, 0, 0, 1, HasGpsFix: true,
+			var raw = new TelemetryFrame(i, i / 10.0, lat, lon, 0, null, 0, 0, 1, HasGpsFix: true, StartsAfterGap: loss && i == 350,
 				DroneAttitude: aircraft ? new DroneAttitude(5, -10, 90) : null);
 			frames.Add(new DerivedFrame(raw, 20, 0, 0, 0, 0, 0, default, 0, 0, 1, 0, 0));
 		}
@@ -47,6 +49,23 @@ public sealed class TrackBackdropTests
 		byte[] bgra = new byte[width * height * 4];
 		backdrop.DrawInto(bgra, width, height, seconds, frames);
 		return bgra;
+	}
+
+	[TestMethod]
+	public void ALossIsCrossedByTheChosenJoin()
+	{
+		List<DerivedFrame> frames = Frames(false, loss: true);
+		byte[] Picture(RouteJoin join)
+		{
+			using TrackBackdrop backdrop = Backdrop(new TrackMapSettings(Follow: false, GpsLossJoin: join), frames);
+			return Draw(backdrop, frames, 59.9, 1280, 720);
+		}
+
+		byte[] gap = Picture(RouteJoin.Gap), dashed = Picture(RouteJoin.Dashed), straight = Picture(RouteJoin.Straight);
+
+		CollectionAssert.AreNotEqual(gap, dashed);
+		CollectionAssert.AreNotEqual(dashed, straight);
+		CollectionAssert.AreNotEqual(gap, straight);
 	}
 
 	[TestMethod]

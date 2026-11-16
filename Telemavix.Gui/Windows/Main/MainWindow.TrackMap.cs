@@ -24,7 +24,7 @@ public partial class MainWindow
 		TrackMapMarkerBox.Maximum = (decimal)TrackMapSettings.MaxMarkerScale;
 		TrackMapTrail.Changed += style => ChangeTrackMap(map => map with
 		{
-			ShowTrail = style.Visible, TrailColor = style.Color, ColorBySpeed = style.BySpeed, TrailWidth = style.Width
+			ShowTrail = style.Visible, TrailColor = style.Color, ColorBySpeed = style.BySpeed, TrailWidth = style.Width, GpsLossJoin = style.GpsLossJoin
 		});
 		TrackMapSource.SelectionChanged += providerId => ChangeTrackMap(map => map with { ProviderId = providerId });
 		TrackMapSource.LabelsChanged += show => ChangeTrackMap(map => map with { ShowLabels = show });
@@ -50,7 +50,7 @@ public partial class MainWindow
 		TrackMapSource.Load(map.ProviderId, settings, map.ShowLabels, true);
 		TrackMapFollowCheck.IsChecked = map.Follow;
 		TrackMapZoomBox.Value = map.MaxZoom;
-		TrackMapTrail.Populate(map.ShowTrail, map.TrailColor, map.ColorBySpeed, map.TrailWidth);
+		TrackMapTrail.Populate(map.ShowTrail, map.TrailColor, map.ColorBySpeed, map.TrailWidth, map.GpsLossJoin);
 		TrackMapAheadCheck.IsChecked = map.ShowAhead;
 		TrackMapMarkerBox.Value = (decimal)map.MarkerScale;
 		_loadingTrackMap = false;

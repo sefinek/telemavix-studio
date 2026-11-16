@@ -23,6 +23,40 @@ public sealed class ExternalTrackTests
 	}
 
 	[TestMethod]
+	public void ARecordWithoutPositionBetweenTwoFixes_IsALossEvenWhenShort()
+	{
+		ExternalTrackPoint[] fixes = [.. Walk(T0, 10, 5).Where(p => p.Utc != T0.AddSeconds(5))];
+		var track = new ExternalTrack(fixes, phoneSamples: [new ExternalPhoneSample(T0.AddSeconds(5), new PhoneReading(PressureHectopascals: 1000))]);
+		int cursor = 0;
+
+		Assert.AreEqual(ExternalTrackState.Lost, track.At(T0.AddSeconds(4.5), ref cursor)!.Value.State);
+		Assert.AreEqual(ExternalTrackState.Fix, track.At(T0.AddSeconds(6.5), ref cursor)!.Value.State);
+		Assert.AreEqual(TimeSpan.FromSeconds(2), track.TimeWithoutFix());
+	}
+
+	[TestMethod]
+	public void AMissedSecondOfASteadyOneHertzTrack_IsALoss()
+	{
+		var track = new ExternalTrack(Walk(T0, 300, 5).Where(p => p.Utc != T0.AddSeconds(100)));
+		int cursor = 0;
+
+		Assert.AreEqual(ExternalTrackState.Lost, track.At(T0.AddSeconds(99.5), ref cursor)!.Value.State);
+		Assert.AreEqual(ExternalTrackState.Fix, track.At(T0.AddSeconds(150.5), ref cursor)!.Value.State);
+		Assert.AreEqual(TimeSpan.FromSeconds(2), track.TimeWithoutFix());
+	}
+
+	[TestMethod]
+	public void AShortStepOfAnUnsteadyTrack_IsBridged()
+	{
+		ExternalTrackPoint[] fixes = [.. Walk(T0, 300, 5).Where(p => (p.Utc - T0).TotalSeconds % 4 != 1)];
+		var track = new ExternalTrack(fixes);
+		int cursor = 0;
+
+		Assert.AreEqual(ExternalTrackState.Fix, track.At(T0.AddSeconds(100.5), ref cursor)!.Value.State);
+		Assert.AreEqual(TimeSpan.Zero, track.TimeWithoutFix());
+	}
+
+	[TestMethod]
 	public void Gpx_PointsOfEverySegment()
 	{
 		using MemoryStream gpx = Gpx("""

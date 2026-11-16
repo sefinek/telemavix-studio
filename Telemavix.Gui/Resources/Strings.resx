@@ -4136,7 +4136,7 @@ Note: Telemavix Studio is provided free of charge. If someone asks you to pay fo
     <value>Fixed {0} GPS anomaly (a position or speed jump no vehicle could make)|Fixed {0} GPS anomalies (position or speed jumps no vehicle could make)</value>
   </data>
   <data name="Main_GpsAlert" xml:space="preserve">
-    <value>GPS alert</value>
+    <value>Alert</value>
   </data>
   <data name="GpsAlert_Hint" xml:space="preserve">
     <value>Appears when searching for the first GPS signal, when the signal is lost for at least a second (showing how long), when it returns, or after an incorrect position or speed reading is corrected. It disappears shortly afterward. To see it in the preview, scrub to a GPS issue marked in yellow or orange on the timeline.</value>
@@ -4232,7 +4232,7 @@ This is a summary. The full DJI terms govern and may change.</value>
     <value>Debug mode is off.</value>
   </data>
   <data name="Timeline_LockedGpsAlert" xml:space="preserve">
-    <value>The GPS alert's display time is set automatically from GPS events and cannot be changed manually.</value>
+    <value>The alert's display time is set automatically from its events and cannot be changed manually.</value>
   </data>
   <data name="Timeline_LockedMapCredit" xml:space="preserve">
     <value>Map attribution must remain visible while the map is displayed. The app sets its display time automatically to meet the provider's requirement.</value>
@@ -4494,7 +4494,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Device distance</value>
   </data>
   <data name="Widget_DeviceBattery" xml:space="preserve">
-    <value>GPS device battery</value>
+    <value>Device battery</value>
   </data>
   <data name="Editor_UnavailableAmbientTemperature" xml:space="preserve">
     <value>No temperature in the recording's data. Attach a FIT or GPX track containing temperature readings.</value>
@@ -4506,7 +4506,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>No distance recorded by the device. Attach a FIT file containing this measurement.</value>
   </data>
   <data name="Editor_UnavailableDeviceBattery" xml:space="preserve">
-    <value>No GPS device battery level. Attach a FIT file containing these readings.</value>
+    <value>No device battery level. Attach a FIT file containing these readings.</value>
   </data>
   <data name="Widget_AmbientTemperatureDescription" xml:space="preserve">
     <value>Temperature recorded by the GPS device in the FIT or GPX track.</value>
@@ -5599,16 +5599,10 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>File</value>
   </data>
   <data name="TrackFile_Name" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="TrackFile_Format" xml:space="preserve">
-    <value>Format</value>
+    <value>Name</value>
   </data>
   <data name="TrackFile_Device" xml:space="preserve">
     <value>Device</value>
-  </data>
-  <data name="TrackFile_Activity" xml:space="preserve">
-    <value>Activity</value>
   </data>
   <data name="TrackFile_Recorded" xml:space="preserve">
     <value>Recorded</value>
@@ -5626,25 +5620,61 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>every {0:0.#} s (median)</value>
   </data>
   <data name="TrackFile_PhoneSensors" xml:space="preserve">
-    <value>Phone sensors</value>
+    <value>Sensors</value>
   </data>
-  <data name="TrackFile_Sport_running" xml:space="preserve">
-    <value>Running</value>
+  <data name="TrackFile_Source" xml:space="preserve">
+    <value>Source</value>
   </data>
-  <data name="TrackFile_Sport_cycling" xml:space="preserve">
-    <value>Cycling</value>
+  <data name="TrackFile_PhoneApp" xml:space="preserve">
+    <value>{0} (phone app)</value>
   </data>
-  <data name="TrackFile_Sport_walking" xml:space="preserve">
-    <value>Walking</value>
+  <data name="TrackFile_Pauses" xml:space="preserve">
+    <value>Pauses</value>
   </data>
-  <data name="TrackFile_Sport_hiking" xml:space="preserve">
-    <value>Hiking</value>
+  <data name="TrackFile_PausesValue" xml:space="preserve">
+    <value>{0} ({1} in total)</value>
   </data>
-  <data name="TrackFile_Sport_swimming" xml:space="preserve">
-    <value>Swimming</value>
+  <data name="TrackFile_GpsLost" xml:space="preserve">
+    <value>GPS signal lost</value>
   </data>
-  <data name="TrackFile_Sport_training" xml:space="preserve">
-    <value>Training</value>
+  <data name="TrackFile_Gps" xml:space="preserve">
+    <value>GPS</value>
+  </data>
+  <data name="TrackFile_Accuracy" xml:space="preserve">
+    <value>accuracy ±{0:0} m (median)</value>
+  </data>
+  <data name="TrackFile_SatellitesRange" xml:space="preserve">
+    <value>satellites {0}-{1}</value>
+  </data>
+  <data name="TrackFile_Battery" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="TrackFile_BatteryValue" xml:space="preserve">
+    <value>{0:0}% → {1:0}%</value>
+  </data>
+  <data name="TrackFile_Sensor_Pressure" xml:space="preserve">
+    <value>Pressure</value>
+  </data>
+  <data name="TrackFile_Sensor_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="TrackFile_Sensor_Acceleration" xml:space="preserve">
+    <value>Accelerometer</value>
+  </data>
+  <data name="TrackFile_Sensor_AngularVelocity" xml:space="preserve">
+    <value>Gyroscope</value>
+  </data>
+  <data name="TrackFile_Sensor_Bearing" xml:space="preserve">
+    <value>Bearing</value>
+  </data>
+  <data name="TrackFile_Sensor_CellSignal" xml:space="preserve">
+    <value>Mobile signal</value>
+  </data>
+  <data name="TrackFile_Sensor_BatteryTemperature" xml:space="preserve">
+    <value>Battery temperature</value>
+  </data>
+  <data name="TrackFile_Sensor_Charging" xml:space="preserve">
+    <value>Charging</value>
   </data>
   <data name="Sensor_MaxHeartRate" xml:space="preserve">
     <value>Maximum heart rate (bpm)</value>

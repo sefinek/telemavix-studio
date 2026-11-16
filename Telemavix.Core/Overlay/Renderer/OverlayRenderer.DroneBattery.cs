@@ -122,10 +122,10 @@ public sealed partial class OverlayRenderer
 	{
 		DroneBattery? battery = frame.Raw.DroneBattery is { } reading && double.IsFinite(reading.Percent) ? reading : null;
 		SKColor textColor = TextColorOf(element), outlineColor = OutlineColorOf(element);
-		float left = DrawBatteryReading(canvas, element, element.Label ?? CoreStrings.Overlay_DroneBattery, battery?.Percent);
+		(string Text, BatteryCondition Condition)[] rows = DroneBatteryRows(element, battery);
+		float left = DrawBatteryReading(canvas, element, element.Label ?? CoreStrings.Overlay_DroneBattery, battery?.Percent, lineBelow: rows.Length > 0);
 
 		SKFont lineFont = TextFont(element, OverlayElementBounds.SmallFontSize);
-		(string Text, BatteryCondition Condition)[] rows = DroneBatteryRows(element, battery);
 		for (int i = 0; i < rows.Length; i++)
 		{
 			float baseline = OverlayElementBounds.DroneBatteryLineBaseline + i * OverlayElementBounds.DroneBatteryLineStep;
@@ -148,20 +148,30 @@ public sealed partial class OverlayRenderer
 	/// <summary>
 	///     The caption, the icon (when the widget shows it) and the percent in the charge's color: what the drone battery and the device battery share.
 	///     The widgets that line their text up (OverlayElementBounds.SupportsTextAlign: the device battery) line the caption, the icon with the percent and the note up to the right or the
-	///     center of the box as a block each; the drone battery stays on the left. Returns where the readout's text starts, for what a widget draws under it.
+	///     center of the box as a block each; the drone battery stays on the left. With a line under the percent (the note, or the drone's lines: `lineBelow`) the two sit as a pair about the
+	///     icon's middle; with nothing under it the percent is centered on the icon. Returns where the readout's text starts, for what a widget draws under it.
 	/// </summary>
-	private float DrawBatteryReading(SKCanvas canvas, BatteryElement element, string caption, double? percent, bool charging = false, string? note = null)
+	private float DrawBatteryReading(SKCanvas canvas, BatteryElement element, string caption, double? percent, bool charging = false, string? note = null, bool? lineBelow = null)
 	{
 		SKColor textColor = TextColorOf(element), outlineColor = OutlineColorOf(element), level = BatteryColor(element, percent);
 		SKFont captionFont = TextFont(element, OverlayElementBounds.LabelFontSize), valueFont = TextFont(element, OverlayElementBounds.DroneBatteryValueFontSize);
 		SKFont unitFont = TextFont(element, OverlayElementBounds.UnitFontSize), noteFont = TextFont(element, OverlayElementBounds.SmallFontSize);
 		string title = caption.ToUpperInvariant(), value = percent is { } charge ? F(charge, "0") : "--";
+		float valueBaseline = OverlayElementBounds.DroneBatteryValueBaseline;
+		if (element.ShowIcon && !(lineBelow ?? note is not null))
+		{
+			valueFont.MeasureText("0", out SKRect digit);
+			valueBaseline = (OverlayElementBounds.DroneBatteryIconTop + OverlayElementBounds.DroneBatteryIconBottom + digit.Height) / 2;
+		}
 
 		float iconPart = element.ShowIcon ? OverlayElementBounds.DroneBatteryIconWidth + OverlayElementBounds.DroneBatteryIconGap : 0;
 		float valueWidth = valueFont.MeasureText(value);
-		float readout = iconPart + valueWidth + OverlayElementBounds.StatUnitGapX + unitFont.MeasureText("%");
-		float titleWidth = captionFont.MeasureText(title), noteWidth = note is null ? 0 : noteFont.MeasureText(note);
 		TextAlign align = OverlayElementBounds.SupportsTextAlign(element) ? element.TextAlign : TextAlign.Left;
+		// Lined up to the right or the center, the icon and the percent sign keep their place when the value drops to one digit: the value
+		// has the room of two digits and sits against the sign.
+		float valueSlot = align == TextAlign.Left ? valueWidth : Math.Max(valueWidth, valueFont.MeasureText("00"));
+		float readout = iconPart + valueSlot + OverlayElementBounds.StatUnitGapX + unitFont.MeasureText("%");
+		float titleWidth = captionFont.MeasureText(title), noteWidth = note is null ? 0 : noteFont.MeasureText(note);
 		float box = align == TextAlign.Left ? 0 : Math.Max(OverlayElementBounds.TextBoxRight(element), Math.Max(titleWidth, Math.Max(readout, noteWidth)));
 		float readoutX = OverlayElementBounds.AlignedX(align, box, readout);
 
@@ -176,8 +186,8 @@ public sealed partial class OverlayRenderer
 		}
 
 		float left = readoutX + iconPart;
-		DrawOutlined(canvas, value, left, OverlayElementBounds.DroneBatteryValueBaseline, valueFont, level, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
-		DrawOutlined(canvas, "%", left + valueWidth + OverlayElementBounds.StatUnitGapX, OverlayElementBounds.DroneBatteryValueBaseline, unitFont, textColor,
+		DrawOutlined(canvas, value, left + valueSlot - valueWidth, valueBaseline, valueFont, level, outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
+		DrawOutlined(canvas, "%", left + valueSlot + OverlayElementBounds.StatUnitGapX, valueBaseline, unitFont, textColor,
 			outlineColor: outlineColor, outlineWidthScale: element.OutlineWidth);
 		if (note is not null)
 		{

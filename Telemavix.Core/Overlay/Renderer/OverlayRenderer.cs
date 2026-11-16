@@ -75,7 +75,6 @@ public sealed partial class OverlayRenderer : IDisposable
 	private readonly SKPaint _thinStroke2White70;
 	private readonly SKPaint _dotOutlineBlackFill;
 	private readonly SKPaint _dotFillAccent;
-	private readonly SKPaint _blackStroke3;
 	private readonly SKPaint _blackStroke2;
 	private readonly SKPaint _sunFillPaint;
 	private readonly SKPaint _whiteStroke6Round;
@@ -108,7 +107,7 @@ public sealed partial class OverlayRenderer : IDisposable
 	private readonly SKPaint _routeStrokePaint;
 	private readonly SKPaint _routeDashPaint;
 	private readonly SKPaint _alphaPaint = new();
-	private readonly SKPath _headingArrow = CreateHeadingArrow();
+	private readonly TrailMarker _trailMarker = new();
 	private readonly Dictionary<float, SKPathEffect> _dashEffects = [];
 
 	// The widgets' own FontFamily, built on first use. Typefaces are kept apart from fonts: several sizes share one.
@@ -156,8 +155,6 @@ public sealed partial class OverlayRenderer : IDisposable
 			{ Color = new SKColor(255, 255, 255, 70), IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2 };
 		_dotOutlineBlackFill = new SKPaint { Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Fill };
 		_dotFillAccent = new SKPaint { Color = Accent, IsAntialias = true, Style = SKPaintStyle.Fill };
-		_blackStroke3 = new SKPaint
-			{ Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 3 };
 		_blackStroke2 = new SKPaint
 			{ Color = SKColors.Black, IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 2 };
 		_sunFillPaint = new SKPaint { Color = SunColor, IsAntialias = true, Style = SKPaintStyle.Fill };
@@ -248,7 +245,6 @@ public sealed partial class OverlayRenderer : IDisposable
 		_thinStroke2White70.Dispose();
 		_dotOutlineBlackFill.Dispose();
 		_dotFillAccent.Dispose();
-		_blackStroke3.Dispose();
 		_blackStroke2.Dispose();
 		_sunFillPaint.Dispose();
 		_whiteStroke6Round.Dispose();
@@ -282,7 +278,7 @@ public sealed partial class OverlayRenderer : IDisposable
 		_alphaPaint.Dispose();
 		_shadowPaint.Dispose();
 		DisposeShadowFilters();
-		_headingArrow.Dispose();
+		_trailMarker.Dispose();
 		foreach (SKPathEffect effect in _dashEffects.Values) effect.Dispose();
 		DisposeRoutes(_compassRoutes);
 		foreach (MapLayer layer in _mapLayers.Values) layer.Dispose();

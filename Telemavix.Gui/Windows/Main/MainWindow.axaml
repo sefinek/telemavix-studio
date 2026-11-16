@@ -629,17 +629,13 @@
 										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Name}" />
 										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileName" TextWrapping="Wrap" />
 									</Grid>
-									<Grid Name="TrackFileFormatRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Format}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileFormat" TextWrapping="Wrap" />
+									<Grid Name="TrackFileSourceRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Source}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileSource" TextWrapping="Wrap" />
 									</Grid>
 									<Grid Name="TrackFileDeviceRow" ColumnDefinitions="110,*" ColumnSpacing="8">
 										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Device}" />
 										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileDevice" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileActivityRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Activity}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileActivity" TextWrapping="Wrap" />
 									</Grid>
 									<Grid Name="TrackFileRecordedRow" ColumnDefinitions="110,*" ColumnSpacing="8">
 										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Recorded}" />
@@ -649,9 +645,29 @@
 										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Points}" />
 										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFilePoints" TextWrapping="Wrap" />
 									</Grid>
+									<Grid Name="TrackFilePausesRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Pauses}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFilePauses" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileGpsLostRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_GpsLost}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileGpsLost" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileGpsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Gps}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileGps" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileBatteryRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Battery}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileBattery" TextWrapping="Wrap" />
+									</Grid>
 									<Grid Name="TrackFileDataRow" ColumnDefinitions="110,*" ColumnSpacing="8">
 										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Data}" />
 										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileData" TextWrapping="Wrap" />
+									</Grid>
+									<Grid Name="TrackFileSensorsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
+										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_PhoneSensors}" />
+										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileSensors" TextWrapping="Wrap" />
 									</Grid>
 								</StackPanel>
 							</Border>
@@ -708,7 +724,7 @@
 									<TextBlock Text="{x:Static local:Strings.TrackMap_MaxZoom}" Classes="infoLabel" Margin="0" />
 									<NumericUpDown Name="TrackMapZoomBox" Increment="1" FormatString="0" HorizontalAlignment="Stretch"
 									               ValueChanged="OnTrackMapZoomChanged" />
-									<local:TrailStyleEditor Name="TrackMapTrail" GpsLossVisible="False" />
+									<local:TrailStyleEditor Name="TrackMapTrail" />
 									<CheckBox Name="TrackMapAheadCheck" Content="{x:Static local:Strings.TrackMap_ShowAhead}" Click="OnTrackMapAheadChanged" />
 									<TextBlock Classes="infoLabel checkHint" Text="{x:Static local:Strings.TrackMap_ShowAheadHint}" />
 									<TextBlock Text="{x:Static local:Strings.TrackMap_MarkerSize}" Classes="infoLabel" Margin="0" />

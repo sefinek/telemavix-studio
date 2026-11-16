@@ -17,7 +17,7 @@ public partial class WelcomeWindow
 	private static HttpClient CreateConnectionHttp()
 	{
 		var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd($"Telemavix/{AppUpdates.CurrentVersion} (+{AppUpdates.RepositoryUrl})");
+		client.DefaultRequestHeaders.UserAgent.ParseAdd($"TelemavixStudio/{AppUpdates.CurrentVersion} (+{AppUpdates.RepositoryUrl})");
 		return client;
 	}
 

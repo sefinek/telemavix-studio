@@ -524,30 +524,8 @@ public sealed partial class OverlayRenderer
 	/// <summary>Heading arrow (matches the driving direction, north-up) when useArrow, a static dot otherwise - shared by Compass and MapWidget so the two draw identically for whichever style each picks.</summary>
 	private void DrawTrailMarker(SKCanvas canvas, float cx, float cy, double headingDegrees, TrailOverlayElement element, bool forceDot = false)
 	{
-		SKPaint fill = _dotFillAccent;
-		if (element.MarkerColor is not null)
-		{
-			_markerFillPaint.Color = ResolveColor(element.MarkerColor, Accent);
-			fill = _markerFillPaint;
-		}
-
-		canvas.Save();
-		canvas.Translate(cx, cy);
-		canvas.Scale(Math.Clamp(element.MarkerScale, 0.3f, 4f));
-		if (element.TrailUseArrow && !forceDot)
-		{
-			// Clockwise from north, the way a heading turns on screen (y grows down).
-			canvas.RotateDegrees((float)headingDegrees);
-			canvas.DrawPath(_headingArrow, fill);
-			canvas.DrawPath(_headingArrow, _blackStroke3);
-		}
-		else
-		{
-			canvas.DrawCircle(0, 0, 9, _dotOutlineBlackFill);
-			canvas.DrawCircle(0, 0, 6, fill);
-		}
-
-		canvas.Restore();
+		SKColor fill = element.MarkerColor is null ? Accent : ResolveColor(element.MarkerColor, Accent);
+		_trailMarker.Draw(canvas, cx, cy, headingDegrees, Math.Clamp(element.MarkerScale, 0.3f, 4f), fill, element.TrailUseArrow && !forceDot);
 	}
 
 	/// <summary>The direction of travel the widget turns by and points with: the steadied one, or the measured one without StabilizeHeading.</summary>
@@ -565,22 +543,6 @@ public sealed partial class OverlayRenderer
 	{
 		if (!element.DotWhenNotFacingTravel || frame.Raw.DroneAttitude is not { } attitude) return false;
 		return AngleMath.DifferenceDegrees(attitude.YawDegrees, ShownHeading(frame, element)) > Math.Clamp(element.DroneFacingToleranceDegrees, DroneFacingToleranceMin, DroneFacingToleranceMax);
-	}
-
-	/// <summary>The heading arrow pointing north around (0, 0), built once - DrawHeadingArrow rotates it.</summary>
-	private static SKPath CreateHeadingArrow()
-	{
-		const double length = 42;
-		const double wingAngle = 2.5;
-		const double wingLength = length * 0.55;
-
-		using var builder = new SKPathBuilder();
-		builder.MoveTo(0, (float)-length);
-		builder.LineTo((float)(Math.Sin(wingAngle) * wingLength), (float)(-Math.Cos(wingAngle) * wingLength));
-		builder.LineTo(0, 0);
-		builder.LineTo((float)(Math.Sin(-wingAngle) * wingLength), (float)(-Math.Cos(-wingAngle) * wingLength));
-		builder.Close();
-		return builder.Detach();
 	}
 
 	private static string CardinalDirection(double heading)

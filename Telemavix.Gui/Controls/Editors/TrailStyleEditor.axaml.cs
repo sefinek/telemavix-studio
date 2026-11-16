@@ -28,13 +28,6 @@ public partial class TrailStyleEditor : UserControl
 	/// <summary>Raised on user edits only, not while Populate fills the controls.</summary>
 	public event Action<TrailStyle>? Changed;
 
-	/// <summary>False where the route has no join to choose (a map drawn from the track alone breaks the line at a gap).</summary>
-	public bool GpsLossVisible
-	{
-		get => GpsLossPanel.IsVisible;
-		set => GpsLossPanel.IsVisible = value;
-	}
-
 	public void Populate(TrailOverlayElement element)
 	{
 		Populate(element.TrailVisible, element.TrailColor, element.TrailColorBySpeed, element.TrailWidth, element.GpsLossJoin);

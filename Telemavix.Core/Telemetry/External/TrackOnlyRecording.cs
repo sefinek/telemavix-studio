@@ -32,7 +32,7 @@ public static class TrackOnlyRecording
 /// <summary>The size and frame rate of a track viewed with no recording: asked of the user, as no file says them.</summary>
 public readonly record struct TrackOnlyFormat(int Width, int Height, double Fps)
 {
-	public static TrackOnlyFormat Default { get; } = new(1920, 1080, 50);
+	public static TrackOnlyFormat Default { get; } = new(2560, 1440, 30);
 
 	public static TrackOnlyFormat Of(VideoInfo video)
 	{

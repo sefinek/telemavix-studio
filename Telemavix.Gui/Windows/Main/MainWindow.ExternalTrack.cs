@@ -317,7 +317,7 @@ public partial class MainWindow
 		}
 	}
 
-	/// <summary>The card of a track opened on its own: what the file is - its format, the device and activity it names, how long and how often it was sampled, and which readings it carries.</summary>
+	/// <summary>The card of a track opened on its own: what wrote the file, when and how long, how well it was recorded and which readings it carries.</summary>
 	private void ShowTrackFileInfo(string path, ExternalTrack track)
 	{
 		static void Row(Grid row, TextBlock value, string? text)
@@ -326,21 +326,23 @@ public partial class MainWindow
 			value.Text = text;
 		}
 
-		IReadOnlyList<ExternalTrackPoint> points = track.Points;
-		string format = ExternalTrackReader.FormatName(path);
-		string? device = track.Manufacturer ?? track.DeviceName;
-		string? activity = track.Sport switch
+		static string Clock(TimeSpan length) => length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture);
+
+		ExternalTrackFacts facts = ExternalTrackFacts.Of(track);
+		CultureInfo culture = CultureInfo.CurrentCulture;
+		DateTime start = track.StartUtc.ToLocalFromUtc(), end = track.EndUtc.ToLocalFromUtc();
+		string recorded = $"{start:yyyy-MM-dd HH:mm:ss} - {(end.Date == start.Date ? end.ToString("HH:mm:ss", culture) : end.ToString("yyyy-MM-dd HH:mm:ss", culture))}";
+
+		string? source = null;
+		if (track.Creator is { } creator)
 		{
-			"running" => Strings.TrackFile_Sport_running,
-			"cycling" => Strings.TrackFile_Sport_cycling,
-			"walking" => Strings.TrackFile_Sport_walking,
-			"hiking" => Strings.TrackFile_Sport_hiking,
-			"swimming" => Strings.TrackFile_Sport_swimming,
-			"training" => Strings.TrackFile_Sport_training,
-			_ => null
-		};
-		TimeSpan length = track.EndUtc - track.StartUtc;
-		string interval = string.Format(CultureInfo.CurrentCulture, Strings.TrackFile_Interval, track.MedianIntervalSeconds);
+			string named = creator.HasVersion ? $"{creator.Name} {creator.Version}" : creator.Name;
+			source = creator.IsTelemavixGps ? string.Format(culture, Strings.TrackFile_PhoneApp, named) : named;
+		}
+
+		List<string> gps = [];
+		if (facts.MedianAccuracyMeters is { } accuracy) gps.Add(string.Format(culture, Strings.TrackFile_Accuracy, accuracy));
+		if (facts.MinSatellites is { } fewest && facts.MaxSatellites is { } most) gps.Add(string.Format(culture, Strings.TrackFile_SatellitesRange, fewest, most));
 
 		List<string> data = [];
 
@@ -349,24 +351,42 @@ public partial class MainWindow
 			if (present) data.Add(name);
 		}
 
-		Has(points.Any(p => p.AltitudeMeters is not null), Strings.Main_Altitude);
-		Has(points.Any(p => p.SpeedMs is not null), Strings.Common_Speed);
-		Has(points.Any(p => p.DistanceMeters is not null), Strings.Main_Distance);
-		Has(points.Any(p => p.HeartRateBpm is > 0), Strings.Widget_HeartRate);
-		Has(points.Any(p => p.CadencePerMinute is > 0), Strings.Widget_Cadence);
-		Has(points.Any(p => p.TemperatureCelsius is not null), Strings.Widget_AmbientTemperature);
-		Has(points.Any(p => p.Satellites is not null), Strings.Widget_Satellites);
-		Has(track.Batteries.Count > 0, Strings.Widget_DeviceBattery);
-		Has(points.Any(p => p.Phone is not null), Strings.TrackFile_PhoneSensors);
-		Has(points.Any(p => p.Attitude is not null), Strings.Widget_Attitude);
+		Has(facts.Data.HasFlag(TrackData.Altitude), Strings.Main_Altitude);
+		Has(facts.Data.HasFlag(TrackData.Speed), Strings.Common_Speed);
+		Has(facts.Data.HasFlag(TrackData.Distance), Strings.Main_Distance);
+		Has(facts.Data.HasFlag(TrackData.HeartRate), Strings.Widget_HeartRate);
+		Has(facts.Data.HasFlag(TrackData.Cadence), Strings.Widget_Cadence);
+		Has(facts.Data.HasFlag(TrackData.Temperature), Strings.Widget_AmbientTemperature);
+		Has(facts.Data.HasFlag(TrackData.Attitude), Strings.Widget_Attitude);
+		Has(facts.Data.HasFlag(TrackData.Battery), Strings.Widget_DeviceBattery);
+
+		List<string> sensors = [];
+
+		void Senses(PhoneSensors sensor, string name)
+		{
+			if (facts.Sensors.HasFlag(sensor)) sensors.Add(name);
+		}
+
+		Senses(PhoneSensors.Pressure, Strings.TrackFile_Sensor_Pressure);
+		Senses(PhoneSensors.Light, Strings.TrackFile_Sensor_Light);
+		Senses(PhoneSensors.Acceleration, Strings.TrackFile_Sensor_Acceleration);
+		Senses(PhoneSensors.AngularVelocity, Strings.TrackFile_Sensor_AngularVelocity);
+		Senses(PhoneSensors.Bearing, Strings.TrackFile_Sensor_Bearing);
+		Senses(PhoneSensors.CellSignal, Strings.TrackFile_Sensor_CellSignal);
+		Senses(PhoneSensors.BatteryTemperature, Strings.TrackFile_Sensor_BatteryTemperature);
+		Senses(PhoneSensors.Charging, Strings.TrackFile_Sensor_Charging);
 
 		Row(TrackFileNameRow, TrackFileName, Path.GetFileName(path));
-		Row(TrackFileFormatRow, TrackFileFormat, format);
-		Row(TrackFileDeviceRow, TrackFileDevice, device);
-		Row(TrackFileActivityRow, TrackFileActivity, activity);
-		Row(TrackFileRecordedRow, TrackFileRecorded, $"{track.StartUtc.ToLocalFromUtc():yyyy-MM-dd HH:mm:ss}");
-		Row(TrackFilePointsRow, TrackFilePoints, string.Format(CultureInfo.CurrentCulture, Strings.TrackFile_PointsValue, points.Count, length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture), interval));
+		Row(TrackFileSourceRow, TrackFileSource, source);
+		Row(TrackFileDeviceRow, TrackFileDevice, track.Manufacturer ?? track.DeviceName);
+		Row(TrackFileRecordedRow, TrackFileRecorded, recorded);
+		Row(TrackFilePointsRow, TrackFilePoints, string.Format(culture, Strings.TrackFile_PointsValue, track.Points.Count, Clock(track.EndUtc - track.StartUtc), string.Format(culture, Strings.TrackFile_Interval, track.MedianIntervalSeconds)));
+		Row(TrackFilePausesRow, TrackFilePauses, facts.PauseCount > 0 ? string.Format(culture, Strings.TrackFile_PausesValue, facts.PauseCount, Clock(facts.PausedTime)) : null);
+		Row(TrackFileGpsLostRow, TrackFileGpsLost, facts.GpsLost > TimeSpan.Zero ? Clock(facts.GpsLost) : null);
+		Row(TrackFileGpsRow, TrackFileGps, string.Join(", ", gps));
+		Row(TrackFileBatteryRow, TrackFileBattery, facts.BatteryStartPercent is { } from && facts.BatteryEndPercent is { } to ? string.Format(culture, Strings.TrackFile_BatteryValue, from, to) : null);
 		Row(TrackFileDataRow, TrackFileData, string.Join(", ", data));
+		Row(TrackFileSensorsRow, TrackFileSensors, string.Join(", ", sensors));
 	}
 
 	private void ShowExternalTrackInfo(ExternalTrack track)

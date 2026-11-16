@@ -2986,7 +2986,7 @@ Select the original file from the camera&apos;s or drone&apos;s memory card ({0}
     <value>Detected</value>
   </data>
   <data name="Summary_TelemetryNoGpsFix" xml:space="preserve">
-    <value>No GPS fix</value>
+    <value>No GPS</value>
   </data>
   <data name="Summary_TelemetryNoGpsFixTip" xml:space="preserve">
     <value>The recording contains telemetry but no GPS positions. Speed, distance, altitude, map, compass and trip statistics are unavailable.</value>
@@ -3698,7 +3698,7 @@ Note: Telemavix Studio is provided free of charge. If someone asks you to pay fo
     <value>The bar appears when the speed first reaches the selected threshold. The appearance time is calculated automatically and shown in the locked "Appear at" field.</value>
   </data>
   <data name="KeyMoments_MovingOnly" xml:space="preserve">
-    <value>G-force and lean only while riding</value>
+    <value>G-force and lean only while moving</value>
   </data>
   <data name="KeyMoments_MovingOnlyHint" xml:space="preserve">
     <value>When stationary, starting, or stopping, G-force and lean readings may come from handling the camera or putting the bike down. To include a moment, speed must stay at or above the selected threshold for 3 seconds before it and 3 seconds after it. This filter does not apply to speed, altitude, or route gradient.</value>
@@ -5075,6 +5075,9 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="Track_Auto_Start" xml:space="preserve">
     <value>The video starts at {0} UTC on the track.</value>
+  </data>
+  <data name="Track_Auto_LeadsTrack" xml:space="preserve">
+    <value>The video starts {0} s before the first point of the track, so the beginning has no telemetry. The phone started recording after the camera.</value>
   </data>
   <data name="Track_Auto_None" xml:space="preserve">
     <value>The track could not be matched automatically.</value>

@@ -49,7 +49,7 @@ public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = nu
 				AppLogger.Info($"Track {name}: aligned by the camera's own recording span, video start {alignment.VideoStartUtc:O}");
 				break;
 			case TrackAlignmentMethod.ContainerClock:
-				AppLogger.Info($"Track {name}: aligned by the container's creation time inside the camera's recording span, video start {alignment.VideoStartUtc:O}");
+				AppLogger.Info($"Track {name}: aligned by the container's creation time (approximate, check it on the picture), video start {alignment.VideoStartUtc:O}");
 				break;
 			default:
 				AppLogger.Warn(string.Format(CoreStrings.ExternalTrack_MotionEstimate, alignment.Correlation));
@@ -61,13 +61,27 @@ public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = nu
 
 	/// <summary>
 	///     The automatic placement of a recording on a track, by the most exact way there is: the camera's own recording span, the container's
-	///     creation time inside a span, then how both moved. Null when none of them says where it lies.
+	///     creation time inside a span, how both moved, then the container's creation time alone. Null when none of them says where it lies.
 	/// </summary>
 	public static TrackAlignment? Propose(IReadOnlyList<TelemetryFrame> frames, double fps, DateTime? recordingStartUtc, ExternalTrack track)
 	{
 		if (RecordingAnchor(frames, fps, track) is { } byRecording) return new TrackAlignment(byRecording, TrackAlignmentMethod.RecordingSpan);
 		if (ContainingSpanAnchor(frames, fps, track, recordingStartUtc) is { } byClock) return new TrackAlignment(byClock, TrackAlignmentMethod.ContainerClock);
-		return ExternalTrackSync.Estimate(frames, fps, track) is { } estimate ? new TrackAlignment(estimate.TrackTimeAtVideoStartUtc, TrackAlignmentMethod.Motion, estimate.Correlation) : null;
+		if (ExternalTrackSync.Estimate(frames, fps, track) is { } estimate) return new TrackAlignment(estimate.TrackTimeAtVideoStartUtc, TrackAlignmentMethod.Motion, estimate.Correlation);
+		return WholeRecordingClockAnchor(frames, fps, track, recordingStartUtc) is { } byContainer ? new TrackAlignment(byContainer, TrackAlignmentMethod.ContainerClock) : null;
+	}
+
+	/// <summary>
+	///     The last resort for a track with no recording spans (a phone's): the container's creation time, when the whole recording then lies
+	///     inside the track. Off by the difference of the two clocks, so it is only a proposal to be checked on the picture.
+	/// </summary>
+	public static DateTime? WholeRecordingClockAnchor(IReadOnlyList<TelemetryFrame> frames, double fps, ExternalTrack track, DateTime? recordingStartUtc)
+	{
+		if (recordingStartUtc is not { } start || frames.Count == 0 || fps <= 0) return null;
+
+		double length = frames[^1].SampleTimeSeconds - frames[0].SampleTimeSeconds + 1 / fps;
+		var slack = TimeSpan.FromSeconds(SpanClockSlackSeconds);
+		return start >= track.StartUtc - slack && start.AddSeconds(length) <= track.EndUtc + slack ? start.AddSeconds(-frames[0].SampleTimeSeconds) : null;
 	}
 
 	/// <summary>The share (0 to 1) of the recording's length that falls inside the track's time range under this synchronization.</summary>

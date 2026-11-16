@@ -75,7 +75,7 @@ public partial class KeyMomentsEditor : UserControl
 	/// </summary>
 	private void ShowPeaks()
 	{
-		double? ridingFrom = _hasRidePeaks && MovingOnlyCheck.IsChecked == true ? (double)(RidingFromBox.Value ?? 2) : null;
+		double? ridingFrom = _hasRidePeaks && MovingOnlyCheck.IsChecked == true ? (double)(RidingFromBox.Value ?? 3) : null;
 		bool any = false;
 		int position = 0;
 		foreach (PeakKind kind in PeakKinds)

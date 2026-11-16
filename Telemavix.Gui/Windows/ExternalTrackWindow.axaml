@@ -87,10 +87,10 @@
 				</StackPanel>
 
 				<StackPanel Name="SyncStep" Spacing="14" IsVisible="False">
-					<Border Classes="settingsCard">
-						<StackPanel Classes="settingBlock" Spacing="4">
-							<TextBlock Name="VerdictText" Classes="rowTitle" TextWrapping="Wrap" />
-							<TextBlock Name="VerdictHint" Classes="rowHint" />
+					<Border Name="VerdictAlert" Classes="alert note">
+						<StackPanel Spacing="4">
+							<TextBlock Name="VerdictText" Classes="alertTitle" />
+							<TextBlock Name="VerdictHint" Classes="alertText" />
 						</StackPanel>
 					</Border>
 

@@ -40,7 +40,7 @@
 			          ToolTip.Tip="{x:Static local:Strings.KeyMoments_MovingOnlyHint}" Click="OnMovingOnlyClick" />
 			<Grid Name="RidingFromPanel" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="28,0,0,0">
 				<TextBlock Text="{x:Static local:Strings.KeyMoments_RidingFrom}" Classes="infoLabel" Margin="0" VerticalAlignment="Center" />
-				<NumericUpDown Grid.Column="1" Name="RidingFromBox" Width="130" Minimum="0.5" Maximum="50" Increment="0.5" Value="2"
+				<NumericUpDown Grid.Column="1" Name="RidingFromBox" Width="130" Minimum="0.5" Maximum="50" Increment="0.5" Value="3"
 				               FormatString="0.0" ValueChanged="OnRidingFromChanged" />
 			</Grid>
 		</StackPanel>

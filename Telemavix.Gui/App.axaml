@@ -37,6 +37,8 @@
 			<SolidColorBrush x:Key="SuccessHoverBrush" Color="{StaticResource SuccessHoverColor}" />
 			<SolidColorBrush x:Key="SuccessPressedBrush" Color="{StaticResource SuccessPressedColor}" />
 			<SolidColorBrush x:Key="SuccessSubtleBrush" Color="{StaticResource SuccessSubtleColor}" />
+			<SolidColorBrush x:Key="WarningSubtleBrush" Color="{StaticResource WarningSubtleColor}" />
+			<SolidColorBrush x:Key="DangerSubtleBrush" Color="{StaticResource DangerSubtleColor}" />
 			<SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
 			<SolidColorBrush x:Key="WarningHoverBrush" Color="{StaticResource WarningHoverColor}" />
 			<SolidColorBrush x:Key="WarningPressedBrush" Color="{StaticResource WarningPressedColor}" />
@@ -327,6 +329,47 @@
 			<Setter Property="BorderThickness" Value="1" />
 			<Setter Property="CornerRadius" Value="12" />
 			<Setter Property="Padding" Value="12" />
+		</Style>
+		<Style Selector="Border.alert">
+			<Setter Property="BorderThickness" Value="3,0,0,0" />
+			<Setter Property="CornerRadius" Value="6" />
+			<Setter Property="Padding" Value="14,10" />
+		</Style>
+		<Style Selector="Border.alert TextBlock.alertTitle">
+			<Setter Property="FontWeight" Value="SemiBold" />
+			<Setter Property="TextWrapping" Value="Wrap" />
+		</Style>
+		<Style Selector="Border.alert TextBlock.alertText">
+			<Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+			<Setter Property="TextWrapping" Value="Wrap" />
+		</Style>
+		<Style Selector="Border.alert.note">
+			<Setter Property="Background" Value="{StaticResource AccentSubtleBrush}" />
+			<Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+		</Style>
+		<Style Selector="Border.alert.note TextBlock.alertTitle">
+			<Setter Property="Foreground" Value="{StaticResource AccentHoverBrush}" />
+		</Style>
+		<Style Selector="Border.alert.success">
+			<Setter Property="Background" Value="{StaticResource SuccessSubtleBrush}" />
+			<Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+		</Style>
+		<Style Selector="Border.alert.success TextBlock.alertTitle">
+			<Setter Property="Foreground" Value="{StaticResource SuccessHoverBrush}" />
+		</Style>
+		<Style Selector="Border.alert.warning">
+			<Setter Property="Background" Value="{StaticResource WarningSubtleBrush}" />
+			<Setter Property="BorderBrush" Value="{StaticResource WarningBrush}" />
+		</Style>
+		<Style Selector="Border.alert.warning TextBlock.alertTitle">
+			<Setter Property="Foreground" Value="{StaticResource WarningHoverBrush}" />
+		</Style>
+		<Style Selector="Border.alert.error">
+			<Setter Property="Background" Value="{StaticResource DangerSubtleBrush}" />
+			<Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+		</Style>
+		<Style Selector="Border.alert.error TextBlock.alertTitle">
+			<Setter Property="Foreground" Value="{StaticResource DangerHoverBrush}" />
 		</Style>
 		<Style Selector="TextBlock.infoLabel">
 			<Setter Property="Opacity" Value="0.55" />

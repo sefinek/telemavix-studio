@@ -329,13 +329,26 @@ public partial class ExternalTrackWindow : Window
 		if (_proposal is { } found)
 		{
 			VerdictText.Text = ProposalText(found);
+			SetAlert(found.NeedsVerification ? "warning" : "success");
 			Show(VerdictHint, string.Format(Strings.Track_Auto_Start, found.VideoStartUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)));
+			double lead = LoadedTrack is { } loaded ? (loaded.StartUtc - found.VideoStartUtc).TotalSeconds : 0;
+			if (lead >= 0.5) Show(VerdictHint, VerdictHint.Text + " " + string.Format(Strings.Track_Auto_LeadsTrack, lead.ToString("0.#", CultureInfo.CurrentCulture)));
 		}
 		else
 		{
 			VerdictText.Text = Strings.Track_Auto_None;
+			SetAlert("error");
 			Show(VerdictHint, Strings.Track_Auto_NoneHint);
 		}
+	}
+
+	private void SetAlert(string kind)
+	{
+		VerdictAlert.Classes.Remove("note");
+		VerdictAlert.Classes.Remove("success");
+		VerdictAlert.Classes.Remove("warning");
+		VerdictAlert.Classes.Remove("error");
+		VerdictAlert.Classes.Add(kind);
 	}
 
 	/// <summary>The synchronization the second step describes, or null with the reason shown when it can't be used.</summary>

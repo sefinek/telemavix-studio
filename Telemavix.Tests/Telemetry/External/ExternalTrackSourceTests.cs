@@ -126,12 +126,16 @@ public sealed class ExternalTrackSourceTests
 	}
 
 	[TestMethod]
-	public void Apply_OverlappingCameraClockWithoutMatchingMotionDoesNotProveAlignment()
+	public void Propose_WithoutMatchingMotionFallsBackToTheCameraClockAndAsksForVerification()
 	{
 		string directory = Directory.CreateTempSubdirectory().FullName;
 		try
 		{
-			Assert.ThrowsExactly<InvalidOperationException>(() => new ExternalTrackSource(WriteTrack(directory)).Apply(Frames(), Fps, TrackStart.AddSeconds(5)));
+			ExternalTrack track = ExternalTrackReader.Read(WriteTrack(directory));
+			TrackAlignment? proposed = ExternalTrackSource.Propose(Frames(), Fps, TrackStart.AddSeconds(5), track);
+
+			Assert.AreEqual(TrackAlignmentMethod.ContainerClock, proposed?.Method);
+			Assert.IsTrue(proposed!.NeedsVerification);
 		}
 		finally
 		{

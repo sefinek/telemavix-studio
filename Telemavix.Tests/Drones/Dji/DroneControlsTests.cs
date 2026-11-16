@@ -202,6 +202,22 @@ public sealed class DroneControlsTests
 	}
 
 	[TestMethod]
+	public void WholeRecordingClockAnchor_NeedsTheWholeRecordingInsideTheTrack()
+	{
+		var builder = new FlightLogBuilder(12, Started);
+		builder.Add(Custom, CustomRecord(Started));
+		for (int i = 0; i < 600; i++) builder.Add(Osd, OsdRecord(50 + i * 1e-5, 20, 5, 0, 0, 10, true));
+		var log = FlightLog.Parse(builder.Build());
+		ExternalTrack track = DjiFlightLogFormat.ToTrack(log, log.Decode(null));
+		List<TelemetryFrame> frames = [.. Enumerable.Range(0, 100).Select(i => new TelemetryFrame(i, i / 10.0, 0, 0, 0, null, 0, 0, 0, HasGpsFix: false))];
+
+		Assert.AreEqual(track.StartUtc.AddSeconds(5), ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.StartUtc.AddSeconds(5)));
+		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.EndUtc.AddSeconds(30)), "ends after the track");
+		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.StartUtc.AddMinutes(-5)), "starts before the track");
+		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, null));
+	}
+
+	[TestMethod]
 	public void Coverage_IsTheShareOfTheRecordingInsideTheTracksRange()
 	{
 		var builder = new FlightLogBuilder(12, Started);

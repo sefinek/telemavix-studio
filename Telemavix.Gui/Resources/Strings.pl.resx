@@ -2986,7 +2986,7 @@ Wybierz oryginalny plik z karty pamięci kamery lub drona ({0}). Nagrania wyeksp
     <value>Wykryto</value>
   </data>
   <data name="Summary_TelemetryNoGpsFix" xml:space="preserve">
-    <value>Brak pozycji GPS</value>
+    <value>Brak GPS</value>
   </data>
   <data name="Summary_TelemetryNoGpsFixTip" xml:space="preserve">
     <value>Nagranie zawiera telemetrię, ale nie ma w niej pozycji GPS. Prędkość, dystans, wysokość, mapa, kompas i statystyki trasy są niedostępne.</value>
@@ -3698,7 +3698,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Pasek pojawi się, gdy prędkość po raz pierwszy osiągnie ustawiony próg. Moment pojawienia się jest obliczany automatycznie i wyświetlany w zablokowanym polu „Pojawia się”.</value>
   </data>
   <data name="KeyMoments_MovingOnly" xml:space="preserve">
-    <value>Przeciążenie i przechył tylko podczas jazdy</value>
+    <value>Przeciążenie i przechył tylko podczas ruchu</value>
   </data>
   <data name="KeyMoments_MovingOnlyHint" xml:space="preserve">
     <value>Na postoju oraz podczas ruszania i zatrzymywania się odczyty przeciążenia i przechyłu mogą wynikać z poruszania kamerą lub odstawiania roweru. Aby uwzględnić dany moment, prędkość musi utrzymywać się na poziomie co najmniej ustawionego progu przez 3 sekundy przed nim i 3 sekundy po nim. Filtr nie dotyczy prędkości, wysokości ani nachylenia trasy.</value>
@@ -5075,6 +5075,9 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="Track_Auto_Start" xml:space="preserve">
     <value>Początek filmu odpowiada godzinie {0} UTC na trasie.</value>
+  </data>
+  <data name="Track_Auto_LeadsTrack" xml:space="preserve">
+    <value>Film zaczyna się {0} s przed pierwszym punktem trasy, więc jego początek będzie bez telemetrii. Telefon zaczął nagrywać później niż kamera.</value>
   </data>
   <data name="Track_Auto_None" xml:space="preserve">
     <value>Nie udało się dopasować trasy automatycznie.</value>

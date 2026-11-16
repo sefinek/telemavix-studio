@@ -5,7 +5,7 @@ public enum TrackAlignmentMethod
 	/// <summary>The track holds the camera's own start and stop of recording, which is as long as the footage: the start is known to the frame.</summary>
 	RecordingSpan,
 
-	/// <summary>The container's creation time falls inside one of the track's recording spans; it is off by the difference of the two clocks.</summary>
+	/// <summary>The container's creation time falls inside one of the track's recording spans, or (a track with none) the whole recording lies inside the track; it is off by the difference of the two clocks.</summary>
 	ContainerClock,
 
 	/// <summary>Matched by how the camera and the track moved - an approximation (see TrackSyncEstimate).</summary>

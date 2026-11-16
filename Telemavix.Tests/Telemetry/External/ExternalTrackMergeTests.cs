@@ -76,6 +76,17 @@ public sealed class ExternalTrackMergeTests
 	}
 
 	[TestMethod]
+	public void Apply_ARecordEverySecondWithOnlyTwoFixesIsALossNotAStraightLine()
+	{
+		ExternalPhoneSample[] samples = [.. Enumerable.Range(1, 99).Select(i => new ExternalPhoneSample(T0.AddSeconds(i), new PhoneReading(Satellites: 35)))];
+		var track = new ExternalTrack([Point(0, 53.1, 5), Point(100, 53.2, 5)], phoneSamples: samples);
+
+		TelemetryFrame middle = ExternalTrackMerge.Apply(Frames(25 * 100), track, T0)[25 * 50];
+
+		Assert.IsFalse(middle.HasGpsFix, "the phone wrote a record each second, so a hundred seconds between two fixes is a gap");
+	}
+
+	[TestMethod]
 	public void PhoneAt_HoldsTheLatestReadingAndLetsGoOfAStaleOne()
 	{
 		var track = new ExternalTrack([new ExternalTrackPoint(T0, 53.1, 18.9), new ExternalTrackPoint(T0.AddSeconds(1), 53.1001, 18.9)],

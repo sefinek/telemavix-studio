@@ -78,7 +78,7 @@ public readonly record struct ExternalTrackSample(
 /// </summary>
 public sealed class ExternalTrack
 {
-	/// <summary>A gap longer than this many times the fixes' usual interval (and than MinGapSeconds) is a gap.</summary>
+	/// <summary>A gap longer than this many times the records' usual interval (and than MinGapSeconds) is a gap. Records without a position count too: a phone that writes a row every second but gets two fixes is losing its signal, not moving in a line.</summary>
 	private const double GapIntervals = 3;
 
 	private const double MinGapSeconds = 3;
@@ -115,7 +115,8 @@ public sealed class ExternalTrack
 		Pauses = [.. (pauses ?? []).OrderBy(p => p.FromUtc)];
 		Recordings = [.. (recordings ?? []).Where(r => r.EndUtc > r.StartUtc).OrderBy(r => r.StartUtc)];
 		Batteries = [.. (batteries ?? []).Where(b => double.IsFinite(b.Percent) && b.Percent is >= 0 and <= 100).OrderBy(b => b.Utc)];
-		double[] intervals = [.. sorted.Zip(sorted.Skip(1), (a, b) => (b.Utc - a.Utc).TotalSeconds).Order()];
+		DateTime[] rhythm = [.. sorted.Select(p => p.Utc).Concat((phoneSamples ?? []).Select(s => s.Utc)).Distinct().Order()];
+		double[] intervals = [.. rhythm.Zip(rhythm.Skip(1), (a, b) => (b - a).TotalSeconds).Order()];
 		MedianIntervalSeconds = intervals[intervals.Length / 2];
 		GapSeconds = Math.Max(minGapSeconds ?? MinGapSeconds, GapIntervals * MedianIntervalSeconds);
 

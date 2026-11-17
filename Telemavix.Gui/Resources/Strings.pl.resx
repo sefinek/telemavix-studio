@@ -1748,9 +1748,6 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
   <data name="Main_Watermark" xml:space="preserve">
     <value>Znak wodny</value>
   </data>
-  <data name="Main_Widgets" xml:space="preserve">
-    <value>WIDŻETY</value>
-  </data>
   <data name="Main_WidgetSettings" xml:space="preserve">
     <value>Ustawienia widżetu</value>
   </data>

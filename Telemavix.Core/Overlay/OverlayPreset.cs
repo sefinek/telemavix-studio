@@ -175,15 +175,7 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 	public static OverlayPreset CreateTelemavixGps(string id, string name)
 	{
 		OverlayPreset basis = CreateDefault(id, name);
-		const float width = OverlayElementBounds.ReferenceWidth;
 		float top = basis.Elements.First(e => e is DateTimeTextElement).Y;
-
-		// The GPS alert is the top center, on the row of the date and the phone's column; the alert's panel is as high as a stat, so nothing sits under it.
-		OverlayElement AtTopCenter(GpsAlertElement alert)
-		{
-			SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.GpsAlert, 0, 0, 1);
-			return alert with { X = width / 2f - (box.Left + box.Right) / 2, Y = top - box.Top };
-		}
 
 		Dictionary<OverlayElementType, OverlayElement> column = RightEdgeColumn(top,
 		[
@@ -199,12 +191,19 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 				.. basis.Elements.Select(e => e switch
 				{
 					RollGaugeElement or GMeterElement => e with { Visible = false },
-					GpsAlertElement alert => AtTopCenter(alert),
+					GpsAlertElement alert => GpsAlertAtTopCenter(alert, top),
 					SatellitesElement or CellSignalElement or DeviceBatteryElement or PressureElement or LightElement => column[e.Type] with { Id = e.Id },
 					_ => e
 				})
 			]
 		};
+	}
+
+	/// <summary>The GPS alert at the top center, on the row of the date and a right-edge column; its panel is as high as a stat, so nothing sits under it.</summary>
+	private static OverlayElement GpsAlertAtTopCenter(GpsAlertElement alert, float top)
+	{
+		SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.GpsAlert, 0, 0, 1);
+		return alert with { X = OverlayElementBounds.ReferenceWidth / 2f - (box.Left + box.Right) / 2, Y = top - box.Top };
 	}
 
 	/// <summary>
@@ -232,7 +231,7 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 
 	/// <summary>
 	///     The layout for an activity recorded by a Garmin watch (a FIT file): the default one: a widget a watch's activity has no data for is switched off by OverlayDataRequirements like for any file.
-	///     The watch's own readings are a column down the right edge, where the G-meter was: the heart rate (coloured by its zone), the cadence and the battery;
+	///     The watch's own readings are a column down the right edge, where the G-meter was (so the G-meter is off): the heart rate (coloured by its zone), the cadence and the battery, with the GPS alert at the top center;
 	///     the trip's figures and the elevation profile stay off, as in the default layout. A widget with no data behind it is turned off at render time (OverlayDataRequirements).
 	/// </summary>
 	public static OverlayPreset CreateGarmin(string id, string name)
@@ -252,6 +251,8 @@ public sealed record OverlayPreset(string Id, string Name, List<OverlayElement> 
 				.. basis.Elements.Select(e => e switch
 				{
 					HeartRateElement or CadenceElement or DeviceBatteryElement => column[e.Type] with { Id = e.Id },
+					GMeterElement => e with { Visible = false },
+					GpsAlertElement alert => GpsAlertAtTopCenter(alert, top),
 					_ => e
 				})
 			]

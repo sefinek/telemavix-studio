@@ -186,6 +186,28 @@ public sealed class OverlayPresetTests
 	}
 
 	[TestMethod]
+	public void CreateGarmin_TheWatchesColumnReplacesTheGMeterAndTheGpsAlertIsTheTopCenter()
+	{
+		var basis = OverlayPreset.CreateDefault("d", "Default");
+		var garmin = OverlayPreset.CreateGarmin("x", "Garmin");
+
+		Assert.IsFalse(garmin.Elements.Single(e => e.Type == OverlayElementType.GMeter).Visible, "the column is where the G-meter was");
+		OverlayElement alert = garmin.Elements.Single(e => e.Type == OverlayElementType.GpsAlert);
+		SKRect box = OverlayElementBounds.GetBounds(OverlayElementType.GpsAlert, alert.X, alert.Y, 1);
+		Assert.AreEqual(OverlayElementBounds.ReferenceWidth / 2f, (box.Left + box.Right) / 2, 1, "the GPS alert is the top center, not between the watch's readings");
+
+		OverlayElementType[] changed = [OverlayElementType.GMeter, OverlayElementType.GpsAlert, OverlayElementType.HeartRate, OverlayElementType.Cadence, OverlayElementType.DeviceBattery];
+		foreach (OverlayElement element in basis.Elements.Where(e => !changed.Contains(e.Type)))
+			Assert.AreEqual(element, garmin.Elements.Single(e => e.Id == element.Id), element.Type.ToString());
+	}
+
+	[TestMethod]
+	public void CreateGarmin_NoShownWidgetCoversAnother()
+	{
+		AssertWidgetsDoNotOverlap(OverlayPreset.CreateGarmin("x", "Garmin"), false);
+	}
+
+	[TestMethod]
 	public void CreateDrone_NoShownWidgetCoversAnother()
 	{
 		AssertWidgetsDoNotOverlap(OverlayPreset.CreateDrone("x", "Drones"), false);

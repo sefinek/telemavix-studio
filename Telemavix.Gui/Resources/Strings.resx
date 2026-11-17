@@ -1748,9 +1748,6 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
   <data name="Main_Watermark" xml:space="preserve">
     <value>Watermark</value>
   </data>
-  <data name="Main_Widgets" xml:space="preserve">
-    <value>WIDGETS</value>
-  </data>
   <data name="Main_WidgetSettings" xml:space="preserve">
     <value>Widget settings</value>
   </data>

@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using SkiaSharp;
 using Telemavix.Core.Overlay;
 
@@ -771,6 +772,24 @@ public partial class MainWindow
 		WidgetSettingsPanelHost.IsEnabled = !locked;
 		WidgetSettingsResetButton.IsEnabled = !locked;
 		BuiltInSettingsNotice.IsVisible = locked;
+	}
+
+	/// <summary>
+	///     A disabled host takes no pointer events, links included, though a link only reads. The press ends up on the enabled
+	///     scroll viewer above, which finds the link under the pointer and runs the action it carries in its Tag.
+	/// </summary>
+	private void OnLockedWidgetSettingsPressed(object? sender, PointerPressedEventArgs e)
+	{
+		if (!IsActivePresetDefault || e.Handled || !e.GetCurrentPoint(WidgetSettingsPanelHost).Properties.IsLeftButtonPressed) return;
+
+		foreach (Visual visual in WidgetSettingsPanelHost.GetVisualsAt(e.GetPosition(WidgetSettingsPanelHost)))
+		{
+			if (visual is not TextBlock { Tag: Action open } link || !link.Classes.Contains("link")) continue;
+
+			open();
+			e.Handled = true;
+			return;
+		}
 	}
 
 	private void OnWidgetSettingsBackClick(object? sender, RoutedEventArgs e)

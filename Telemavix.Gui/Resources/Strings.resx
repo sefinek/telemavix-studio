@@ -1791,10 +1791,10 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
     <value>Allowed in a film, with conditions</value>
   </data>
   <data name="MapSource_BestNoKey" xml:space="preserve">
-    <value>Esri's public server without a key is used now, fine for previews and testing only. Paste a free Esri key below and the same map may be shown in a film.</value>
+    <value>The map is currently downloaded from Esri's public server, which is intended for previews and testing only. To use the same map in a video, paste a free Esri API key below.</value>
   </data>
   <data name="MapSource_BestUses" xml:space="preserve">
-    <value>{0} with your key is used now.</value>
+    <value>Currently showing {0}, downloaded using your API key.</value>
   </data>
   <data name="MapSource_GetKeyShort" xml:space="preserve">
     <value>How do I get a key?</value>
@@ -1836,7 +1836,13 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
     <value>Generate a free Esri key</value>
   </data>
   <data name="MapSource_KeyRejected" xml:space="preserve">
-    <value>Esri rejected this key, so the public Esri server is used (preview and tests only, not for a film).</value>
+    <value>The API key was not accepted. The app is now using Esri's public maps, which may not be included in published videos.</value>
+  </data>
+  <data name="MapKeyNotice_Title" xml:space="preserve">
+    <value>Esri API key not accepted</value>
+  </data>
+  <data name="MapKeyNotice_Message" xml:space="preserve">
+    <value>The app is now using Esri's public maps. You can use them for previews and testing, but the terms do not allow them to be included in published videos. Enter a valid API key in the map source settings.</value>
   </data>
   <data name="MapSource_ApiKeyRequired" xml:space="preserve">
     <value>This map works only with an API key.</value>
@@ -1852,6 +1858,21 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
   </data>
   <data name="MapTerms_Allowed" xml:space="preserve">
     <value>yes</value>
+  </data>
+  <data name="MapTerms_Cache" xml:space="preserve">
+    <value>Tile storage on disk</value>
+  </data>
+  <data name="MapTerms_CacheAllowed" xml:space="preserve">
+    <value>no time limit</value>
+  </data>
+  <data name="MapTerms_CacheForbidden" xml:space="preserve">
+    <value>not allowed - the app does not save tiles</value>
+  </data>
+  <data name="MapTerms_CacheNotStated" xml:space="preserve">
+    <value>not specified in the terms - the app stores tiles for {0} day|not specified in the terms - the app stores tiles for {0} days</value>
+  </data>
+  <data name="MapTerms_CacheTemporary" xml:space="preserve">
+    <value>temporary storage only - the app stores tiles for {0} day|temporary storage only - the app stores tiles for {0} days</value>
   </data>
   <data name="MapTerms_Commercial" xml:space="preserve">
     <value>General commercial use of maps</value>

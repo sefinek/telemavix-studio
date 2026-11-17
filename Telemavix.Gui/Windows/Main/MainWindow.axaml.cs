@@ -98,6 +98,7 @@ public partial class MainWindow : Window
 	public MainWindow()
 	{
 		InitializeComponent();
+		WidgetSettingsColumnScroll.AddHandler(PointerPressedEvent, OnLockedWidgetSettingsPressed, RoutingStrategies.Bubble);
 		Opened += OnWindowOpened;
 
 		OverlaySettings settings = OverlaySettingsStore.Load();
@@ -323,6 +324,7 @@ public partial class MainWindow : Window
 			}
 		}
 
+		await MapKeyNotice.CheckStoredAsync(this);
 		await OfferAppUpdateAsync(await UpdateChecks.Latest);
 	}
 

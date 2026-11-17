@@ -624,9 +624,10 @@ public partial class WelcomeWindow : Window
 
 		if (key.Length > 0)
 		{
-			await MapKeyCheck.CheckEsriAsync(key);
+			MapKeyVerdict verdict = await MapKeyCheck.CheckEsriAsync(key);
 			if (previewKey != _mapPreviewKey) return;
 			ShowMapKeyStatus();
+			if (verdict == MapKeyVerdict.Rejected) await MapKeyNotice.ShowAsync(this, key);
 		}
 
 		Dictionary<string, string> keys = _mapApiKeys is { } existing ? new Dictionary<string, string>(existing) : [];

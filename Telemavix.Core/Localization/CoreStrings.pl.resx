@@ -189,17 +189,14 @@
   <data name="Map_CartoPositronName" xml:space="preserve">
     <value>CARTO Positron (jasna)</value>
   </data>
-  <data name="Map_EoxName" xml:space="preserve">
-    <value>Sentinel-2 cloudless 2016 (EOX, mało szczegółów)</value>
-  </data>
   <data name="Map_GugikName" xml:space="preserve">
     <value>Ortofotomapa GUGiK (tylko Polska)</value>
   </data>
-  <data name="Map_NoteLowDetail" xml:space="preserve">
-    <value>Zdjęcia satelitarne o rozdzielczości 10 m na piksel nadają się do wstępu z trasą, ale przy dużym przybliżeniu są rozmyte.</value>
-  </data>
   <data name="Map_NoteMapTilerVideo" xml:space="preserve">
-    <value>Wideo dozwolone w serwisach internetowych (YouTube, Vimeo) dla kanałów do 100 tys. subskrybentów. Darmowy plan tylko do użytku niekomercyjnego.</value>
+    <value>Mapę można pokazywać w filmach publikowanych w serwisach takich jak YouTube i Vimeo, na kanałach mających do 100 tys. subskrybentów. Darmowy plan jest dostępny wyłącznie do użytku niekomercyjnego. Regulamin zabrania masowego pobierania kafelków, ale nie precyzuje, czy pobranie mapy całej trasy podlega temu ograniczeniu. Aplikacja przechowuje kafelki na dysku tylko tymczasowo.</value>
+  </data>
+  <data name="Map_NoteThunderforest" xml:space="preserve">
+    <value>Regulamin pozwala przechowywać kafelki na dysku. Pobieranie ich masowo lub z wyprzedzeniem wymaga jednak odpowiedniego planu, dlatego przygotowanie mapy całej trasy może wymagać płatnej subskrypcji. Darmowy plan obejmuje 150 tys. kafelków miesięcznie.</value>
   </data>
   <data name="Map_NoteSharedServer" xml:space="preserve">
     <value>Darmowy serwer społeczności: nie może być nadmiernie obciążany, kafelki mogą się wczytywać wolniej.</value>
@@ -597,7 +594,7 @@
     <value>Mapa niedostępna</value>
   </data>
   <data name="Map_EsriKeyRejected" xml:space="preserve">
-    <value>Esri odrzuciło klucz API, więc używany jest publiczny serwer Esri. Nadaje się tylko do podglądu i testów - wpisz poprawny klucz, aby pokazać mapę w filmie.</value>
+    <value>Klucz API Esri nie został zaakceptowany. Aplikacja korzysta teraz z publicznych map Esri, których nie wolno umieszczać w publikowanych filmach. Wprowadź prawidłowy klucz API w ustawieniach źródła mapy.</value>
   </data>
   <data name="Overlay_MapDownloading" xml:space="preserve">
     <value>Pobieranie mapy...</value>

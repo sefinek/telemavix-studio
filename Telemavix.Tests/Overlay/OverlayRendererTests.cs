@@ -217,13 +217,13 @@ public sealed class OverlayRendererTests
 	public void MapCredit_FollowsTheTermsOfTheMapsOnScreen()
 	{
 		List<DerivedFrame> frames = Route(300, 0);
-		var eox = new MapWidgetElement { X = 1920, Y = 1080, MapProviderId = MapProviders.EoxId };
-		MapWidgetElement gugik = eox with { MapProviderId = MapProviders.GugikId };
+		var keyed = new MapWidgetElement { X = 1920, Y = 1080, MapProviderId = MapProviders.MapTilerSatelliteId };
+		MapWidgetElement gugik = keyed with { MapProviderId = MapProviders.GugikId };
 		var hiddenCredit = new MapAttributionElement { X = 100, Y = 2000, Visible = false };
 
 		// Without a mosaic both maps draw the same placeholder, so only the credit tells them apart.
-		CollectionAssert.AreNotEqual(RenderLayout([gugik]), RenderLayout([eox]), "a required credit without a credit widget");
-		CollectionAssert.AreNotEqual(RenderLayout([gugik, hiddenCredit]), RenderLayout([eox, hiddenCredit]), "a required credit hidden");
+		CollectionAssert.AreNotEqual(RenderLayout([gugik]), RenderLayout([keyed]), "a required credit without a credit widget");
+		CollectionAssert.AreNotEqual(RenderLayout([gugik, hiddenCredit]), RenderLayout([keyed, hiddenCredit]), "a required credit hidden");
 		CollectionAssert.AreEqual(RenderLayout([gugik]), RenderLayout([gugik, hiddenCredit]), "a brief credit hidden");
 		Assert.IsFalse(RenderLayout([hiddenCredit with { Visible = true }]).Any(b => b != 0), "a credit without a map");
 

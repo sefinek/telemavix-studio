@@ -189,17 +189,14 @@
   <data name="Map_CartoPositronName" xml:space="preserve">
     <value>CARTO Positron (light)</value>
   </data>
-  <data name="Map_EoxName" xml:space="preserve">
-    <value>Sentinel-2 cloudless 2016 (EOX, low detail)</value>
-  </data>
   <data name="Map_GugikName" xml:space="preserve">
     <value>GUGiK orthophoto (Poland only)</value>
   </data>
-  <data name="Map_NoteLowDetail" xml:space="preserve">
-    <value>Satellite imagery at 10 m per pixel is suitable for the route intro but looks blurry when zoomed in closely.</value>
-  </data>
   <data name="Map_NoteMapTilerVideo" xml:space="preserve">
-    <value>Video allowed on internet platforms (YouTube, Vimeo) for channels of up to 100,000 subscribers. The free plan is for non-commercial use only.</value>
+    <value>Maps may be shown in videos published on platforms such as YouTube and Vimeo, on channels with up to 100,000 subscribers. The free plan is for non-commercial use only. The terms prohibit bulk tile downloads but do not specify whether downloading a map of an entire route falls under this restriction. The app stores tiles on disk only temporarily.</value>
+  </data>
+  <data name="Map_NoteThunderforest" xml:space="preserve">
+    <value>The terms allow tiles to be stored on disk. However, downloading them in bulk or in advance requires a suitable plan, so preparing a map of an entire route may require a paid subscription. The free plan includes 150,000 tiles per month.</value>
   </data>
   <data name="Map_NoteSharedServer" xml:space="preserve">
     <value>A free community server: it mustn't be overloaded, and tiles may load more slowly.</value>
@@ -597,7 +594,7 @@
     <value>Map unavailable</value>
   </data>
   <data name="Map_EsriKeyRejected" xml:space="preserve">
-    <value>Esri rejected the API key, so the public Esri server is used instead. It is only good for preview and tests - enter a valid key to show the map in a film.</value>
+    <value>The Esri API key was not accepted. The app is now using Esri's public maps, which may not be included in published videos. Enter a valid API key in the map source settings.</value>
   </data>
   <data name="Overlay_MapDownloading" xml:space="preserve">
     <value>Downloading map...</value>

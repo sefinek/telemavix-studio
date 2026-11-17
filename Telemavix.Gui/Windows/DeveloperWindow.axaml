@@ -38,6 +38,7 @@
 						<Button Content="Close while rendering" Tag="close-rendering" Click="OnActionClick" />
 						<Button Content="Export rights" Tag="export-notice" Click="OnActionClick" />
 						<Button Content="DJI API terms" Tag="dji-api-notice" Click="OnActionClick" />
+						<Button Content="Esri key rejected" Tag="map-key-notice" Click="OnActionClick" />
 					</WrapPanel>
 					<TextBlock Text="RENDER QUEUE" Classes="sectionLabel" />
 					<WrapPanel>

@@ -15,6 +15,22 @@ public enum MapUse
 	Conditional
 }
 
+/// <summary>What a provider's terms say about keeping its tiles on disk. Silence is not permission (see MapTerms.CacheMaxAge).</summary>
+public enum MapCache
+{
+	/// <summary>The terms say nothing - the app keeps tiles only for MapTerms.UnstatedCacheDays.</summary>
+	NotStated,
+
+	/// <summary>Tiles are never written to disk.</summary>
+	Forbidden,
+
+	/// <summary>Only a temporary cache - the app's own limit is MapTerms.CacheDays.</summary>
+	Temporary,
+
+	/// <summary>The terms allow keeping tiles on the device without a time limit.</summary>
+	Allowed
+}
+
 /// <summary>How long a map's credit has to be on screen.</summary>
 public enum MapCreditRule
 {
@@ -27,21 +43,32 @@ public enum MapCreditRule
 
 /// <summary>
 ///     A tile server's terms as the app follows them - shown in the map picker (MapSourcePicker) and acted on: the credit's
-///     rule by the renderer, CacheDays by MapTileFetcher. Checked against each provider's own terms on 2026-10-04 (MapTiler, Thunderforest and Esri's attribution rule again on 2026-11-06) (the
-///     quotes are next to each provider in MapProviders.BuiltIn). Region null = the whole world.
+///     rule by the renderer, Cache by MapTileFetcher (through CacheMaxAge). Checked against each provider's own terms on 2026-10-04 (MapTiler, Thunderforest and Esri's attribution rule again on 2026-11-06,
+///     the cache rules again in the audit of 2026-11-17) (the quotes are next to each provider in MapProviders.BuiltIn). Region null = the whole world.
 /// </summary>
 public sealed record MapTerms(
 	MapUse Commercial,
 	MapUse Video,
 	MapCreditRule Credit,
 	string TermsUrl,
-	// Null: for as long as wanted; 0: never stored on disk.
+	MapCache Cache = MapCache.NotStated,
+	// The app's own limit for Temporary (and for NotStated, where it is UnstatedCacheDays) - the terms give no number of days.
 	int? CacheDays = null,
 	MapRegion? Region = null,
 	string? Note = null,
 	// The map images are CC BY-SA: the share-alike duty covers the map as used, which the export notice says without extending it to the whole film.
 	bool ShareAlike = false)
 {
+	public const int UnstatedCacheDays = 7;
+
+	/// <summary>How long a fetched tile may stay on disk: zero never, null for as long as wanted, else the days.</summary>
+	public TimeSpan? CacheMaxAge => Cache switch
+	{
+		MapCache.Forbidden => TimeSpan.Zero,
+		MapCache.Allowed => null,
+		_ => TimeSpan.FromDays(CacheDays ?? UnstatedCacheDays)
+	};
+
 	public MapUse CommercialVideo => (Commercial, Video) switch
 	{
 		(MapUse.NotAllowed, _) or (_, MapUse.NotAllowed) => MapUse.NotAllowed,
@@ -96,7 +123,7 @@ public static class MapProviders
 	public const string DefaultId = AutoSatelliteId;
 	public const string CustomId = "custom";
 	public const string GugikId = "gugik";
-	public const string EoxId = "eox-2016";
+	public const string OpenTopoMapId = "opentopomap";
 	public const string EsriImageryId = "esri-imagery";
 	public const string EsriPublicId = "esri-public";
 	public const string StreetsAutoId = "streets";
@@ -121,47 +148,48 @@ public static class MapProviders
 	public static readonly MapRegion Poland = new(CoreStrings.Map_RegionPoland, 49.0, 14.07, 54.91, 24.16);
 
 	// "Ortofotomapa jest dostępna bezpłatnie do pobrania i możliwa do dowolnego wykorzystania" - no rule for the credit's
-	// duration; the service metadata names the source.
+	// duration; the service metadata names the source. Geoportal's own app caches WMTS for offline, but nothing says how long
+	// another client may keep tiles, hence the default days; the bulk way to a copy is the download service (WCS).
 	private static readonly MapTerms GugikTerms = new(MapUse.Allowed, MapUse.Allowed, MapCreditRule.Briefly,
 		"https://www.geoportal.gov.pl/pl/dane/ortofotomapa-orto", Region: Poland);
 
-	// 2016 is CC BY 4.0 ("you may stitch multiple requests to fit your needs"); the credit "must be clearly visible wherever
-	// the imagery is displayed". 10 m a pixel: a blur at a close-up map's zoom.
-	private static readonly MapTerms EoxTerms = new(MapUse.Allowed, MapUse.Allowed, MapCreditRule.WhileMapVisible,
-		"https://cloudless.eox.at/license-non-commercial", Note: CoreStrings.Map_NoteLowDetail);
-
 	// "Die Lizenz CC-BY-SA der Online-Karte erlaubt deren kommerzielle Nutzung"; the licence text is to be shown "stets",
-	// "deutlich sichtbar"; the server is for apps as long as mass downloads don't overload it.
+	// "deutlich sichtbar"; the server is for apps as long as mass downloads don't overload it. Nothing on caching or prefetching.
 	private static readonly MapTerms OpenTopoMapTerms = new(MapUse.Allowed, MapUse.Conditional, MapCreditRule.WhileMapVisible,
 		"https://opentopomap.org/about", Note: CoreStrings.Map_NoteSharedServer, ShareAlike: true);
 
 	// Videos "for usage in internet channels (YouTube, Vimeo, etc.) with a maximum 100,000 subscribers"; the free plan "is
 	// limited to non-commercial use"; the credit "is required to be shown on screen while the map is displayed"; only a
-	// "temporary personal cache".
+	// "temporary personal cache" (the 7 days are the app's own, the terms give no number). Also: "it is prohibited to batch or
+	// excessive bulk download of map tiles" and exporting map content outside the Service needs a written agreement (§6) -
+	// whether a route's mosaic is that, the terms leave open.
 	private static readonly MapTerms MapTilerTerms = new(MapUse.PaidPlanOnly, MapUse.Conditional, MapCreditRule.WhileMapVisible,
-		"https://www.maptiler.com/terms/cloud", 7, Note: CoreStrings.Map_NoteMapTilerVideo);
+		"https://www.maptiler.com/terms/cloud", MapCache.Temporary, 7, Note: CoreStrings.Map_NoteMapTilerVideo);
 
 	// "Commercial use is permitted and encouraged"; map images are CC-BY-SA 4.0; tiles "may be cached in-browser and
-	// on-device"; CC-BY-SA permits use in any medium subject to its attribution and share-alike requirements.
+	// on-device for offline use", kept "beyond the HTTP Expiry date, until fresh tiles are downloaded"; but "no bulk-downloading
+	// scraping, pre-downloading, pre-caching or anything similar without an appropriate plan", and no caching proxies or
+	// redistribution. CC-BY-SA permits use in any medium subject to its attribution and share-alike requirements.
 	private static readonly MapTerms ThunderforestTerms = new(MapUse.Allowed, MapUse.Conditional, MapCreditRule.WhileMapVisible,
-		"https://www.thunderforest.com/terms", ShareAlike: true);
+		"https://www.thunderforest.com/terms", MapCache.Allowed, Note: CoreStrings.Map_NoteThunderforest, ShareAlike: true);
 
 	// Commercial use within the free tier's limit, each customer with their own key; the credit "visible on the map itself",
-	// not hidden or faded; a client-side cache of at most 30 days.
+	// not hidden or faded; "downloading or extracting map content in bulk" is on the list of what is not allowed. The Basemaps
+	// terms of 2026-09-29 name no cache limit (the 30 days an earlier reading gave aren't in them), so the cache is NotStated.
 	private static readonly MapTerms CartoTerms = new(MapUse.Allowed, MapUse.NotStated, MapCreditRule.WhileMapVisible,
-		"https://carto.com/legal/basemap-terms", 30, Note: CoreStrings.Map_NoteCarto);
+		"https://carto.com/legal/basemap-terms", Note: CoreStrings.Map_NoteCarto);
 
 	// ArcGIS Location Platform: commercial use on the free tier (2M basemap tiles a month); a film with Esri basemaps
 	// is fine for an Esri customer who credits Esri and its imagery's sources (arcgis.esri.de, "Dos and Don'ts"); Data may
 	// not be scraped, downloaded or stored (Master Agreement), so nothing goes to the disk cache.
 	private static readonly MapTerms EsriTerms = new(MapUse.Allowed, MapUse.Allowed, MapCreditRule.WhileMapVisible,
-		"https://www.esri.com/en-us/legal/terms/full-master-agreement", 0, Note: CoreStrings.Map_NoteEsri);
+		"https://www.esri.com/en-us/legal/terms/full-master-agreement", MapCache.Forbidden, Note: CoreStrings.Map_NoteEsri);
 
 	// The same imagery without a key: Esri's public service is for Esri's own products and ArcGIS accounts - in another
 	// app, let alone a published film, it's against its terms. The default's pick without a key because the user chose
-	// it over GUGiK/EOX; its terms are shown as they are.
+	// it over GUGiK; its terms are shown as they are.
 	private static readonly MapTerms EsriPublicTerms = new(MapUse.NotAllowed, MapUse.NotAllowed, MapCreditRule.WhileMapVisible,
-		"https://www.esri.com/en-us/legal/terms/full-master-agreement", 0, Note: CoreStrings.Map_NoteEsriPublic);
+		"https://www.esri.com/en-us/legal/terms/full-master-agreement", MapCache.Forbidden, Note: CoreStrings.Map_NoteEsriPublic);
 
 	private static readonly MapTerms EsriStreetsPublicTerms = EsriPublicTerms with { Note = CoreStrings.Map_NoteEsriStreetsPublic };
 
@@ -179,8 +207,6 @@ public static class MapProviders
 			"https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0" +
 			"&LAYER=ORTOFOTOMAPA&STYLE=default&FORMAT=image/jpeg&tileMatrixSet=EPSG:3857&tileMatrix=EPSG:3857:{z}&tileRow={y}&tileCol={x}",
 			"Orthophoto © Główny Urząd Geodezji i Kartografii", GugikTerms),
-		new(EoxId, CoreStrings.Map_EoxName, "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg",
-			"EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH\n(Contains modified Copernicus Sentinel data 2016 & 2017)", EoxTerms),
 		new(EsriStreetsId, CoreStrings.Map_EsriStreetsName,
 			"https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/navigation/static/tile/{hz}/{hy}/{hx}?token={api_key}",
 			"Powered by Esri | Esri, TomTom, Garmin, FAO, NOAA, USGS,\n© OpenStreetMap contributors, and the GIS User Community", EsriTerms, EsriKeyGroup),
@@ -190,7 +216,7 @@ public static class MapProviders
 			$"© MapTiler {OsmCredit}", MapTilerTerms, MapTilerKeyGroup),
 		new("maptiler-outdoor", "MapTiler Outdoor", "https://api.maptiler.com/maps/outdoor-v2/256/{z}/{x}/{y}.png?key={api_key}",
 			$"© MapTiler {OsmCredit}", MapTilerTerms, MapTilerKeyGroup),
-		new("opentopomap", "OpenTopoMap", "https://a.tile.opentopomap.org/{z}/{x}/{y}.png",
+		new(OpenTopoMapId, "OpenTopoMap", "https://a.tile.opentopomap.org/{z}/{x}/{y}.png",
 			$"Map data: {OsmCredit}, SRTM | Map style: © OpenTopoMap (CC-BY-SA)", OpenTopoMapTerms),
 		new("thunderforest-cycle", "Thunderforest OpenCycleMap", "https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey={api_key}",
 			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
@@ -199,6 +225,18 @@ public static class MapProviders
 		new("thunderforest-landscape", "Thunderforest Landscape", "https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey={api_key}",
 			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
 		new("thunderforest-atlas", "Thunderforest Atlas", "https://tile.thunderforest.com/atlas/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-transport", "Thunderforest Transport", "https://tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-transport-dark", "Thunderforest Transport Dark", "https://tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-spinal-map", "Thunderforest Spinal Map", "https://tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-pioneer", "Thunderforest Pioneer", "https://tile.thunderforest.com/pioneer/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-mobile-atlas", "Thunderforest Mobile Atlas", "https://tile.thunderforest.com/mobile-atlas/{z}/{x}/{y}.png?apikey={api_key}",
+			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
+		new("thunderforest-neighbourhood", "Thunderforest Neighbourhood", "https://tile.thunderforest.com/neighbourhood/{z}/{x}/{y}.png?apikey={api_key}",
 			"Maps © www.thunderforest.com, Data © www.osm.org/copyright", ThunderforestTerms, ThunderforestKeyGroup),
 		new("carto-positron", CoreStrings.Map_CartoPositronName, "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png?key={api_key}",
 			$"{OsmCredit}, © CARTO", CartoTerms, CartoKeyGroup),
@@ -215,12 +253,12 @@ public static class MapProviders
 	];
 
 	/// <summary>
-	///     The built-in provider with this id - the default's pick for a route nobody knows yet (EOX, the one covering the
-	///     world) for null, the auto id or an id this version doesn't know (a removed one: "esri", "osm"). Not the custom one.
+	///     The built-in provider with this id - Esri's public imagery (the default's pick without a key, which covers the
+	///     world) for null, the auto id or an id this version doesn't know (a removed one: "esri", "osm", "eox-2016"). Not the custom one.
 	/// </summary>
 	public static MapProvider Get(string? id)
 	{
-		return BuiltIn.FirstOrDefault(p => p.Id == id) ?? BuiltIn.First(p => p.Id == EoxId);
+		return BuiltIn.FirstOrDefault(p => p.Id == id) ?? BuiltIn.First(p => p.Id == EsriPublicId);
 	}
 }
 
@@ -252,7 +290,7 @@ public sealed record MapSources(
 	/// <summary>
 	///     The provider a map really uses. No choice (null) is the default style (DefaultProviderId, satellite unless the
 	///     first-run window said streets). The two "best available" picks are Esri's, one source: with its key the keyed
-	///     service, else Esri's public one, as the user chose over GUGiK/EOX. Any other id as it is.
+	///     service, else Esri's public one, as the user chose over GUGiK. Any other id as it is.
 	/// </summary>
 	public string Resolve(string? providerId)
 	{
@@ -372,6 +410,6 @@ public sealed record MapSources(
 	public TimeSpan? CacheMaxAge(string? providerId)
 	{
 		string id = Resolve(providerId);
-		return id != MapProviders.CustomId && MapProviders.Get(id).Terms.CacheDays is { } days ? TimeSpan.FromDays(days) : null;
+		return id != MapProviders.CustomId ? MapProviders.Get(id).Terms.CacheMaxAge : null;
 	}
 }

@@ -30,6 +30,12 @@ public sealed class ExportMapsTests
 	[DataRow("thunderforest-outdoors")]
 	[DataRow("thunderforest-landscape")]
 	[DataRow("thunderforest-atlas")]
+	[DataRow("thunderforest-transport")]
+	[DataRow("thunderforest-transport-dark")]
+	[DataRow("thunderforest-spinal-map")]
+	[DataRow("thunderforest-pioneer")]
+	[DataRow("thunderforest-mobile-atlas")]
+	[DataRow("thunderforest-neighbourhood")]
 	public void ShareAlikeMaps_ReportTheirVideoConditions(string providerId)
 	{
 		MapProvider provider = MapProviders.Get(providerId);
@@ -76,11 +82,11 @@ public sealed class ExportMapsTests
 	[TestMethod]
 	public void RouteIntro_AddsItsOwnProviderOnlyWhenOn()
 	{
-		var off = new OverlaySettings(ShowRouteIntro: false) { ShowRouteIntro = false, RouteIntroMapProvider = MapProviders.EoxId };
+		var off = new OverlaySettings(ShowRouteIntro: false) { ShowRouteIntro = false, RouteIntroMapProvider = MapProviders.MapTilerSatelliteId };
 		OverlaySettings on = off with { ShowRouteIntro = true };
 
 		Assert.IsEmpty(ExportMaps.Used(null, off));
-		Assert.AreEqual(MapProviders.EoxId, ExportMaps.Used(null, on).Single().ProviderId);
+		Assert.AreEqual(MapProviders.MapTilerSatelliteId, ExportMaps.Used(null, on).Single().ProviderId);
 	}
 
 	[TestMethod]

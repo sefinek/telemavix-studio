@@ -1791,10 +1791,10 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>Wolno pokazać w filmie, ale z warunkami</value>
   </data>
   <data name="MapSource_BestNoKey" xml:space="preserve">
-    <value>Teraz używany jest publiczny serwer Esri bez klucza, dobry tylko do podglądu i testów. Wklej poniżej darmowy klucz Esri, a tę samą mapę będzie można pokazać w filmie.</value>
+    <value>Mapa jest obecnie pobierana z publicznego serwera Esri, który służy wyłącznie do podglądu i testów. Aby móc użyć tej samej mapy w filmie, wklej poniżej darmowy klucz API Esri.</value>
   </data>
   <data name="MapSource_BestUses" xml:space="preserve">
-    <value>Teraz używana jest mapa {0} z twoim kluczem.</value>
+    <value>Obecnie wyświetlana jest mapa {0}, pobierana przy użyciu twojego klucza API.</value>
   </data>
   <data name="MapSource_GetKeyShort" xml:space="preserve">
     <value>Jak zdobyć klucz?</value>
@@ -1836,7 +1836,13 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>Wygeneruj darmowy klucz Esri</value>
   </data>
   <data name="MapSource_KeyRejected" xml:space="preserve">
-    <value>Esri odrzuciło ten klucz, więc używany jest publiczny serwer Esri (tylko do podglądu i testów, nie do filmu).</value>
+    <value>Podany klucz API nie został zaakceptowany. Aplikacja korzysta teraz z publicznych map Esri, których nie wolno umieszczać w publikowanych filmach.</value>
+  </data>
+  <data name="MapKeyNotice_Title" xml:space="preserve">
+    <value>Klucz API Esri nie został zaakceptowany</value>
+  </data>
+  <data name="MapKeyNotice_Message" xml:space="preserve">
+    <value>Aplikacja korzysta teraz z publicznych map Esri. Możesz używać ich do podglądu i testów, ale regulamin nie pozwala umieszczać ich w publikowanych filmach. Wprowadź prawidłowy klucz API w ustawieniach źródła mapy.</value>
   </data>
   <data name="MapSource_ApiKeyRequired" xml:space="preserve">
     <value>Ta mapa działa tylko z kluczem API.</value>
@@ -1852,6 +1858,21 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
   </data>
   <data name="MapTerms_Allowed" xml:space="preserve">
     <value>tak</value>
+  </data>
+  <data name="MapTerms_Cache" xml:space="preserve">
+    <value>Przechowywanie kafelków na dysku</value>
+  </data>
+  <data name="MapTerms_CacheAllowed" xml:space="preserve">
+    <value>bez limitu czasu</value>
+  </data>
+  <data name="MapTerms_CacheForbidden" xml:space="preserve">
+    <value>zabronione - aplikacja nie zapisuje kafelków</value>
+  </data>
+  <data name="MapTerms_CacheNotStated" xml:space="preserve">
+    <value>regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dzień|regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dni|regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dni</value>
+  </data>
+  <data name="MapTerms_CacheTemporary" xml:space="preserve">
+    <value>dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dzień|dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dni|dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dni</value>
   </data>
   <data name="MapTerms_Commercial" xml:space="preserve">
     <value>Ogólny użytek komercyjny map</value>
@@ -1887,7 +1908,7 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>tylko w płatnym planie</value>
   </data>
   <data name="MapTerms_ReadTerms" xml:space="preserve">
-    <value>Regulamin dostawcy</value>
+    <value>Regulamin</value>
   </data>
   <data name="MarkerStyle_Arrow" xml:space="preserve">
     <value>Strzałka</value>

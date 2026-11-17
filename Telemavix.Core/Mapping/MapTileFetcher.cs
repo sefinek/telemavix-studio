@@ -10,8 +10,9 @@ namespace Telemavix.Core.Mapping;
 
 /// <summary>
 ///     Downloads XYZ map tiles and caches them on disk, so re-rendering the same or an overlapping route doesn't re-fetch
-///     what's already there - for as long as the provider's terms allow (MapTerms.CacheDays: CARTO 30 days), else for good;
-///     a provider whose terms forbid storing its data (CacheDays 0, a zero max age: Esri) is never written or read.
+///     what's already there - for as long as the provider's terms allow (MapTerms.CacheMaxAge: a few days where they say
+///     nothing or only "temporary", unlimited where they allow it, a custom URL for good);
+///     a provider whose terms forbid storing its data (MapCache.Forbidden, a zero max age: Esri) is never written or read.
 ///     Identifies itself with a real User-Agent, as tile servers ask; a custom tile URL (OverlaySettings.CustomMapUrlTemplate)
 ///     is the user's own responsibility to use within its provider's terms.
 /// </summary>

@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Telemavix.Core.Localization;
 using Telemavix.Core.Mapping;
 using Telemavix.Core.Overlay;
 
@@ -26,7 +27,7 @@ public sealed partial class MapSourcePicker : UserControl
 		[MapProviders.EsriImageryId, MapProviders.EsriStreetsId, MapProviders.EsriPublicId, MapProviders.EsriStreetsPublicId];
 
 	private static readonly HashSet<string> SatelliteIds =
-		[MapProviders.EsriImageryId, MapProviders.EsriPublicId, MapProviders.MapTilerSatelliteId, "maptiler-hybrid", MapProviders.GugikId, MapProviders.EoxId];
+		[MapProviders.EsriImageryId, MapProviders.EsriPublicId, MapProviders.MapTilerSatelliteId, "maptiler-hybrid", MapProviders.GugikId];
 
 	/// <summary>
 	///     The list top to bottom: the two best-available picks, each saying which map it really is now (Esri's keyed service, or
@@ -71,6 +72,7 @@ public sealed partial class MapSourcePicker : UserControl
 	public MapSourcePicker()
 	{
 		InitializeComponent();
+		ApiKeyPageLink.Tag = (Action)OpenApiKeyPage;
 	}
 
 	/// <summary>The provider id, after the user picked another one.</summary>
@@ -233,6 +235,14 @@ public sealed partial class MapSourcePicker : UserControl
 			_ => null
 		});
 		Fact(Strings.MapTerms_Credit, terms.Credit == MapCreditRule.Briefly ? Strings.MapTerms_CreditBriefly : Strings.MapTerms_CreditWhileVisible);
+		int cacheDays = (int)(terms.CacheMaxAge?.TotalDays ?? 0);
+		Fact(Strings.MapTerms_Cache, terms.Cache switch
+		{
+			MapCache.Allowed => Strings.MapTerms_CacheAllowed,
+			MapCache.Forbidden => Strings.MapTerms_CacheForbidden,
+			MapCache.Temporary => Plural.Format(Strings.MapTerms_CacheTemporary, cacheDays),
+			_ => Plural.Format(Strings.MapTerms_CacheNotStated, cacheDays)
+		});
 		if (terms.Region is { } region) Fact(Strings.MapTerms_Coverage, region.Name);
 		panel.Children.Add(facts);
 
@@ -245,8 +255,9 @@ public sealed partial class MapSourcePicker : UserControl
 
 	private static TextBlock Link(string text, string url)
 	{
-		var link = new TextBlock { Text = text, Classes = { "link" }, HorizontalAlignment = HorizontalAlignment.Left };
-		link.PointerPressed += (_, _) => AppUpdateFlow.OpenInBrowser(url);
+		Action open = () => AppUpdateFlow.OpenInBrowser(url);
+		var link = new TextBlock { Text = text, Classes = { "link" }, HorizontalAlignment = HorizontalAlignment.Left, Tag = open };
+		link.PointerPressed += (_, _) => open();
 		return link;
 	}
 
@@ -287,6 +298,11 @@ public sealed partial class MapSourcePicker : UserControl
 	}
 
 	private void OnApiKeyPageClick(object? sender, PointerPressedEventArgs e)
+	{
+		OpenApiKeyPage();
+	}
+
+	private void OpenApiKeyPage()
 	{
 		if (KeyGroupShown(CurrentSources(OverlaySettingsStore.Load())) is not { } group) return;
 
@@ -332,6 +348,7 @@ public sealed partial class MapSourcePicker : UserControl
 		_loading = loading;
 		ShowSelected(settings);
 		SharedChanged?.Invoke();
+		if (TopLevel.GetTopLevel(this) is Window owner) await MapKeyNotice.ShowAsync(owner, key);
 	}
 
 	// The best-available picks take Esri's key - the one that makes them sharp and allowed in a film - whatever they resolve to now.

@@ -121,6 +121,9 @@ public partial class DeveloperWindow : Window
 			case "dji-api-notice":
 				await DjiApiNotice.ShowAsync(this);
 				break;
+			case "map-key-notice":
+				await MapKeyNotice.ShowAsync(this, null);
+				break;
 			case "render-done" when _main is not null:
 				await _main.NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, SampleRenderDone(), DialogKind.Success,
 					Path.Combine(Path.GetTempPath(), SampleFile));

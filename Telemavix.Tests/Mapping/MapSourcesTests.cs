@@ -126,7 +126,7 @@ public sealed class MapSourcesTests
 		var sources = new MapSources(RouteBounds: InPoland);
 
 		Assert.AreEqual(MapCreditRule.Briefly, sources.CreditRule(MapProviders.GugikId));
-		Assert.AreEqual(MapCreditRule.WhileMapVisible, sources.CreditRule(MapProviders.EoxId));
+		Assert.AreEqual(MapCreditRule.WhileMapVisible, sources.CreditRule(MapProviders.OpenTopoMapId));
 		Assert.AreEqual(MapCreditRule.WhileMapVisible, sources.CreditRule("carto-dark"));
 		Assert.AreEqual(MapCreditRule.WhileMapVisible, sources.CreditRule(MapProviders.CustomId), "unless the user says otherwise");
 		Assert.AreEqual(MapCreditRule.Briefly, (sources with { CustomCreditBriefly = true }).CreditRule(MapProviders.CustomId));
@@ -137,10 +137,33 @@ public sealed class MapSourcesTests
 	{
 		var sources = new MapSources();
 
-		Assert.AreEqual(TimeSpan.FromDays(30), sources.CacheMaxAge("carto-positron"));
-		Assert.IsNull(sources.CacheMaxAge("opentopomap"));
 		Assert.AreEqual(TimeSpan.Zero, sources.CacheMaxAge("esri-imagery"), "never stored");
+		Assert.AreEqual(TimeSpan.Zero, sources.CacheMaxAge(MapProviders.EsriPublicId), "never stored");
+		Assert.AreEqual(TimeSpan.FromDays(7), sources.CacheMaxAge("maptiler-satellite"), "a temporary cache only");
+		Assert.IsNull(sources.CacheMaxAge("thunderforest-cycle"), "the terms allow it");
 		Assert.IsNull(sources.CacheMaxAge(MapProviders.CustomId));
+	}
+
+	[TestMethod]
+	public void CacheMaxAge_TermsThatSayNothingAreNotPermission()
+	{
+		var sources = new MapSources();
+		TimeSpan unstated = TimeSpan.FromDays(MapTerms.UnstatedCacheDays);
+
+		Assert.AreEqual(unstated, sources.CacheMaxAge("carto-positron"));
+		Assert.AreEqual(unstated, sources.CacheMaxAge(MapProviders.OpenTopoMapId));
+		Assert.AreEqual(unstated, sources.CacheMaxAge(MapProviders.GugikId));
+	}
+
+	[TestMethod]
+	public void CacheMaxAge_EveryBuiltInProviderHasAnExplicitRule()
+	{
+		foreach (MapProvider provider in MapProviders.BuiltIn)
+		{
+			TimeSpan? age = provider.Terms.CacheMaxAge;
+			Assert.AreEqual(provider.Terms.Cache == MapCache.Allowed, age is null, provider.Id);
+			Assert.AreEqual(provider.Terms.Cache == MapCache.Forbidden, age == TimeSpan.Zero, provider.Id);
+		}
 	}
 
 	[TestMethod]
@@ -224,8 +247,8 @@ public sealed class MapSourcesTests
 	[TestMethod]
 	public async Task MapWidgets_ChangingOneWidgetsSourceInvalidatesThePreparedMaps_AndSameSourcesShareOne()
 	{
-		MapWidgetElement first = new() { X = 0, Y = 0, Visible = true, MapProviderId = MapProviders.EoxId };
-		MapWidgetElement second = new() { X = 100, Y = 0, Visible = true, MapProviderId = MapProviders.EoxId };
+		MapWidgetElement first = new() { X = 0, Y = 0, Visible = true, MapProviderId = MapProviders.MapTilerSatelliteId };
+		MapWidgetElement second = new() { X = 100, Y = 0, Visible = true, MapProviderId = MapProviders.MapTilerSatelliteId };
 		OverlayElement[] layout = [first, second];
 		using var renderer = new OverlayRenderer(1280, 720, 0, layout, [], routeIntro: RouteIntroSettings.From(new OverlaySettings()));
 

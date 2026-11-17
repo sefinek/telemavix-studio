@@ -5685,6 +5685,12 @@ GPS points: {2} · timer pauses: {3}</value>
   <data name="TrackFile_PhoneApp" xml:space="preserve">
     <value>{0} (phone app)</value>
   </data>
+  <data name="TrackFile_Build" xml:space="preserve">
+    <value>Build</value>
+  </data>
+  <data name="TrackFile_System" xml:space="preserve">
+    <value>Phone system</value>
+  </data>
   <data name="TrackFile_Pauses" xml:space="preserve">
     <value>Pauses</value>
   </data>

@@ -6,7 +6,8 @@ namespace Telemavix.Core.Telemetry.External;
 ///     The program a track file says it was written by: Telemavix GPS (the phone app) is told by its developer data in a FIT and by its creator in a GPX, any other
 ///     GPX by the creator attribute as it stands. A FIT of another program has none (its file_creator names a device's firmware, not a program).
 /// </summary>
-public sealed record TrackCreator(string Name, string? Version = null)
+/// <remarks>Build and SystemInfo are what a Telemavix GPS FIT says about the build that wrote it and about the phone (Android version, power saving); null when it says nothing.</remarks>
+public sealed record TrackCreator(string Name, string? Version = null, string? Build = null, string? SystemInfo = null)
 {
 	/// <summary>False for a version that says nothing (0.0 in a GPX, 0.0.0 in a FIT: a build with no version of its own).</summary>
 	public bool HasVersion => System.Version.TryParse(Version, out Version? parsed) && (parsed.Major > 0 || parsed.Minor > 0 || Math.Max(parsed.Build, 0) > 0);

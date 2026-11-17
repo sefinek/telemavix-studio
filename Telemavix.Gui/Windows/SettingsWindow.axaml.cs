@@ -100,6 +100,9 @@ public partial class SettingsWindow : Window
 	/// <summary>Whether the main window is rendering - an FFmpeg update that restarts the app is held off until it isn't.</summary>
 	public Func<bool> IsRendering { get; init; } = () => false;
 
+	/// <summary>Runs a tool's install or update with the main window's log in view for as long as it takes (MainWindow.RunWithConsoleAsync); plain when there is no main window.</summary>
+	public Func<Func<Task>, Task> RunWithConsole { get; init; } = work => work();
+
 	/// <summary>Opens the performance test over the given window - MainWindow's, which knows the loaded recording.</summary>
 	public Func<Window, Task>? OpenBenchmark { get; init; }
 
@@ -500,7 +503,7 @@ public partial class SettingsWindow : Window
 		try
 		{
 			UpdateCheckResult result = await check;
-			DependencyStatusRows.Populate(this, DependencyStatusGrid, result.Dependencies, IsRendering);
+			DependencyStatusRows.Populate(this, DependencyStatusGrid, result.Dependencies, IsRendering, RunWithConsole);
 			ShowAppUpdate(result);
 		}
 		finally

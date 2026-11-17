@@ -34,7 +34,7 @@ public static class FitReader
 	private const int EventNumber = 0, EventType = 1;
 	private const int FileIdManufacturer = 1, Cadence = 4, FractionalCadence = 53, SessionSport = 5, ZonesMaxHeartRate = 1, ZonesCalculation = 5;
 	private const long PercentOfMaxHeartRate = 1;
-	private const int BatteryCapacity = 2, DeviceIndex = 0, DeviceBatteryLevel = 32;
+	private const int BatteryCapacity = 2, DeviceIndex = 0, DeviceBatteryLevel = 32, DeviceDescriptor = 19, DeviceProductName = 27, FileIdProductName = 8;
 
 	// Garmin's "smart recording" writes a record only when direction, speed or heart rate changed enough, so a 4-20 s step is normal there and not a lost fix.
 	private const double SmartRecordingGapSeconds = 30;
@@ -65,6 +65,7 @@ public static class FitReader
 		public long? Sport;
 		public int? MaxHeartRate;
 		public TrackCreator? Creator;
+		public string? Build, DeviceName, SystemInfo;
 	}
 
 	public static bool LooksLikeFit(ReadOnlySpan<byte> start)
@@ -91,8 +92,12 @@ public static class FitReader
 		if (at == 0) throw new InvalidDataException("Not a FIT file.");
 		bool steps = CountsStepsPerLeg(activity.Sport);
 		if (steps) points = [.. points.Select(p => p with { CadencePerMinute = p.CadencePerMinute is { } perLeg ? perLeg * 2 : null })];
+
+		// What the build and the phone say about themselves is Telemavix GPS's own; another program's product_name and descriptor name its device, not a build.
+		TrackCreator? creator = activity.Creator is { } written ? written with { Build = Blank(activity.Build), SystemInfo = Blank(activity.SystemInfo) } : null;
 		return new ExternalTrack(points, Pauses(timer), batteries, phoneSamples: samples, minGapSeconds: activity.Garmin ? SmartRecordingGapSeconds : null,
-			cadenceInSteps: steps, maxHeartRateBpm: activity.MaxHeartRate, manufacturer: ManufacturerName(activity.Manufacturer), creator: activity.Creator);
+			cadenceInSteps: steps, maxHeartRateBpm: activity.MaxHeartRate, manufacturer: ManufacturerName(activity.Manufacturer), creator: creator,
+			deviceName: creator is null ? null : Blank(activity.DeviceName));
 	}
 
 	private sealed record Definition(bool BigEndian, int Message, (int Number, int Size, int BaseType)[] Fields, (int Number, int Size, int Index)[] Developer)
@@ -165,6 +170,7 @@ public static class FitReader
 				long? maker = Field(definition, data, FileIdManufacturer);
 				if (IsGarmin(maker)) activity.Garmin = true;
 				activity.Manufacturer ??= maker;
+				activity.Build ??= Text(definition, data, FileIdProductName);
 				continue;
 			}
 
@@ -191,8 +197,13 @@ public static class FitReader
 
 			if (definition.Message == DeviceInfoMessage)
 			{
-				if (Field(definition, data, DeviceIndex) == 0 && Field(definition, data, DeviceBatteryLevel) is { } level && level is >= 0 and <= 100)
-					batteries.Add(new ExternalBatteryReading(utc, level));
+				if (Field(definition, data, DeviceIndex) == 0)
+				{
+					if (Field(definition, data, DeviceBatteryLevel) is { } level && level is >= 0 and <= 100) batteries.Add(new ExternalBatteryReading(utc, level));
+					activity.DeviceName ??= Text(definition, data, DeviceProductName);
+					activity.SystemInfo ??= Text(definition, data, DeviceDescriptor);
+				}
+
 				continue;
 			}
 
@@ -287,6 +298,8 @@ public static class FitReader
 	}
 
 	/// <summary>A string field (field_description's name): the bytes up to the first zero, null when the message doesn't have it.</summary>
+	private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+
 	private static string? Text(Definition definition, ReadOnlySpan<byte> data, int number)
 	{
 		int at = 0;

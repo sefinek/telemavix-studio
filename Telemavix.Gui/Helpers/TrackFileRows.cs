@@ -25,6 +25,8 @@ internal static class TrackFileRows
 
 		if (path is not null) Add(Strings.TrackFile_Name, Path.GetFileName(path));
 		if (track.Creator is { } creator) Add(Strings.TrackFile_Source, creator.IsTelemavixGps ? string.Format(culture, Strings.TrackFile_PhoneApp, creator.Display) : creator.Display);
+		Add(Strings.TrackFile_Build, track.Creator?.Build);
+		Add(Strings.TrackFile_System, track.Creator?.SystemInfo);
 		Add(Strings.TrackFile_Device, track.Manufacturer ?? track.DeviceName);
 
 		DateTime start = track.StartUtc.ToLocalFromUtc(), end = track.EndUtc.ToLocalFromUtc();

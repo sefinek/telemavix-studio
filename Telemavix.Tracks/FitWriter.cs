@@ -12,8 +12,11 @@ namespace Telemavix.Tracks;
 /// </summary>
 public static class FitWriter
 {
-	private const byte FileIdLocal = 0, EventLocal = 1, RecordLocal = 2, LapLocal = 3, SessionLocal = 4, ActivityLocal = 5, DeveloperIdLocal = 6, FieldDescriptionLocal = 7, DeviceInfoLocal = 8, SportLocal = 9, FileCreatorLocal = 10;
+	private const byte FileIdLocal = 0, EventLocal = 1, RecordLocal = 2, LapLocal = 3, SessionLocal = 4, ActivityLocal = 5, DeveloperIdLocal = 6, FieldDescriptionLocal = 7, DeviceInfoLocal = 8, SportLocal = 9, FileCreatorLocal = 10, NamedDeviceInfoLocal = 11;
 	private const ushort FileIdMessage = 0, SportMessage = 12, SessionMessage = 18, LapMessage = 19, RecordMessage = 20, EventMessage = 21, DeviceInfoMessage = 23, ActivityMessage = 34, FileCreatorMessage = 49, FieldDescriptionMessage = 206, DeveloperDataIdMessage = 207;
+
+	/// <summary>file_id's product_name, and device_info's descriptor and product_name.</summary>
+	private const int FileIdProductName = 8, DeviceInfoDescriptor = 19, DeviceInfoProductName = 27;
 
 	private const byte EnumType = 0x00, SInt8 = 0x01, UInt8 = 0x02, UInt16Type = 0x84, SInt32 = 0x85, UInt32Type = 0x86, StringType = 0x07, Float32 = 0x88, UInt32Z = 0x8C, ByteArray = 0x0D;
 
@@ -76,7 +79,10 @@ public static class FitWriter
 		// A device serial must be non-zero (serial_number is uint32z); the app has no hardware number of its own, so it is the start time, the same in file_id and in device_info.
 		uint serial = Seconds(first) | 1;
 
-		Define(body, FileIdLocal, FileIdMessage, null, (0, 1, EnumType), (1, 2, UInt16Type), (2, 2, UInt16Type), (3, 4, UInt32Z), (4, 4, UInt32Type));
+		string? build = Clean(producer.Build), device = Clean(producer.Device), system = Clean(producer.SystemInfo);
+		(int Number, int Size, byte BaseType)[] fileId = [(0, 1, EnumType), (1, 2, UInt16Type), (2, 2, UInt16Type), (3, 4, UInt32Z), (4, 4, UInt32Type)];
+		if (build is not null) fileId = [.. fileId, (FileIdProductName, TrackProducer.BuildSize, StringType)];
+		Define(body, FileIdLocal, FileIdMessage, null, fileId);
 		Data(body, FileIdLocal, w =>
 		{
 			w.Byte(4);
@@ -84,6 +90,7 @@ public static class FitWriter
 			w.U16(0);
 			w.U32(serial);
 			w.U32(Seconds(first));
+			if (build is not null) w.Text(build, TrackProducer.BuildSize);
 		});
 
 		Define(body, FileCreatorLocal, FileCreatorMessage, null, (0, 2, UInt16Type));
@@ -101,7 +108,24 @@ public static class FitWriter
 		WriteDeveloperDescriptions(body, producer);
 		Define(body, RecordLocal, RecordMessage, DevFields, (253, 4, UInt32Type), (0, 4, SInt32), (1, 4, SInt32), (5, 4, UInt32Type), (73, 4, UInt32Type), (78, 4, UInt32Type), (13, 1, SInt8), (3, 1, UInt8), (31, 1, UInt8));
 		Define(body, DeviceInfoLocal, DeviceInfoMessage, null, (253, 4, UInt32Type), (3, 4, UInt32Z), (2, 2, UInt16Type), (4, 2, UInt16Type), (5, 2, UInt16Type), (0, 1, UInt8), (32, 1, UInt8), (25, 1, EnumType));
-		WriteDeviceInfo(body, first, null, producer.FitVersion, serial);
+		if (device is null && system is null) WriteDeviceInfo(body, first, null, producer.FitVersion, serial);
+		else
+		{
+			Define(body, NamedDeviceInfoLocal, DeviceInfoMessage, null, (253, 4, UInt32Type), (3, 4, UInt32Z), (2, 2, UInt16Type), (4, 2, UInt16Type), (5, 2, UInt16Type), (0, 1, UInt8), (25, 1, EnumType),
+				(DeviceInfoProductName, TrackProducer.DeviceSize, StringType), (DeviceInfoDescriptor, TrackProducer.SystemSize, StringType));
+			Data(body, NamedDeviceInfoLocal, w =>
+			{
+				w.U32(Seconds(first));
+				w.U32(serial);
+				w.U16(DevelopmentManufacturer);
+				w.U16(0);
+				w.U16(producer.FitVersion);
+				w.Byte(0);
+				w.Byte(SourceLocal);
+				w.Text(device ?? "", TrackProducer.DeviceSize);
+				w.Text(system ?? "", TrackProducer.SystemSize);
+			});
+		}
 
 		var events = new List<(DateTime Utc, byte Type)> { (first, TimerStart) };
 		foreach (TrackPause pause in track.Pauses.OrderBy(p => p.FromUtc))
@@ -202,6 +226,14 @@ public static class FitWriter
 			w.Byte(phone?.CellSignalLevel is { } cellLevel ? (byte)Math.Clamp(cellLevel, 0, 254) : byte.MaxValue);
 			w.Byte(phone?.CellSignalDbm is { } cellDbm ? (byte)(sbyte)Math.Clamp(cellDbm, -126, 0) : (byte)0x7F);
 		});
+	}
+
+	/// <summary>Text for a FIT string field: trimmed, line breaks turned into "; " so it stays one line; null when nothing is left.</summary>
+	private static string? Clean(string? text)
+	{
+		if (string.IsNullOrWhiteSpace(text)) return null;
+
+		return string.Join("; ", text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 	}
 
 	/// <summary>The device the activity was recorded on (index 0, the creator); with a battery level it is the phone's reading at that moment, without it the first message that only names the device.</summary>
@@ -553,7 +585,9 @@ public static class FitWriter
 
 	private static int Semicircles(double degrees) => (int)Math.Round(degrees * (2147483648.0 / 180.0));
 
-	private static uint Seconds(DateTime utc) => (uint)Math.Max(0, (DateTime.SpecifyKind(utc, DateTimeKind.Utc) - Epoch).TotalSeconds);
+	// A FIT timestamp has whole seconds. A receiver's fixes sit within a few milliseconds of a whole second (x.999, x+1.000), so truncating turns a 1.001 s step into 2 s
+	// and a real 1.999 s loss into 1 s; rounding keeps a steady one-second track steady and a lost second lost.
+	private static uint Seconds(DateTime utc) => (uint)Math.Max(0, Math.Round((DateTime.SpecifyKind(utc, DateTimeKind.Utc) - Epoch).TotalSeconds, MidpointRounding.AwayFromZero));
 
 	private static ushort Crc(ushort crc, ReadOnlySpan<byte> bytes)
 	{

@@ -48,6 +48,65 @@ public sealed class TrackWriterTests
 	}
 
 	[TestMethod]
+	public void FitRoundsFixTimesToTheNearestSecond()
+	{
+		// Fixes a millisecond either side of a whole second, as a receiver reports them; second 50 is missing, a real loss of one second.
+		var points = Enumerable.Range(0, 100).Where(i => i != 50).Select(i => new TrackPoint(Start.AddSeconds(i % 2 == 0 ? i : i - 0.001), 52.2297 + i * 0.0001, 21.0122, 110, 5)).ToList();
+		using var stream = new MemoryStream();
+		FitWriter.Write(new Track(points), stream);
+
+		ExternalTrack read = FitReader.Read(stream.ToArray());
+
+		Assert.AreEqual(99, read.Points.Count);
+		Assert.AreEqual(Start.AddSeconds(49), read.Points[49].Utc);
+		Assert.AreEqual(Start.AddSeconds(51), read.Points[50].Utc);
+		Assert.AreEqual(TimeSpan.FromSeconds(2), read.TimeWithoutFix());
+	}
+
+	[TestMethod]
+	public void FitCarriesTheBuildAndWhatThePhoneSaysAboutItself()
+	{
+		var producer = new TrackProducer(TrackProducer.ApplicationName, new Version(0, 1, 0), "a1b2c3d 2026-11-17T04:50:00Z", "Google Pixel 8", "Android: 15 (API 35)\n Battery saver: on\r\n");
+		using var stream = new MemoryStream();
+		FitWriter.Write(Sample(), stream, producer);
+
+		ExternalTrack read = FitReader.Read(stream.ToArray());
+
+		Assert.AreEqual(20, read.Points.Count);
+		Assert.AreEqual("a1b2c3d 2026-11-17T04:50:00Z", read.Creator!.Build);
+		Assert.AreEqual("Android: 15 (API 35); Battery saver: on", read.Creator.SystemInfo);
+		Assert.AreEqual("Google Pixel 8", read.DeviceName);
+		Assert.AreEqual("0.1.0", read.Creator.Version);
+	}
+
+	[TestMethod]
+	public void FitWithoutABuildOrADeviceSaysNothingAboutThem()
+	{
+		using var stream = new MemoryStream();
+		FitWriter.Write(Sample(), stream);
+
+		ExternalTrack read = FitReader.Read(stream.ToArray());
+
+		Assert.IsNull(read.Creator!.Build);
+		Assert.IsNull(read.Creator.SystemInfo);
+		Assert.IsNull(read.DeviceName);
+	}
+
+	[TestMethod]
+	public void FitCutsAnOverlongBuildBetweenCharactersAndStaysReadable()
+	{
+		var producer = new TrackProducer(TrackProducer.ApplicationName, new Version(0, 1, 0), new string('x', 200) + "ą", "ą" + new string('y', 200), new string('z', 500));
+		using var stream = new MemoryStream();
+		FitWriter.Write(Sample(), stream, producer);
+
+		ExternalTrack read = FitReader.Read(stream.ToArray());
+
+		Assert.AreEqual(20, read.Points.Count);
+		Assert.AreEqual(47, read.Creator!.Build!.Length);
+		Assert.AreEqual(254, read.Creator.SystemInfo!.Length);
+	}
+
+	[TestMethod]
 	public void FitKeepsAnAltitudeBelowSeaLevelAndTheEnhancedSpeed()
 	{
 		var track = new Track([new TrackPoint(Start, 52.2297, 21.0122, -12.4, 33.3), new TrackPoint(Start.AddSeconds(1), 52.2298, 21.0123, -12.2, 33.4)]);

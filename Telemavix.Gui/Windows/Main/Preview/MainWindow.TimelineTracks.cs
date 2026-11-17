@@ -68,6 +68,37 @@ public partial class MainWindow
 		SyncTimelineScrollBar();
 	}
 
+	// How long the log stays in view after what it was shown for has ended - long enough to read the last line.
+	private static readonly TimeSpan ConsoleLinger = TimeSpan.FromSeconds(4);
+
+	// The runs that need the log in view at the moment (an install and an update can overlap); the layout goes back only when the last one has ended.
+	private int _consoleHolds;
+
+	/// <summary>
+	///     Runs `work` with the log in view: while the expanded timeline has the bottom row, the log takes it, and a few seconds after the work ends the layout
+	///     goes back to the user's choice (`_timelineWanted`, which this never changes) - so a timeline that was open comes back, and a log that was in view anyway
+	///     stays. An edit of the layout in between (the timeline's button) is the user's choice and is what comes back.
+	/// </summary>
+	internal async Task RunWithConsoleAsync(Func<Task> work)
+	{
+		_consoleHolds++;
+		SetTimelineExpanded(false, false);
+		try
+		{
+			await work();
+		}
+		finally
+		{
+			_ = ReleaseConsoleAsync();
+		}
+	}
+
+	private async Task ReleaseConsoleAsync()
+	{
+		await Task.Delay(ConsoleLinger);
+		if (--_consoleHolds == 0 && IsLoaded) SetTimelineExpanded(_timelineWanted, false);
+	}
+
 	private void OnTimelineScroll(object? sender, ScrollEventArgs e)
 	{
 		ExpandedTimeline.ScrollTo(e.NewValue);

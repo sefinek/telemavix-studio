@@ -4,8 +4,13 @@ namespace Telemavix.Tracks;
 ///     The program that wrote a track, named the way Garmin names itself in a file: FIT carries it as file_creator, as the version of device_info and of the developer data
 ///     application, GPX as the creator attribute. Readers and import sites show it as "recorded with".
 /// </summary>
-public sealed record TrackProducer(string Name, Version Version)
+/// <remarks>Build is what tells one build of the app from another (the version alone is the same for all of them); Device is the phone's model and SystemInfo what it says about itself
+/// (Android version, power saving), so a file explains how it came out. Each is optional and left out of the file when null or blank.</remarks>
+public sealed record TrackProducer(string Name, Version Version, string? Build = null, string? Device = null, string? SystemInfo = null)
 {
+	/// <summary>Sizes of the FIT text fields the build, the phone model and the system details go into (bytes with the closing zero); a longer text is cut.</summary>
+	internal const int BuildSize = 48, DeviceSize = 48, SystemSize = 255;
+
 	/// <summary>What the app calls itself: the name in GPX's creator and the one readers recognise a Telemavix GPS track by.</summary>
 	public const string ApplicationName = "Telemavix GPS";
 

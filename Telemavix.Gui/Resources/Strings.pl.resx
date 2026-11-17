@@ -5685,6 +5685,12 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   <data name="TrackFile_PhoneApp" xml:space="preserve">
     <value>{0} (aplikacja na telefon)</value>
   </data>
+  <data name="TrackFile_Build" xml:space="preserve">
+    <value>Kompilacja</value>
+  </data>
+  <data name="TrackFile_System" xml:space="preserve">
+    <value>System telefonu</value>
+  </data>
   <data name="TrackFile_Pauses" xml:space="preserve">
     <value>Przerwy</value>
   </data>

@@ -26,7 +26,8 @@ internal static class DependencyStatusRows
 	}
 
 	/// <param name="isRendering">An FFmpeg update that restarts the app waits until this is false.</param>
-	public static void Populate(Window owner, Grid grid, IReadOnlyList<ToolVersionInfo> statuses, Func<bool> isRendering)
+	/// <param name="runWithConsole">Runs an install or an update with the main window's log in view (see MainWindow.RunWithConsoleAsync), so its output is where the user can see it.</param>
+	public static void Populate(Window owner, Grid grid, IReadOnlyList<ToolVersionInfo> statuses, Func<bool> isRendering, Func<Func<Task>, Task> runWithConsole)
 	{
 		grid.RowDefinitions.Clear();
 		grid.Children.Clear();
@@ -47,37 +48,40 @@ internal static class DependencyStatusRows
 			if (status.InstalledVersion is null && DependencyInstaller.CanAttemptAutoInstall())
 			{
 				var installButton = new Button { Content = Strings.DependencyPrompt_Install };
-				installButton.Click += async (_, _) => await OnInstallClickAsync(status.Tool, installButton);
+				installButton.Click += async (_, _) => await OnInstallClickAsync(status.Tool, installButton, runWithConsole);
 				AddCell(grid, installButton, i, 3);
 			}
 			else if (status.UpdateAvailable)
 			{
 				var updateButton = new Button { Content = Strings.Main_Update };
-				updateButton.Click += async (_, _) => await OnUpdateClickAsync(owner, status, updateButton, isRendering);
+				updateButton.Click += async (_, _) => await OnUpdateClickAsync(owner, status, updateButton, isRendering, runWithConsole);
 				AddCell(grid, updateButton, i, 3);
 			}
 		}
 	}
 
 	// The optional tools aren't asked about at startup, so a missing one is installed from here.
-	private static async Task OnInstallClickAsync(ExternalTool tool, Button button)
+	private static async Task OnInstallClickAsync(ExternalTool tool, Button button, Func<Func<Task>, Task> runWithConsole)
 	{
 		button.IsEnabled = false;
-		AppLogger.Notify(string.Format(Strings.Welcome_InstallingTool, tool.DisplayName));
-
-		InstallResult result;
-		try
+		await runWithConsole(async () =>
 		{
-			result = await DependencyInstaller.InstallAsync(tool, AppLogger.Notify, CancellationToken.None);
-		}
-		catch (Exception ex)
-		{
-			result = new InstallResult(false, ex.Message);
-		}
+			AppLogger.Notify(string.Format(Strings.Welcome_InstallingTool, tool.DisplayName));
 
-		AppLogger.Notify(result.Message);
-		button.Content = result.Success ? Strings.Deps_InstalledDone : Strings.Welcome_Retry;
-		button.IsEnabled = !result.Success;
+			InstallResult result;
+			try
+			{
+				result = await DependencyInstaller.InstallAsync(tool, AppLogger.Notify, CancellationToken.None);
+			}
+			catch (Exception ex)
+			{
+				result = new InstallResult(false, ex.Message);
+			}
+
+			AppLogger.Notify(result.Message);
+			button.Content = result.Success ? Strings.Deps_InstalledDone : Strings.Welcome_Retry;
+			button.IsEnabled = !result.Success;
+		});
 	}
 
 	private static string LatestText(ToolVersionInfo status)
@@ -92,7 +96,7 @@ internal static class DependencyStatusRows
 	}
 
 	// AppLogger.Notify (not a local log panel) so the update's line-by-line output always lands in the same place.
-	private static async Task OnUpdateClickAsync(Window owner, ToolVersionInfo status, Button button, Func<bool> isRendering)
+	private static async Task OnUpdateClickAsync(Window owner, ToolVersionInfo status, Button button, Func<bool> isRendering, Func<Func<Task>, Task> runWithConsole)
 	{
 		if (DependencyInstaller.UpgradeNeedsRestart(status.Tool))
 		{
@@ -101,22 +105,25 @@ internal static class DependencyStatusRows
 		}
 
 		button.IsEnabled = false;
-		AppLogger.Notify(string.Format(Strings.Deps_Updating, status.Tool.DisplayName));
-
-		InstallResult result;
-		try
+		await runWithConsole(async () =>
 		{
-			result = await DependencyInstaller.UpgradeAsync(status.Tool, AppLogger.Notify, CancellationToken.None);
-		}
-		catch (Exception ex)
-		{
-			result = new InstallResult(false, ex.Message);
-		}
+			AppLogger.Notify(string.Format(Strings.Deps_Updating, status.Tool.DisplayName));
 
-		AppLogger.Notify(result.Message);
+			InstallResult result;
+			try
+			{
+				result = await DependencyInstaller.UpgradeAsync(status.Tool, AppLogger.Notify, CancellationToken.None);
+			}
+			catch (Exception ex)
+			{
+				result = new InstallResult(false, ex.Message);
+			}
 
-		button.Content = result.Success ? Strings.Deps_UpdatedDone : Strings.Welcome_Retry;
-		button.IsEnabled = !result.Success;
+			AppLogger.Notify(result.Message);
+
+			button.Content = result.Success ? Strings.Deps_UpdatedDone : Strings.Welcome_Retry;
+			button.IsEnabled = !result.Success;
+		});
 	}
 
 	/// <summary>The preview has FFmpeg's DLLs loaded, and Windows won't let winget replace them - see DependencyInstaller.UpgradeNeedsRestart.</summary>

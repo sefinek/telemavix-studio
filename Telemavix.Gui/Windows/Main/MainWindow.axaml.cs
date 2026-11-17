@@ -483,7 +483,7 @@ public partial class MainWindow : Window
 		OverlaySettings before = OverlaySettingsStore.Load();
 		var settings = new SettingsWindow
 		{
-			IsRendering = () => _phase == UiPhase.Rendering, RecordingCruisingSpeedKmh = RecordingSpeeds().CruisingKmh, OpenBenchmark = ShowBenchmarkAsync,
+			IsRendering = () => _phase == UiPhase.Rendering, RunWithConsole = RunWithConsoleAsync, RecordingCruisingSpeedKmh = RecordingSpeeds().CruisingKmh, OpenBenchmark = ShowBenchmarkAsync,
 			MapWidgetProvider = MapWidgetOwnProvider, ClearMapWidgetProvider = ClearMapWidgetProviders
 		};
 		settings.Load(before);

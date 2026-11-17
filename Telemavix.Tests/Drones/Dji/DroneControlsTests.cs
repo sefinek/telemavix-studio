@@ -202,7 +202,7 @@ public sealed class DroneControlsTests
 	}
 
 	[TestMethod]
-	public void WholeRecordingClockAnchor_NeedsTheWholeRecordingInsideTheTrack()
+	public void OverlappingClockAnchor_NeedsTheRecordingToOverlapTheTrack()
 	{
 		var builder = new FlightLogBuilder(12, Started);
 		builder.Add(Custom, CustomRecord(Started));
@@ -211,10 +211,10 @@ public sealed class DroneControlsTests
 		ExternalTrack track = DjiFlightLogFormat.ToTrack(log, log.Decode(null));
 		List<TelemetryFrame> frames = [.. Enumerable.Range(0, 100).Select(i => new TelemetryFrame(i, i / 10.0, 0, 0, 0, null, 0, 0, 0, HasGpsFix: false))];
 
-		Assert.AreEqual(track.StartUtc.AddSeconds(5), ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.StartUtc.AddSeconds(5)));
-		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.EndUtc.AddSeconds(30)), "ends after the track");
-		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, track.StartUtc.AddMinutes(-5)), "starts before the track");
-		Assert.IsNull(ExternalTrackSource.WholeRecordingClockAnchor(frames, 10, track, null));
+		Assert.AreEqual(track.StartUtc.AddSeconds(5), ExternalTrackSource.OverlappingClockAnchor(frames, 10, track, track.StartUtc.AddSeconds(5)));
+		Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(frames, 10, track, track.EndUtc.AddSeconds(30)), "ends after the track");
+		Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(frames, 10, track, track.StartUtc.AddMinutes(-5)), "ends before the track starts");
+		Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(frames, 10, track, null));
 	}
 
 	[TestMethod]

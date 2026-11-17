@@ -27,6 +27,7 @@ public partial class ExternalTrackWindow : Window
 	private readonly FileSummary? _summary;
 	private readonly Control[] _pages;
 	private readonly Border[] _dots;
+	private string _trackRange = "";
 	private TrackAlignment? _proposal;
 	private TrackSynchronization? _sync;
 	private Step _step;
@@ -72,6 +73,11 @@ public partial class ExternalTrackWindow : Window
 				SecondAnchor.Utc = second.TrackUtc;
 			}
 		}
+
+		FirstAnchor.Changed += UpdateDifference;
+		SecondAnchor.Changed += UpdateDifference;
+		ManualMode.IsCheckedChanged += (_, _) => UpdateDifference();
+		UseSecond.IsCheckedChanged += (_, _) => UpdateDifference();
 
 		PhoneButton.IsVisible = summary?.CameraFormat?.IsDrone == true;
 		ShowStep(Step.File);
@@ -195,10 +201,8 @@ public partial class ExternalTrackWindow : Window
 			_modeChosen = false;
 			_sync = null;
 			PathBox.Text = path;
-			TrackInfo.Text = string.Format(Strings.Track_Info, track.StartUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), track.EndUtc.ToString("HH:mm:ss", CultureInfo.InvariantCulture), track.Points.Count, track.Pauses.Count);
-			string stats = DescribeStats(track);
-			TrackStats.Text = stats;
-			TrackStats.IsVisible = stats.Length > 0;
+			_trackRange = string.Format(Strings.Track_Info, track.StartUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), track.EndUtc.ToString("HH:mm:ss", CultureInfo.InvariantCulture), track.Points.Count, track.Pauses.Count);
+			TrackFileRows.Fill(TrackFileRowsHost, TrackFileRows.Of(track), 150, "rowHint", "summaryValue");
 			Log?.Invoke(string.Format(Strings.Track_Loaded, name, track.Points.Count, track.StartUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), track.EndUtc.ToString("HH:mm:ss", CultureInfo.InvariantCulture)), LogLevel.Info);
 			FirstAnchor.SetTrackPoints(track.Points);
 			SecondAnchor.SetTrackPoints(track.Points);
@@ -244,8 +248,6 @@ public partial class ExternalTrackWindow : Window
 					FirstAnchor.VideoSeconds = 0;
 					FirstAnchor.Utc = found.VideoStartUtc;
 				}
-
-				Log?.Invoke(ProposalText(found), found.NeedsVerification ? LogLevel.Warn : LogLevel.Info);
 			}
 			else
 			{
@@ -332,13 +334,78 @@ public partial class ExternalTrackWindow : Window
 			SetAlert(found.NeedsVerification ? "warning" : "success");
 			Show(VerdictHint, string.Format(Strings.Track_Auto_Start, found.VideoStartUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)));
 			double lead = LoadedTrack is { } loaded ? (loaded.StartUtc - found.VideoStartUtc).TotalSeconds : 0;
-			if (lead >= 0.5) Show(VerdictHint, VerdictHint.Text + " " + string.Format(Strings.Track_Auto_LeadsTrack, lead.ToString("0.#", CultureInfo.CurrentCulture)));
+			if (lead >= 0.5)
+			{
+				string text = found.Method == TrackAlignmentMethod.RecordingSpan ? Strings.Track_Auto_LeadsTrack : Strings.Track_Auto_LeadsTrackClock;
+				Show(VerdictHint, VerdictHint.Text + " " + string.Format(text, lead.ToString("0.#", CultureInfo.CurrentCulture)));
+			}
 		}
 		else
 		{
 			VerdictText.Text = Strings.Track_Auto_None;
 			SetAlert("error");
 			Show(VerdictHint, Strings.Track_Auto_NoneHint);
+		}
+
+		UpdateDifference();
+	}
+
+	/// <summary>
+	///     Under the manual anchors: how far they put the recording from the automatic proposal (and so, when that came from the camera's clock,
+	///     how far the camera's clock is from the track's), and the advice to set the camera's time. Empty while there is nothing to compare.
+	/// </summary>
+	private void UpdateDifference()
+	{
+		string difference = "", advice = "";
+		VerdictAlert.IsVisible = _proposal is null || ManualMode.IsChecked != true;
+		if (_proposal is { } found)
+		{
+			if (found.Method == TrackAlignmentMethod.ContainerClock) advice = Strings.Track_ClockAdvice;
+			if (ManualMode.IsChecked == true && ReadManual() is { } manual)
+			{
+				double shift = found.ShiftOf(manual);
+				if (Math.Abs(shift) < 0.05)
+				{
+					difference = Strings.Track_Diff_Same;
+				}
+				else
+				{
+					difference = string.Format(shift > 0 ? Strings.Track_Diff_Later : Strings.Track_Diff_Earlier, Math.Abs(shift).ToString("0.0", CultureInfo.CurrentCulture),
+						ClockText(manual.At(0)), ClockText(found.VideoStartUtc));
+					if (found.Method == TrackAlignmentMethod.ContainerClock) difference += " " + (shift > 0 ? Strings.Track_Diff_ClockBehind : Strings.Track_Diff_ClockAhead);
+				}
+			}
+		}
+
+		Show(ManualDifference, difference);
+		Show(ClockAdvice, advice);
+	}
+
+	/// <summary>A time of day to a tenth of a second, rounded like the shift beside it and with the decimal separator of the numbers around it.</summary>
+	private static string ClockText(DateTime utc)
+	{
+		const long tenth = TimeSpan.TicksPerSecond / 10;
+		var rounded = new DateTime((utc.Ticks + tenth / 2) / tenth * tenth, DateTimeKind.Utc);
+		return rounded.ToString("HH:mm:ss", CultureInfo.InvariantCulture) + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + rounded.Millisecond / 100;
+	}
+
+	/// <summary>The anchors as typed, or null while they don't make a valid synchronization (half-typed time, a second point not after the first).</summary>
+	private TrackSynchronization? ReadManual()
+	{
+		if (FirstAnchor.TryRead() is not { } first) return null;
+
+		TrackSyncAnchor? second = null;
+		if (UseSecond.IsChecked == true && (second = SecondAnchor.TryRead()) is null) return null;
+
+		var sync = new TrackSynchronization(first, second);
+		try
+		{
+			sync.Validate();
+			return sync;
+		}
+		catch (InvalidDataException)
+		{
+			return null;
 		}
 	}
 
@@ -380,28 +447,6 @@ public partial class ExternalTrackWindow : Window
 		}
 	}
 
-	private static string DescribeStats(ExternalTrack track)
-	{
-		List<string> parts = [];
-		if (track.DeviceName is { } device) parts.Add(string.Format(Strings.Track_StatDevice, device));
-
-		double meters = 0;
-		for (int i = 1; i < track.Points.Count; i++)
-		{
-			ExternalTrackPoint a = track.Points[i - 1], b = track.Points[i];
-			if (!b.StartsAfterGap) meters += TelemetryMath.HaversineMeters(a.Latitude, a.Longitude, b.Latitude, b.Longitude);
-		}
-
-		parts.Add(string.Format(Strings.Track_StatDistance, (meters / 1000).ToString("0.00", CultureInfo.CurrentCulture)));
-		if (track.Points.Where(p => p.SpeedMs is not null).Select(p => p.SpeedMs!.Value).DefaultIfEmpty(-1).Max() is >= 0 and var speed)
-			parts.Add(string.Format(Strings.Track_StatMaxSpeed, (speed * 3.6).ToString("0", CultureInfo.CurrentCulture)));
-		if (track.Points.Where(p => p.HeightMeters is not null).Select(p => p.HeightMeters!.Value).DefaultIfEmpty(double.NaN).Max() is var height && !double.IsNaN(height))
-			parts.Add(string.Format(Strings.Track_StatMaxHeight, height.ToString("0", CultureInfo.CurrentCulture)));
-		if (track.Recordings.Count > 0) parts.Add(string.Format(Strings.Track_StatRecordings, track.Recordings.Count));
-
-		return string.Join(" · ", parts);
-	}
-
 	private void ShowSummary(TrackSynchronization sync)
 	{
 		_sync = sync;
@@ -409,7 +454,7 @@ public partial class ExternalTrackWindow : Window
 		double coverage = LoadedTrack is { } track ? ExternalTrackSource.Coverage(track, sync, FirstAnchor.MaxVideoSeconds) : 0;
 		bool exact = MatchesProposal(sync) && _proposal is { NeedsVerification: false };
 		SumTrack.Text = Path.GetFileName(PathBox.Text);
-		SumRange.Text = TrackInfo.Text;
+		SumRange.Text = _trackRange;
 		SumMethod.Text = sync.Second is not null ? Strings.Track_Method_ManualDrift : MatchesProposal(sync) ? MethodText(_proposal!.Method) : Strings.Track_Method_Manual;
 		SumCoverage.Text = string.Format(Strings.Track_Coverage, (int)Math.Round(coverage * 100));
 
@@ -423,6 +468,7 @@ public partial class ExternalTrackWindow : Window
 	{
 		if (_sync is null || PathBox.Text is not { Length: > 0 } path) return;
 
+		if (MatchesProposal(_sync) && _proposal is { } used) Log?.Invoke(ProposalText(used), used.NeedsVerification ? LogLevel.Warn : LogLevel.Info);
 		Source = new ExternalTrackSource(path, Synchronization: _sync);
 		Accepted = true;
 		Close();

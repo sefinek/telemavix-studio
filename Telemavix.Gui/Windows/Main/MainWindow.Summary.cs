@@ -475,44 +475,93 @@ public partial class MainWindow
 		});
 	}
 
+	/// <summary>
+	///     The telemetry card: the rows are chosen by what the recording is - a flight (the aircraft's own readings), a ride with a GPS
+	///     (camera's or a track's), or a camera with no fix at all - so no row says "-" for something that kind of recording can't have.
+	/// </summary>
 	private void PopulateTelemetryInfo(FileSummary summary)
 	{
 		if (summary.Telemetry is not { } t) return;
 
-		TeleSamples.Text = $"{t.SampleCount}";
-		TeleDuration.Text = TimeSpan.FromSeconds(t.DurationSeconds).ToString(@"hh\:mm\:ss");
-		TeleMaxG.Text = _availability.CameraAxes ? $"{t.MaxGForce:0.00} G" : "-";
 		TeleRecordedAt.Text = (t.RecordedAtUtc ?? summary.ContainerRecordingStartUtc) is { } utc ? utc.ToLocalFromUtc().ToString("yyyy-MM-dd HH:mm:ss") : Strings.Common_UnknownCapital;
 
-		// Without a GPS fix there's nothing to measure: a dash, not a "0.00 km" that reads like a recording that never moved.
-		bool hasGps = _availability.GpsFix;
-		TeleDistance.Text = hasGps ? $"{t.TotalDistanceMeters / 1000.0:0.00} km" : "-";
-		bool hasAltitude = hasGps && _availability.AltitudeAboveSea;
-		TeleAltitude.Text = hasAltitude ? $"{t.MinAltitudeMeters:0} - {t.MaxAltitudeMeters:0} m" : "-";
-		string? noGpsFixTip = hasGps ? null : Strings.Summary_NoGpsFixTip;
-		ToolTip.SetTip(TeleDistance, noGpsFixTip);
-		ToolTip.SetTip(TeleAltitude, hasGps && !hasAltitude ? Strings.Summary_NoDroneAltitudeTip : noGpsFixTip);
-		ShowMaxSpeedInfo();
+		TeleGrid.Children.Clear();
+		TeleGrid.RowDefinitions.Clear();
+		List<(string Label, string Value, string? Tip)> rows = TelemetryRows(summary, t);
+		for (int i = 0; i < rows.Count; i++)
+		{
+			int column = i % 2 == 0 ? 0 : 3;
+			if (column == 0) TeleGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+
+			var label = new TextBlock { Text = rows[i].Label };
+			label.Classes.Add("infoLabel");
+			var value = new TextBlock { Text = rows[i].Value };
+			value.Classes.Add("infoValue");
+			ToolTip.SetTip(value, rows[i].Tip);
+			Grid.SetRow(label, i / 2);
+			Grid.SetColumn(label, column);
+			Grid.SetRow(value, i / 2);
+			Grid.SetColumn(value, column + 1);
+			TeleGrid.Children.Add(label);
+			TeleGrid.Children.Add(value);
+		}
 	}
 
-	/// <summary>
-	///     The top speed as the overlay shows it - processed like the preview, with the speed correction - not the cached
-	///     summary's measured one, so this card and the speed widgets agree. Again after Settings changes either.
-	/// </summary>
-	private void ShowMaxSpeedInfo()
+	private List<(string Label, string Value, string? Tip)> TelemetryRows(FileSummary summary, TelemetrySummary t)
 	{
-		if (!_availability.GpsFix || RecordingSpeeds().PeakKmh is not { } measured)
+		bool drone = summary.CameraFormat?.IsDrone == true;
+		bool hasGps = _availability.GpsFix;
+		string duration = TimeSpan.FromSeconds(t.DurationSeconds).ToString(@"hh\:mm\:ss");
+		string maxG = $"{t.MaxGForce:0.00} G";
+		List<(string Label, string Value, string? Tip)> rows = [(drone ? Strings.Main_FlightTime : Strings.Main_Duration, duration, null)];
+
+		// Without a GPS fix there's nothing to measure: a dash, not a "0.00 km" that reads like a recording that never moved.
+		if (!hasGps)
 		{
-			TeleMaxSpeed.Text = "-";
-			ToolTip.SetTip(TeleMaxSpeed, _summary?.Telemetry is null ? null : Strings.Summary_NoGpsFixTip);
-			return;
+			rows.Add((Strings.Main_Samples, $"{t.SampleCount}", null));
+			rows.Add((Strings.Main_Distance, "-", Strings.Summary_NoGpsFixTip));
+			rows.Add((Strings.Common_MaxSpeed, "-", Strings.Summary_NoGpsFixTip));
+			if (_availability.CameraAxes) rows.Add((Strings.Main_MaxGForce, maxG, null));
+			return rows;
 		}
 
+		TelemetryOverview o = TelemetryOverview.Of(summary.DerivedFrames ?? []);
 		double percent = OverlaySettingsStore.Load().SpeedCorrectionPercent;
-		TeleMaxSpeed.Text = $"{SpeedCalibration.Corrected(measured, percent):0.#} km/h";
-		ToolTip.SetTip(TeleMaxSpeed, percent > 0
-			? string.Format(Strings.Summary_MaxSpeedCorrectedTip, measured, percent)
-			: Strings.Summary_MaxSpeedTip);
+		(string max, string? maxTip) = RecordingSpeeds().PeakKmh is { } measured
+			? ($"{SpeedCalibration.Corrected(measured, percent):0.#} km/h", percent > 0 ? string.Format(Strings.Summary_MaxSpeedCorrectedTip, measured, percent) : Strings.Summary_MaxSpeedTip)
+			: ("-", null);
+		string average = $"{SpeedCalibration.Corrected(o.AverageSpeedKmh, percent):0.#} km/h";
+
+		rows.Add((Strings.Main_Distance, $"{t.TotalDistanceMeters / 1000.0:0.00} km", null));
+		rows.Add((Strings.Common_MaxSpeed, max, maxTip));
+		if (drone)
+		{
+			rows.Add((Strings.Main_AverageSpeed, average, Strings.Main_AverageSpeedTip));
+			if (o.MaxHeightMeters is { } height) rows.Add((Strings.Main_MaxHeight, $"{height:0} m", Strings.Main_MaxHeightTip));
+			if (o.MaxHomeDistanceMeters is { } away) rows.Add((Strings.Main_MaxHomeDistance, away >= 1000 ? $"{away / 1000.0:0.00} km" : $"{away:0} m", Strings.Main_MaxHomeDistanceTip));
+			if (o.MaxClimbMs is { } climb) rows.Add((Strings.Main_MaxClimb, $"{climb:0.#} m/s", null));
+			if (o.BatteryStartPercent is { } from && o.BatteryEndPercent is { } to) rows.Add((Strings.Main_DroneBatteryRange, $"{from:0}% → {to:0}%", Strings.Main_DroneBatteryRangeTip));
+			return rows;
+		}
+
+		rows.Add((Strings.Main_AverageSpeed, average, Strings.Main_AverageSpeedTip));
+		rows.Add((Strings.Main_MovingTime, TimeSpan.FromSeconds(o.MovingSeconds).ToString(@"hh\:mm\:ss"), Strings.Main_MovingTimeTip));
+		if (_availability.AltitudeAboveSea)
+		{
+			rows.Add((Strings.Main_ElevationChange, $"+{o.AscentMeters:0} / -{o.DescentMeters:0} m", Strings.Main_ElevationChangeTip));
+			rows.Add((Strings.Main_Altitude, $"{t.MinAltitudeMeters:0} - {t.MaxAltitudeMeters:0} m", null));
+		}
+
+		if (o.AverageHeartRateBpm is { } heart && o.MaxHeartRateBpm is { } peak) rows.Add((Strings.Main_HeartRateRange, $"{heart} / {peak} bpm", null));
+		if (_availability.CameraAxes) rows.Add((Strings.Main_MaxGForce, maxG, null));
+		if (!_externalTrackApplied) rows.Add((Strings.Main_Samples, $"{t.SampleCount}", null));
+		return rows;
+	}
+
+	/// <summary>The top speed as the overlay shows it, with the speed correction: the card is built again after Settings changes it, so it and the speed widgets agree.</summary>
+	private void ShowMaxSpeedInfo()
+	{
+		if (_summary is { Telemetry: not null } summary) PopulateTelemetryInfo(summary);
 	}
 
 	private void LogCacheEvent(FileSummaryCacheEvent e)

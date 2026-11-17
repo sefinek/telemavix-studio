@@ -320,81 +320,15 @@ public partial class MainWindow
 	/// <summary>The card of a track opened on its own: what wrote the file, when and how long, how well it was recorded and which readings it carries.</summary>
 	private void ShowTrackFileInfo(string path, ExternalTrack track)
 	{
-		static void Row(Grid row, TextBlock value, string? text)
-		{
-			row.IsVisible = !string.IsNullOrWhiteSpace(text);
-			value.Text = text;
-		}
-
-		static string Clock(TimeSpan length) => length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture);
-
-		ExternalTrackFacts facts = ExternalTrackFacts.Of(track);
-		CultureInfo culture = CultureInfo.CurrentCulture;
-		DateTime start = track.StartUtc.ToLocalFromUtc(), end = track.EndUtc.ToLocalFromUtc();
-		string recorded = $"{start:yyyy-MM-dd HH:mm:ss} - {(end.Date == start.Date ? end.ToString("HH:mm:ss", culture) : end.ToString("yyyy-MM-dd HH:mm:ss", culture))}";
-
-		string? source = null;
-		if (track.Creator is { } creator)
-		{
-			string named = creator.HasVersion ? $"{creator.Name} {creator.Version}" : creator.Name;
-			source = creator.IsTelemavixGps ? string.Format(culture, Strings.TrackFile_PhoneApp, named) : named;
-		}
-
-		List<string> gps = [];
-		if (facts.MedianAccuracyMeters is { } accuracy) gps.Add(string.Format(culture, Strings.TrackFile_Accuracy, accuracy));
-		if (facts.MinSatellites is { } fewest && facts.MaxSatellites is { } most) gps.Add(string.Format(culture, Strings.TrackFile_SatellitesRange, fewest, most));
-
-		List<string> data = [];
-
-		void Has(bool present, string name)
-		{
-			if (present) data.Add(name);
-		}
-
-		Has(facts.Data.HasFlag(TrackData.Altitude), Strings.Main_Altitude);
-		Has(facts.Data.HasFlag(TrackData.Speed), Strings.Common_Speed);
-		Has(facts.Data.HasFlag(TrackData.Distance), Strings.Main_Distance);
-		Has(facts.Data.HasFlag(TrackData.HeartRate), Strings.Widget_HeartRate);
-		Has(facts.Data.HasFlag(TrackData.Cadence), Strings.Widget_Cadence);
-		Has(facts.Data.HasFlag(TrackData.Temperature), Strings.Widget_AmbientTemperature);
-		Has(facts.Data.HasFlag(TrackData.Attitude), Strings.Widget_Attitude);
-		Has(facts.Data.HasFlag(TrackData.Battery), Strings.Widget_DeviceBattery);
-
-		List<string> sensors = [];
-
-		void Senses(PhoneSensors sensor, string name)
-		{
-			if (facts.Sensors.HasFlag(sensor)) sensors.Add(name);
-		}
-
-		Senses(PhoneSensors.Pressure, Strings.TrackFile_Sensor_Pressure);
-		Senses(PhoneSensors.Light, Strings.TrackFile_Sensor_Light);
-		Senses(PhoneSensors.Acceleration, Strings.TrackFile_Sensor_Acceleration);
-		Senses(PhoneSensors.AngularVelocity, Strings.TrackFile_Sensor_AngularVelocity);
-		Senses(PhoneSensors.Bearing, Strings.TrackFile_Sensor_Bearing);
-		Senses(PhoneSensors.CellSignal, Strings.TrackFile_Sensor_CellSignal);
-		Senses(PhoneSensors.BatteryTemperature, Strings.TrackFile_Sensor_BatteryTemperature);
-		Senses(PhoneSensors.Charging, Strings.TrackFile_Sensor_Charging);
-
-		Row(TrackFileNameRow, TrackFileName, Path.GetFileName(path));
-		Row(TrackFileSourceRow, TrackFileSource, source);
-		Row(TrackFileDeviceRow, TrackFileDevice, track.Manufacturer ?? track.DeviceName);
-		Row(TrackFileRecordedRow, TrackFileRecorded, recorded);
-		Row(TrackFilePointsRow, TrackFilePoints, string.Format(culture, Strings.TrackFile_PointsValue, track.Points.Count, Clock(track.EndUtc - track.StartUtc), string.Format(culture, Strings.TrackFile_Interval, track.MedianIntervalSeconds)));
-		Row(TrackFilePausesRow, TrackFilePauses, facts.PauseCount > 0 ? string.Format(culture, Strings.TrackFile_PausesValue, facts.PauseCount, Clock(facts.PausedTime)) : null);
-		Row(TrackFileGpsLostRow, TrackFileGpsLost, facts.GpsLost > TimeSpan.Zero ? Clock(facts.GpsLost) : null);
-		Row(TrackFileGpsRow, TrackFileGps, string.Join(", ", gps));
-		Row(TrackFileBatteryRow, TrackFileBattery, facts.BatteryStartPercent is { } from && facts.BatteryEndPercent is { } to ? string.Format(culture, Strings.TrackFile_BatteryValue, from, to) : null);
-		Row(TrackFileDataRow, TrackFileData, string.Join(", ", data));
-		Row(TrackFileSensorsRow, TrackFileSensors, string.Join(", ", sensors));
+		TrackFileRows.Fill(TrackFileRowsHost, TrackFileRows.Of(track, path), 110, "infoLabel", "infoValue");
 	}
 
 	private void ShowExternalTrackInfo(ExternalTrack track)
 	{
 		TimeSpan length = track.EndUtc - track.StartUtc;
 		string text = string.Format(Strings.Track_Summary,
-			length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture), track.Points.Count);
-		if (track.DeviceName is { } name) text = $"{name} · {text}";
+			length.ToString(length.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture));
+		if ((track.DeviceName ?? track.Creator?.Display) is { } name) text = $"{name} · {text}";
 		ExternalTrackInfo.Text = text;
 		ToolTip.SetTip(ExternalTrackInfo, text);
 		ExternalTrackInfo.IsVisible = true;

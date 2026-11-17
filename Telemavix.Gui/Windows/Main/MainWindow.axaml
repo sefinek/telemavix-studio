@@ -625,50 +625,7 @@
 									<StackPanel Classes="cardTitle">
 										<TextBlock Classes="cardTitleText" Text="{x:Static local:Strings.TrackFile_Header}" />
 									</StackPanel>
-									<Grid Name="TrackFileNameRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Name}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileName" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileSourceRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Source}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileSource" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileDeviceRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Device}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileDevice" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileRecordedRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Recorded}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileRecorded" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFilePointsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Points}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFilePoints" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFilePausesRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Pauses}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFilePauses" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileGpsLostRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_GpsLost}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileGpsLost" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileGpsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Gps}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileGps" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileBatteryRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Battery}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileBattery" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileDataRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_Data}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileData" TextWrapping="Wrap" />
-									</Grid>
-									<Grid Name="TrackFileSensorsRow" ColumnDefinitions="110,*" ColumnSpacing="8">
-										<TextBlock Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.TrackFile_PhoneSensors}" />
-										<TextBlock Grid.Column="1" Classes="infoValue" Name="TrackFileSensors" TextWrapping="Wrap" />
-									</Grid>
+									<StackPanel Name="TrackFileRowsHost" Spacing="2" />
 								</StackPanel>
 							</Border>
 
@@ -677,7 +634,7 @@
 									<StackPanel Classes="cardTitle">
 										<TextBlock Classes="cardTitleText" Text="{x:Static local:Strings.Main_TelemetryHeader}" />
 									</StackPanel>
-									<Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="2" ColumnSpacing="8">
+									<Grid Name="TeleGrid" RowSpacing="2" ColumnSpacing="8">
 										<Grid.ColumnDefinitions>
 											<ColumnDefinition Width="Auto" SharedSizeGroup="InfoLabelLeft" />
 											<ColumnDefinition Width="*" />
@@ -685,20 +642,6 @@
 											<ColumnDefinition Width="Auto" SharedSizeGroup="InfoLabelRight" />
 											<ColumnDefinition Width="*" />
 										</Grid.ColumnDefinitions>
-										<TextBlock Grid.Row="0" Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.Main_Samples}" />
-										<TextBlock Grid.Row="0" Grid.Column="1" Classes="infoValue" Name="TeleSamples" />
-										<TextBlock Grid.Row="0" Grid.Column="3" Classes="infoLabel" Text="{x:Static local:Strings.Main_Duration}" />
-										<TextBlock Grid.Row="0" Grid.Column="4" Classes="infoValue" Name="TeleDuration" />
-
-										<TextBlock Grid.Row="1" Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.Main_Distance}" />
-										<TextBlock Grid.Row="1" Grid.Column="1" Classes="infoValue" Name="TeleDistance" />
-										<TextBlock Grid.Row="1" Grid.Column="3" Classes="infoLabel" Text="{x:Static local:Strings.Common_MaxSpeed}" />
-										<TextBlock Grid.Row="1" Grid.Column="4" Classes="infoValue" Name="TeleMaxSpeed" />
-
-										<TextBlock Grid.Row="2" Grid.Column="0" Classes="infoLabel" Text="{x:Static local:Strings.Main_Altitude}" />
-										<TextBlock Grid.Row="2" Grid.Column="1" Classes="infoValue" Name="TeleAltitude" />
-										<TextBlock Grid.Row="2" Grid.Column="3" Classes="infoLabel" Text="{x:Static local:Strings.Main_MaxGForce}" />
-										<TextBlock Grid.Row="2" Grid.Column="4" Classes="infoValue" Name="TeleMaxG" />
 									</Grid>
 									<TextBlock Classes="infoLabel" Margin="0,10,0,0">
 										<Run Text="{x:Static local:Strings.Main_Recorded}" /><Run Text=" " /><Run Name="TeleRecordedAt" />

@@ -143,6 +143,78 @@ public sealed class ExternalTrackSourceTests
 		}
 	}
 
+	private static List<TelemetryFrame> FramesOf(double seconds)
+	{
+		return [.. Enumerable.Range(0, (int)(seconds * Fps)).Select(f => new TelemetryFrame(f, f / Fps, 0, 0, 0, null, 0, 0, 1, HasGpsFix: false))];
+	}
+
+	[TestMethod]
+	public void OverlappingClockAnchor_ARecordingStartingASecondBeforeTheTrackIsPlacedOnTheClock()
+	{
+		string directory = Directory.CreateTempSubdirectory().FullName;
+		try
+		{
+			ExternalTrack track = ExternalTrackReader.Read(WriteTrack(directory));
+			DateTime start = TrackStart.AddSeconds(-1);
+
+			Assert.AreEqual(start, ExternalTrackSource.OverlappingClockAnchor(Frames(), Fps, track, start));
+		}
+		finally
+		{
+			Directory.Delete(directory, true);
+		}
+	}
+
+	[TestMethod]
+	public void OverlappingClockAnchor_NeedsAtLeastTwentySecondsOfOverlapOrAllOfAShorterRecording()
+	{
+		string directory = Directory.CreateTempSubdirectory().FullName;
+		try
+		{
+			ExternalTrack track = ExternalTrackReader.Read(WriteTrack(directory));
+			List<TelemetryFrame> hundredSeconds = FramesOf(100);
+
+			Assert.IsNotNull(ExternalTrackSource.OverlappingClockAnchor(hundredSeconds, Fps, track, TrackStart.AddSeconds(-30)), "the camera outlived the track: all 59 s of it overlap");
+			Assert.IsNotNull(ExternalTrackSource.OverlappingClockAnchor(hundredSeconds, Fps, track, TrackStart.AddSeconds(-80)), "20 s overlap is enough");
+			Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(hundredSeconds, Fps, track, TrackStart.AddSeconds(-81)), "under 20 s says nothing");
+			Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(hundredSeconds, Fps, track, TrackStart.AddSeconds(41)), "the camera started 18 s before the track ended");
+			Assert.IsNotNull(ExternalTrackSource.OverlappingClockAnchor(FramesOf(15), Fps, track, TrackStart.AddSeconds(49)), "a short clip needs its length less the slack (5 s), not 20 s");
+			Assert.IsNull(ExternalTrackSource.OverlappingClockAnchor(FramesOf(15), Fps, track, TrackStart.AddSeconds(54.5)), "under 5 s inside");
+		}
+		finally
+		{
+			Directory.Delete(directory, true);
+		}
+	}
+
+	[TestMethod]
+	public void OverlappingClockAnchor_CountsBackFromTheFirstFramesOwnTime()
+	{
+		string directory = Directory.CreateTempSubdirectory().FullName;
+		try
+		{
+			ExternalTrack track = ExternalTrackReader.Read(WriteTrack(directory));
+			List<TelemetryFrame> frames = [.. Frames().Select(f => f with { SampleTimeSeconds = f.SampleTimeSeconds + 4 })];
+
+			Assert.AreEqual(TrackStart.AddSeconds(1), ExternalTrackSource.OverlappingClockAnchor(frames, Fps, track, TrackStart.AddSeconds(5)));
+		}
+		finally
+		{
+			Directory.Delete(directory, true);
+		}
+	}
+
+	[TestMethod]
+	public void ShiftOf_IsHowMuchLaterTheManualStartLiesOnTheTrackThanTheProposal()
+	{
+		var proposal = new TrackAlignment(TrackStart.AddSeconds(-1), TrackAlignmentMethod.ContainerClock);
+
+		Assert.AreEqual(0, proposal.ShiftOf(new TrackSynchronization(new TrackSyncAnchor(0, TrackStart.AddSeconds(-1)))), 1e-9);
+		Assert.AreEqual(7, proposal.ShiftOf(new TrackSynchronization(new TrackSyncAnchor(0, TrackStart.AddSeconds(6)))), 1e-9);
+		Assert.AreEqual(7, proposal.ShiftOf(new TrackSynchronization(new TrackSyncAnchor(78, TrackStart.AddSeconds(84)))), 1e-9, "an anchor later in the video counts back to the first frame");
+		Assert.AreEqual(-3, proposal.ShiftOf(new TrackSynchronization(new TrackSyncAnchor(0, TrackStart.AddSeconds(-4)))), 1e-9);
+	}
+
 	[TestMethod]
 	public void Apply_WithNoWayToMatchItIsAnErrorThatNamesTheFile()
 	{

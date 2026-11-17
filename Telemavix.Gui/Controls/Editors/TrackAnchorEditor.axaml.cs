@@ -12,10 +12,15 @@ public partial class TrackAnchorEditor : UserControl
 {
 	private double _previewSeconds;
 
+	/// <summary>The video time or the track's time was changed - typed, picked or set from code.</summary>
+	public event Action? Changed;
+
 	public TrackAnchorEditor()
 	{
 		InitializeComponent();
 		CurrentFrameButton.Click += (_, _) => VideoSeconds = _previewSeconds;
+		VideoBox.ValueChanged += (_, _) => Changed?.Invoke();
+		UtcBox.TextChanged += (_, _) => Changed?.Invoke();
 		PointBox.SelectionChanged += (_, _) =>
 		{
 			if (PointBox.SelectedItem is TrackPointChoice choice) Utc = choice.Point.Utc;
@@ -51,11 +56,16 @@ public partial class TrackAnchorEditor : UserControl
 	/// <summary>The point as typed - InvalidDataException with a message for the user when the time or the date doesn't read.</summary>
 	public TrackSyncAnchor Read()
 	{
-		if (DataValidationErrors.GetHasErrors(VideoBox) || VideoBox.Value is not { } seconds ||
-		    !TrackSyncAnchor.TryParse($"{seconds.ToString(CultureInfo.InvariantCulture)}={UtcBox.Text}", out TrackSyncAnchor? anchor))
-			throw new InvalidDataException(Strings.Track_InvalidTime);
+		return TryRead() ?? throw new InvalidDataException(Strings.Track_InvalidTime);
+	}
 
-		return anchor!;
+	/// <summary>The point as typed, or null while it doesn't read - for what runs on every keystroke, where a thrown exception would be the usual case.</summary>
+	public TrackSyncAnchor? TryRead()
+	{
+		return !DataValidationErrors.GetHasErrors(VideoBox) && VideoBox.Value is { } seconds &&
+		       TrackSyncAnchor.TryParse($"{seconds.ToString(CultureInfo.InvariantCulture)}={UtcBox.Text}", out TrackSyncAnchor? anchor)
+			? anchor
+			: null;
 	}
 
 	private sealed record TrackPointChoice(ExternalTrackPoint Point)

@@ -68,21 +68,25 @@ public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = nu
 		if (RecordingAnchor(frames, fps, track) is { } byRecording) return new TrackAlignment(byRecording, TrackAlignmentMethod.RecordingSpan);
 		if (ContainingSpanAnchor(frames, fps, track, recordingStartUtc) is { } byClock) return new TrackAlignment(byClock, TrackAlignmentMethod.ContainerClock);
 		if (ExternalTrackSync.Estimate(frames, fps, track) is { } estimate) return new TrackAlignment(estimate.TrackTimeAtVideoStartUtc, TrackAlignmentMethod.Motion, estimate.Correlation);
-		return WholeRecordingClockAnchor(frames, fps, track, recordingStartUtc) is { } byContainer ? new TrackAlignment(byContainer, TrackAlignmentMethod.ContainerClock) : null;
+		return OverlappingClockAnchor(frames, fps, track, recordingStartUtc) is { } byContainer ? new TrackAlignment(byContainer, TrackAlignmentMethod.ContainerClock) : null;
 	}
 
 	/// <summary>
-	///     The last resort for a track with no recording spans (a phone's): the container's creation time, when the whole recording then lies
-	///     inside the track. Off by the difference of the two clocks, so it is only a proposal to be checked on the picture.
+	///     The last resort for a track with no recording spans (a phone's): the container's creation time, when the recording then overlaps the
+	///     track by at least `MinClockOverlapSeconds` (for a clip under that plus the clocks' slack, all of it but the slack). The camera may well have started before the track or
+	///     outlived it, so the recording needn't lie inside. Off by the difference of the two clocks, so it is only a proposal to be checked on the picture.
 	/// </summary>
-	public static DateTime? WholeRecordingClockAnchor(IReadOnlyList<TelemetryFrame> frames, double fps, ExternalTrack track, DateTime? recordingStartUtc)
+	public static DateTime? OverlappingClockAnchor(IReadOnlyList<TelemetryFrame> frames, double fps, ExternalTrack track, DateTime? recordingStartUtc)
 	{
 		if (recordingStartUtc is not { } start || frames.Count == 0 || fps <= 0) return null;
 
 		double length = frames[^1].SampleTimeSeconds - frames[0].SampleTimeSeconds + 1 / fps;
-		var slack = TimeSpan.FromSeconds(SpanClockSlackSeconds);
-		return start >= track.StartUtc - slack && start.AddSeconds(length) <= track.EndUtc + slack ? start.AddSeconds(-frames[0].SampleTimeSeconds) : null;
+		DateTime from = start > track.StartUtc ? start : track.StartUtc, to = start.AddSeconds(length) < track.EndUtc ? start.AddSeconds(length) : track.EndUtc;
+		double required = Math.Clamp(length - SpanClockSlackSeconds, 1, MinClockOverlapSeconds);
+		return (to - from).TotalSeconds >= required ? start.AddSeconds(-frames[0].SampleTimeSeconds) : null;
 	}
+
+	private const double MinClockOverlapSeconds = 20;
 
 	/// <summary>The share (0 to 1) of the recording's length that falls inside the track's time range under this synchronization.</summary>
 	public static double Coverage(ExternalTrack track, TrackSynchronization synchronization, double videoSeconds)

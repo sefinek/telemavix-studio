@@ -11,6 +11,9 @@ public sealed record TrackCreator(string Name, string? Version = null)
 	/// <summary>False for a version that says nothing (0.0 in a GPX, 0.0.0 in a FIT: a build with no version of its own).</summary>
 	public bool HasVersion => System.Version.TryParse(Version, out Version? parsed) && (parsed.Major > 0 || parsed.Minor > 0 || Math.Max(parsed.Build, 0) > 0);
 
+	/// <summary>The name with its version when it has one ("Telemavix GPS 0.5.2").</summary>
+	public string Display => HasVersion ? $"{Name} {Version}" : Name;
+
 	public bool IsTelemavixGps => string.Equals(Name, TrackProducer.ApplicationName, StringComparison.OrdinalIgnoreCase);
 
 	/// <summary>The creator attribute of a GPX ("Telemavix GPS 0.5.2", "Garmin Connect"): the name, and the version when the text ends with one. Null when blank.</summary>

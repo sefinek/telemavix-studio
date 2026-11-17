@@ -1524,6 +1524,51 @@ W każdej kategorii znajdziesz do trzech momentów ze skrajnymi wartościami. Mo
   <data name="Main_SampleRate" xml:space="preserve">
     <value>Próbkowanie</value>
   </data>
+  <data name="Main_FlightTime" xml:space="preserve">
+    <value>Czas lotu</value>
+  </data>
+  <data name="Main_AverageSpeed" xml:space="preserve">
+    <value>Prędkość śr.</value>
+  </data>
+  <data name="Main_AverageSpeedTip" xml:space="preserve">
+    <value>Dystans podzielony przez czas w ruchu.</value>
+  </data>
+  <data name="Main_MovingTime" xml:space="preserve">
+    <value>W ruchu</value>
+  </data>
+  <data name="Main_MovingTimeTip" xml:space="preserve">
+    <value>Czas, w którym prędkość wynosiła co najmniej 3 km/h. Postoje nie są wliczane.</value>
+  </data>
+  <data name="Main_ElevationChange" xml:space="preserve">
+    <value>Przewyższenie</value>
+  </data>
+  <data name="Main_ElevationChangeTip" xml:space="preserve">
+    <value>Suma podjazdów i zjazdów. Wahania wysokości poniżej 3 m są pomijane.</value>
+  </data>
+  <data name="Main_MaxHeight" xml:space="preserve">
+    <value>Maks. wysokość</value>
+  </data>
+  <data name="Main_MaxHeightTip" xml:space="preserve">
+    <value>Nad miejscem startu.</value>
+  </data>
+  <data name="Main_MaxHomeDistance" xml:space="preserve">
+    <value>Maks. odległość</value>
+  </data>
+  <data name="Main_MaxHomeDistanceTip" xml:space="preserve">
+    <value>Od miejsca startu.</value>
+  </data>
+  <data name="Main_MaxClimb" xml:space="preserve">
+    <value>Maks. wznoszenie</value>
+  </data>
+  <data name="Main_HeartRateRange" xml:space="preserve">
+    <value>Tętno śr. / maks.</value>
+  </data>
+  <data name="Main_DroneBatteryRange" xml:space="preserve">
+    <value>Bateria drona</value>
+  </data>
+  <data name="Main_DroneBatteryRangeTip" xml:space="preserve">
+    <value>Na początku i na końcu nagrania.</value>
+  </data>
   <data name="Main_Samples" xml:space="preserve">
     <value>Próbki</value>
   </data>
@@ -4274,26 +4319,11 @@ To skrót. Wiążący jest pełny regulamin DJI, który może się zmieniać.</v
     <value>Trasa FIT lub GPX, dziennik lotu DJI</value>
   </data>
   <data name="Track_FitPreferred" xml:space="preserve">
-    <value>Plik FIT może zawierać zapisaną prędkość, przerwy w pomiarze czasu, dystans i stan baterii urządzenia. Z pliku GPX prędkość jest wyliczana z kolejnych pozycji. GPX nie dostarcza odczytów dystansu z licznika ani poziomu baterii.</value>
+    <value>Plik FIT zawiera zazwyczaj więcej danych niż GPX: zapisaną prędkość, przerwy timera, dystans z licznika i stan baterii urządzenia. W GPX prędkość jest wyliczana z kolejnych pozycji, a przerw timera i dystansu z licznika nie ma. Jeśli możesz wybierać, wybierz FIT.</value>
   </data>
   <data name="Track_Info" xml:space="preserve">
     <value>{0} - {1} UTC
 Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
-  </data>
-  <data name="Track_StatDevice" xml:space="preserve">
-    <value>Urządzenie: {0}</value>
-  </data>
-  <data name="Track_StatDistance" xml:space="preserve">
-    <value>dystans: {0} km</value>
-  </data>
-  <data name="Track_StatMaxSpeed" xml:space="preserve">
-    <value>maks. prędkość: {0} km/h</value>
-  </data>
-  <data name="Track_StatMaxHeight" xml:space="preserve">
-    <value>maks. wysokość: {0} m</value>
-  </data>
-  <data name="Track_StatRecordings" xml:space="preserve">
-    <value>nagrania kamery: {0}</value>
   </data>
   <data name="Track_FirstAnchor" xml:space="preserve">
     <value>PUNKT SYNCHRONIZACJI</value>
@@ -5023,7 +5053,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>brak</value>
   </data>
   <data name="Track_Summary" xml:space="preserve">
-    <value>czas trasy: {0} · punkty GPS: {1}</value>
+    <value>czas trasy: {0}</value>
   </data>
   <data name="Phone_Found" xml:space="preserve">
     <value>Znaleziono dziennik pasujący do nagrania</value>
@@ -5059,7 +5089,7 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Podsumowanie</value>
   </data>
   <data name="Track_FileHelp" xml:space="preserve">
-    <value>Wybierz plik trasy z urządzenia GPS albo dziennik lotu drona. W następnym kroku aplikacja spróbuje automatycznie dopasować trasę do nagrania. Jeśli się to nie uda lub zechcesz poprawić dopasowanie, możesz ustawić je ręcznie.</value>
+    <value>Wybierz plik trasy z urządzenia GPS albo dziennik lotu drona. W następnym kroku aplikacja spróbuje automatycznie dopasować trasę do nagrania. Jeśli dopasowanie się nie uda albo będzie nieidealne, ustawisz je ręcznie.</value>
   </data>
   <data name="Track_Aligning" xml:space="preserve">
     <value>Dopasowywanie trasy do nagrania...</value>
@@ -5075,6 +5105,27 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="Track_Auto_Start" xml:space="preserve">
     <value>Początek filmu odpowiada godzinie {0} UTC na trasie.</value>
+  </data>
+  <data name="Track_Diff_Same" xml:space="preserve">
+    <value>W obu dopasowaniach początek filmu przypada na ten sam moment trasy.</value>
+  </data>
+  <data name="Track_Diff_Later" xml:space="preserve">
+    <value>W ręcznym dopasowaniu początek filmu przypada o {0} s później niż w automatycznym ({1} UTC zamiast {2} UTC).</value>
+  </data>
+  <data name="Track_Diff_Earlier" xml:space="preserve">
+    <value>W ręcznym dopasowaniu początek filmu przypada o {0} s wcześniej niż w automatycznym ({1} UTC zamiast {2} UTC).</value>
+  </data>
+  <data name="Track_Diff_ClockBehind" xml:space="preserve">
+    <value>Jeśli ręczne dopasowanie jest poprawne, zegar kamery spóźnia się o tę różnicę względem czasu zapisanego w trasie.</value>
+  </data>
+  <data name="Track_Diff_ClockAhead" xml:space="preserve">
+    <value>Jeśli ręczne dopasowanie jest poprawne, zegar kamery spieszy się o tę różnicę względem czasu zapisanego w trasie.</value>
+  </data>
+  <data name="Track_ClockAdvice" xml:space="preserve">
+    <value>Aby ułatwić automatyczne dopasowanie kolejnych nagrań, ustaw w kamerze prawidłową datę, godzinę i strefę czasową. Zsynchronizuj jej zegar z telefonem lub GPS, jeśli kamera ma taką funkcję. Przy dopasowaniu według zegara kamery każda sekunda różnicy przesuwa telemetrię o sekundę.</value>
+  </data>
+  <data name="Track_Auto_LeadsTrackClock" xml:space="preserve">
+    <value>Przy tym dopasowaniu pierwsze {0} s filmu nie będą miały telemetrii z trasy. Może to wynikać z późniejszego rozpoczęcia zapisu trasy lub różnicy między zegarami urządzeń. Sprawdź dopasowanie w podglądzie i w razie potrzeby popraw je ręcznie.</value>
   </data>
   <data name="Track_Auto_LeadsTrack" xml:space="preserve">
     <value>Film zaczyna się {0} s przed pierwszym punktem trasy, więc jego początek będzie bez telemetrii. Telefon zaczął nagrywać później niż kamera.</value>
@@ -5597,6 +5648,12 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>Do aktywności nagranych zegarkiem Garmin (FIT).</value>
+  </data>
+  <data name="Track_FileDetails" xml:space="preserve">
+    <value>Dane z pliku</value>
+  </data>
+  <data name="TrackFile_Utc" xml:space="preserve">
+    <value>Czas UTC</value>
   </data>
   <data name="TrackFile_Header" xml:space="preserve">
     <value>Plik</value>

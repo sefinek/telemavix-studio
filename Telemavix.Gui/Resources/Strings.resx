@@ -1524,6 +1524,51 @@ Each category lists up to three moments with extreme values. You can jump to a m
   <data name="Main_SampleRate" xml:space="preserve">
     <value>Sample rate</value>
   </data>
+  <data name="Main_FlightTime" xml:space="preserve">
+    <value>Flight time</value>
+  </data>
+  <data name="Main_AverageSpeed" xml:space="preserve">
+    <value>Avg. speed</value>
+  </data>
+  <data name="Main_AverageSpeedTip" xml:space="preserve">
+    <value>Distance divided by the moving time.</value>
+  </data>
+  <data name="Main_MovingTime" xml:space="preserve">
+    <value>Moving time</value>
+  </data>
+  <data name="Main_MovingTimeTip" xml:space="preserve">
+    <value>Time spent at 3 km/h or faster. Stops are not counted.</value>
+  </data>
+  <data name="Main_ElevationChange" xml:space="preserve">
+    <value>Elevation change</value>
+  </data>
+  <data name="Main_ElevationChangeTip" xml:space="preserve">
+    <value>Total climb and descent. Altitude wobble under 3 m is ignored.</value>
+  </data>
+  <data name="Main_MaxHeight" xml:space="preserve">
+    <value>Max. height</value>
+  </data>
+  <data name="Main_MaxHeightTip" xml:space="preserve">
+    <value>Above the take-off point.</value>
+  </data>
+  <data name="Main_MaxHomeDistance" xml:space="preserve">
+    <value>Max. distance</value>
+  </data>
+  <data name="Main_MaxHomeDistanceTip" xml:space="preserve">
+    <value>From the take-off point.</value>
+  </data>
+  <data name="Main_MaxClimb" xml:space="preserve">
+    <value>Max. climb rate</value>
+  </data>
+  <data name="Main_HeartRateRange" xml:space="preserve">
+    <value>Heart rate avg. / max.</value>
+  </data>
+  <data name="Main_DroneBatteryRange" xml:space="preserve">
+    <value>Drone battery</value>
+  </data>
+  <data name="Main_DroneBatteryRangeTip" xml:space="preserve">
+    <value>At the start and at the end of the recording.</value>
+  </data>
   <data name="Main_Samples" xml:space="preserve">
     <value>Samples</value>
   </data>
@@ -4274,26 +4319,11 @@ This is a summary. The full DJI terms govern and may change.</value>
     <value>FIT or GPX track, DJI flight log</value>
   </data>
   <data name="Track_FitPreferred" xml:space="preserve">
-    <value>A FIT file can contain recorded speed, timer pauses, distance and the device's battery level. With GPX, speed is calculated from consecutive positions. GPX does not provide the device's distance counter or battery level.</value>
+    <value>A FIT file usually holds more data than a GPX one: the recorded speed, timer pauses, odometer distance and the device's battery level. In a GPX, speed is calculated from consecutive positions, and there are no timer pauses or odometer distance. If you have a choice, pick FIT.</value>
   </data>
   <data name="Track_Info" xml:space="preserve">
     <value>{0} - {1} UTC
 GPS points: {2} · timer pauses: {3}</value>
-  </data>
-  <data name="Track_StatDevice" xml:space="preserve">
-    <value>Device: {0}</value>
-  </data>
-  <data name="Track_StatDistance" xml:space="preserve">
-    <value>distance: {0} km</value>
-  </data>
-  <data name="Track_StatMaxSpeed" xml:space="preserve">
-    <value>max speed: {0} km/h</value>
-  </data>
-  <data name="Track_StatMaxHeight" xml:space="preserve">
-    <value>max height: {0} m</value>
-  </data>
-  <data name="Track_StatRecordings" xml:space="preserve">
-    <value>camera recordings: {0}</value>
   </data>
   <data name="Track_FirstAnchor" xml:space="preserve">
     <value>SYNCHRONIZATION POINT</value>
@@ -5023,7 +5053,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>none</value>
   </data>
   <data name="Track_Summary" xml:space="preserve">
-    <value>duration: {0} · GPS points: {1}</value>
+    <value>duration: {0}</value>
   </data>
   <data name="Phone_Found" xml:space="preserve">
     <value>Found a flight log matching the recording</value>
@@ -5059,7 +5089,7 @@ GPS points: {2} · timer pauses: {3}</value>
     <value>Summary</value>
   </data>
   <data name="Track_FileHelp" xml:space="preserve">
-    <value>Select a track file from a GPS device or a drone&apos;s flight log. In the next step, the app will try to match the track to the recording automatically. If it cannot find a match, or you want to refine it, you can adjust the alignment manually.</value>
+    <value>Select a track file from a GPS device or a drone&apos;s flight log. In the next step, the app will try to match the track to the recording automatically. If the match fails or is not quite right, you will be able to set it by hand.</value>
   </data>
   <data name="Track_Aligning" xml:space="preserve">
     <value>Matching the track to the recording...</value>
@@ -5075,6 +5105,27 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="Track_Auto_Start" xml:space="preserve">
     <value>The video starts at {0} UTC on the track.</value>
+  </data>
+  <data name="Track_Diff_Same" xml:space="preserve">
+    <value>Both alignments place the start of the video at the same point in time on the track.</value>
+  </data>
+  <data name="Track_Diff_Later" xml:space="preserve">
+    <value>The manual alignment places the start of the video {0} s later than the automatic alignment ({1} UTC instead of {2} UTC).</value>
+  </data>
+  <data name="Track_Diff_Earlier" xml:space="preserve">
+    <value>The manual alignment places the start of the video {0} s earlier than the automatic alignment ({1} UTC instead of {2} UTC).</value>
+  </data>
+  <data name="Track_Diff_ClockBehind" xml:space="preserve">
+    <value>If the manual alignment is correct, the camera's clock is behind the track's timestamps by this amount.</value>
+  </data>
+  <data name="Track_Diff_ClockAhead" xml:space="preserve">
+    <value>If the manual alignment is correct, the camera's clock is ahead of the track's timestamps by this amount.</value>
+  </data>
+  <data name="Track_ClockAdvice" xml:space="preserve">
+    <value>To help align future recordings automatically, set the correct date, time and time zone on the camera. Sync its clock with your phone or GPS if the camera supports it. When aligning by the camera's clock, every second of clock difference shifts the telemetry by one second.</value>
+  </data>
+  <data name="Track_Auto_LeadsTrackClock" xml:space="preserve">
+    <value>With this alignment, the first {0} s of the video will have no telemetry from the track. This may be because track recording started later or because the device clocks differ. Check the alignment in the preview and adjust it manually if needed.</value>
   </data>
   <data name="Track_Auto_LeadsTrack" xml:space="preserve">
     <value>The video starts {0} s before the first point of the track, so the beginning has no telemetry. The phone started recording after the camera.</value>
@@ -5597,6 +5648,12 @@ GPS points: {2} · timer pauses: {3}</value>
   </data>
   <data name="Presets_GarminHint" xml:space="preserve">
     <value>For activities recorded by a Garmin watch (FIT).</value>
+  </data>
+  <data name="Track_FileDetails" xml:space="preserve">
+    <value>File details</value>
+  </data>
+  <data name="TrackFile_Utc" xml:space="preserve">
+    <value>UTC time</value>
   </data>
   <data name="TrackFile_Header" xml:space="preserve">
     <value>File</value>

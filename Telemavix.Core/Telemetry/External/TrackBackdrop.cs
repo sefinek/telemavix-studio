@@ -276,9 +276,9 @@ public sealed class TrackBackdrop : IDisposable
 	{
 		var options = TrackMapSettings.From(settings);
 		var sources = MapSources.From(settings);
-		if (sources.MissesApiKey(options.ProviderId))
+		if (sources.SetupProblem(options.ProviderId) is { } problem)
 		{
-			AppLogger.Warn(string.Format(CoreStrings.Map_ApiKeyMissing, sources.NameOf(options.ProviderId)));
+			AppLogger.Warn(problem);
 			return null;
 		}
 

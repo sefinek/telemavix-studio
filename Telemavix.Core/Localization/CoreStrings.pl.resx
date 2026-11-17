@@ -180,6 +180,9 @@
   <data name="Map_ApiKeyMissing" xml:space="preserve">
     <value>Nie podano klucza API wymaganego przez mapę {0}, więc kafelki nie zostaną pobrane. Wpisz klucz w ustawieniach widżetu Mapa.</value>
   </data>
+  <data name="Map_CustomUrlMissing" xml:space="preserve">
+    <value>Nie można pobrać mapy z własnego serwera, ponieważ nie podano adresu URL kafelków. Wprowadź go w ustawieniach widżetu „Mapa”.</value>
+  </data>
   <data name="Map_CacheTileFailed" xml:space="preserve">
     <value>Nie udało się zapisać kafelka mapy {0}</value>
   </data>

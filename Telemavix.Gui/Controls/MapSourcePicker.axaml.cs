@@ -23,10 +23,10 @@ public sealed partial class MapSourcePicker : UserControl
 	// Esri's own entries are what the two best-available picks resolve to (its key when there is one, else its public service), so
 	// listing them again would only offer the same maps twice - one of them failing without a key. A map that already has one chosen
 	// (an older preset) still shows it, see Load.
-	private static readonly HashSet<string> EsriDuplicates =
+	internal static readonly HashSet<string> EsriDuplicates =
 		[MapProviders.EsriImageryId, MapProviders.EsriStreetsId, MapProviders.EsriPublicId, MapProviders.EsriStreetsPublicId];
 
-	private static readonly HashSet<string> SatelliteIds =
+	internal static readonly HashSet<string> SatelliteIds =
 		[MapProviders.EsriImageryId, MapProviders.EsriPublicId, MapProviders.MapTilerSatelliteId, "maptiler-hybrid", MapProviders.GugikId];
 
 	/// <summary>
@@ -136,6 +136,7 @@ public sealed partial class MapSourcePicker : UserControl
 
 		CustomUrlLabel.IsVisible = custom;
 		CustomUrlBox.IsVisible = custom;
+		CustomUrlMissingHint.IsVisible = custom && string.IsNullOrWhiteSpace(CustomUrlBox.Text);
 
 		ApiKeyHeader.IsVisible = group is not null;
 		ApiKeyBox.IsVisible = group is not null;
@@ -164,15 +165,15 @@ public sealed partial class MapSourcePicker : UserControl
 	};
 
 	/// <summary>
-	///     One card for the map really used: may it go in a film (the answer people pick a map by), what's used now or the
-	///     provider's own note, the rest of its terms in one line, and the link to them. A custom server's terms are the user's.
+	///     One card for the map really used: may it go in a film (the answer people pick a map by) and the link to the terms, then
+	///     the rest of them as short facts (commercial use, the credit, saving tiles), then the description with what stands behind
+	///     the facts: what's used now or the provider's own note, the cache rule, the credit's time. A custom server's terms are the user's.
 	/// </summary>
 	private void ShowStatus(MapSources sources, bool best, bool custom)
 	{
 		StatusPanel.Children.Clear();
 		if (custom)
 		{
-			StatusPanel.Children.Add(Hint(Strings.MapTerms_Custom));
 			return;
 		}
 
@@ -202,14 +203,8 @@ public sealed partial class MapSourcePicker : UserControl
 		Grid.SetColumn(termsLink, 2);
 		headline.Children.Add(termsLink);
 
-		var panel = new StackPanel { Spacing = 6 };
+		var panel = new StackPanel { Spacing = 8 };
 		panel.Children.Add(headline);
-
-		string? detail = best
-			? publicEsri ? Strings.MapSource_BestNoKey : string.Format(Strings.MapSource_BestUses, provider.Name)
-			: terms.Note;
-		if (detail is not null) panel.Children.Add(Hint(detail));
-		if (terms.ShareAlike) panel.Children.Add(Hint(Strings.ExportNotice_ShareAlike));
 
 		var facts = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*"), ColumnSpacing = 12, RowSpacing = 3 };
 
@@ -235,22 +230,44 @@ public sealed partial class MapSourcePicker : UserControl
 			_ => null
 		});
 		Fact(Strings.MapTerms_Credit, terms.Credit == MapCreditRule.Briefly ? Strings.MapTerms_CreditBriefly : Strings.MapTerms_CreditWhileVisible);
-		int cacheDays = (int)(terms.CacheMaxAge?.TotalDays ?? 0);
-		Fact(Strings.MapTerms_Cache, terms.Cache switch
+		(string cache, IBrush? cacheColor) = terms.Cache switch
 		{
-			MapCache.Allowed => Strings.MapTerms_CacheAllowed,
-			MapCache.Forbidden => Strings.MapTerms_CacheForbidden,
-			MapCache.Temporary => Plural.Format(Strings.MapTerms_CacheTemporary, cacheDays),
-			_ => Plural.Format(Strings.MapTerms_CacheNotStated, cacheDays)
-		});
+			MapCache.Allowed => (Strings.MapTerms_CacheAllowed, Palette.Success),
+			MapCache.Forbidden => (Strings.MapTerms_CacheForbidden, Palette.Warning),
+			MapCache.Temporary => (Strings.MapTerms_CacheTemporary, Palette.Warning),
+			_ => (Strings.MapTerms_CacheNotStated, (IBrush?)null)
+		};
+		Fact(Strings.MapTerms_Cache, cache, cacheColor);
 		if (terms.Region is { } region) Fact(Strings.MapTerms_Coverage, region.Name);
 		panel.Children.Add(facts);
 
+		string? detail = best
+			? publicEsri ? Strings.MapSource_BestNoKey : string.Format(Strings.MapSource_BestUses, provider.Name)
+			: terms.Note;
+		if (detail is not null) panel.Children.Add(Hint(detail));
+		panel.Children.Add(Hint(CacheInfo(terms)));
+		if (terms.Credit == MapCreditRule.Briefly) panel.Children.Add(Hint(Strings.MapTerms_CreditBrieflyInfo));
+		if (terms.ShareAlike) panel.Children.Add(Hint(Strings.ExportNotice_ShareAlike));
+
 		if (publicEsri && !best) panel.Children.Add(Link(Strings.MapSource_GetEsriKey, MapProviders.KeyPages[MapProviders.EsriKeyGroup]));
+		panel.Children.Add(Hint(Strings.MapTerms_Disclaimer));
 
 		var card = new Border { Padding = new Thickness(12, 10), Child = panel };
 		card.Classes.Add("card");
 		StatusPanel.Children.Add(card);
+	}
+
+	/// <summary>Why the facts say what they say about the disk: the rule of the terms and what the app does because of it, with the days it keeps tiles for.</summary>
+	private static string CacheInfo(MapTerms terms)
+	{
+		int days = (int)(terms.CacheMaxAge?.TotalDays ?? 0);
+		return terms.Cache switch
+		{
+			MapCache.Allowed => Strings.MapTerms_CacheAllowedInfo,
+			MapCache.Forbidden => Strings.MapTerms_CacheForbiddenInfo,
+			MapCache.Temporary => Plural.Format(Strings.MapTerms_CacheTemporaryInfo, days),
+			_ => Plural.Format(Strings.MapTerms_CacheNotStatedInfo, days)
+		};
 	}
 
 	private static TextBlock Link(string text, string url)
@@ -295,6 +312,20 @@ public sealed partial class MapSourcePicker : UserControl
 
 		ShowSelected(OverlaySettingsStore.Load());
 		SelectionChanged?.Invoke(SelectedId);
+	}
+
+	private void OnCompareClick(object? sender, RoutedEventArgs e)
+	{
+		if (TopLevel.GetTopLevel(this) is not Window owner) return;
+
+		var window = new MapComparisonWindow(CurrentSources(OverlaySettingsStore.Load()), SelectedId, PickProvider);
+		_ = window.ShowDialog(owner);
+	}
+
+	private void PickProvider(string id)
+	{
+		if (ProviderCombo.ItemsSource is IEnumerable<object> items && items.OfType<ProviderOption>().FirstOrDefault(o => o.Id == id) is { } option)
+			ProviderCombo.SelectedItem = option;
 	}
 
 	private void OnApiKeyPageClick(object? sender, PointerPressedEventArgs e)

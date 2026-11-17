@@ -180,6 +180,9 @@
   <data name="Map_ApiKeyMissing" xml:space="preserve">
     <value>The API key required for the {0} map is missing, so tiles will not be downloaded. Enter the key in the Map widget settings.</value>
   </data>
+  <data name="Map_CustomUrlMissing" xml:space="preserve">
+    <value>The map cannot be downloaded from the custom server because no tile URL has been specified. Enter it in the Map widget settings.</value>
+  </data>
   <data name="Map_CacheTileFailed" xml:space="preserve">
     <value>Failed to cache map tile {0}</value>
   </data>

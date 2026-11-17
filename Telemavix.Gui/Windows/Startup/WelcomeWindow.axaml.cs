@@ -9,7 +9,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using SkiaSharp;
 using Telemavix.Core;
 using Telemavix.Core.Dependencies;
 using Telemavix.Core.Ffmpeg;
@@ -664,26 +663,9 @@ public partial class WelcomeWindow : Window
 		return [(lat - halfLat, lon - halfLon), (lat + halfLat, lon + halfLon)];
 	}
 
-	private static async Task<Bitmap?> MapPreviewAsync(string urlTemplate, int zoom, TimeSpan? cacheMaxAge, string? labelsUrlTemplate, double areaScale)
+	private static Task<Bitmap?> MapPreviewAsync(string urlTemplate, int zoom, TimeSpan? cacheMaxAge, string? labelsUrlTemplate, double areaScale)
 	{
-		try
-		{
-			using RouteMapMosaic? mosaic = await Task.Run(() => RouteMapMosaic.BuildAsync(ScaledPreviewArea(areaScale), urlTemplate, zoom, 0, CancellationToken.None,
-				targetAspectRatio: 2.0, cacheMaxAge: cacheMaxAge, labelsUrlTemplate: labelsUrlTemplate));
-			if (mosaic is null) return null;
-
-			using SKImage? view = mosaic.Image.Subset(SKRectI.Round(mosaic.View));
-			if (view is null) return null;
-
-			using SKData png = view.Encode(SKEncodedImageFormat.Png, 100);
-			using var stream = new MemoryStream(png.ToArray());
-			return new Bitmap(stream);
-		}
-		catch (Exception ex)
-		{
-			AppLogger.Info($"Map preview failed: {ex.Message}");
-			return null;
-		}
+		return MapPreview.RenderAsync(ScaledPreviewArea(areaScale), urlTemplate, zoom, cacheMaxAge, labelsUrlTemplate);
 	}
 
 	private void ShowSummary()

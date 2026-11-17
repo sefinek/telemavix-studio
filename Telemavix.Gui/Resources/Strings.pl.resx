@@ -1806,13 +1806,13 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>Klucz API {0}</value>
   </data>
   <data name="MapSource_AutoDescription" xml:space="preserve">
-    <value>Zdjęcia satelitarne Esri World Imagery: z twoim kluczem Esri wolno je pokazać w filmie, bez klucza pochodzą z publicznego serwera Esri.</value>
+    <value>Zdjęcia satelitarne Esri World Imagery.</value>
   </data>
   <data name="MapSource_AutoSatellite" xml:space="preserve">
     <value>Satelita (domyślnie: {0})</value>
   </data>
   <data name="MapSource_AutoStreetsDescription" xml:space="preserve">
-    <value>Mapa ulic z nazwami, jak w Google Maps, od Esri: z twoim kluczem Esri wolno ją pokazać w filmie, bez klucza pochodzi z publicznego serwera Esri.</value>
+    <value>Mapa Esri z nazwami ulic i miejscowości, podobna do Google Maps.</value>
   </data>
   <data name="MapSource_AutoStreets" xml:space="preserve">
     <value>Ulice (domyślnie: {0})</value>
@@ -1844,8 +1844,26 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
   <data name="MapKeyNotice_Message" xml:space="preserve">
     <value>Aplikacja korzysta teraz z publicznych map Esri. Możesz używać ich do podglądu i testów, ale regulamin nie pozwala umieszczać ich w publikowanych filmach. Wprowadź prawidłowy klucz API w ustawieniach źródła mapy.</value>
   </data>
+  <data name="MapCompare_Button" xml:space="preserve">
+    <value>Porównaj mapy</value>
+  </data>
+  <data name="MapCompare_Title" xml:space="preserve">
+    <value>Porównanie map</value>
+  </data>
+  <data name="MapCompare_Intro" xml:space="preserve">
+    <value>Wszystkie mapy pokazują ten sam obszar. Przeciągnij mapę lub wpisz współrzędne, aby zmienić widok. Przytrzymaj Ctrl i użyj kółka myszy, aby zmienić przybliżenie. Kliknij mapę, aby ją wybrać.</value>
+  </data>
+  <data name="MapCompare_Zoom" xml:space="preserve">
+    <value>Przybliżenie</value>
+  </data>
+  <data name="MapCompare_Place" xml:space="preserve">
+    <value>Współrzędne</value>
+  </data>
   <data name="MapSource_ApiKeyRequired" xml:space="preserve">
     <value>Ta mapa działa tylko z kluczem API.</value>
+  </data>
+  <data name="MapSource_CustomUrlRequired" xml:space="preserve">
+    <value>Podaj adres URL kafelków, aby wyświetlić mapę.</value>
   </data>
   <data name="MapSource_PasteYourApiKey" xml:space="preserve">
     <value>Wklej swój klucz API</value>
@@ -1860,22 +1878,37 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>tak</value>
   </data>
   <data name="MapTerms_Cache" xml:space="preserve">
-    <value>Przechowywanie kafelków na dysku</value>
+    <value>Zapisywanie kafelków na dysku</value>
   </data>
   <data name="MapTerms_CacheAllowed" xml:space="preserve">
-    <value>bez limitu czasu</value>
+    <value>dozwolone</value>
   </data>
   <data name="MapTerms_CacheForbidden" xml:space="preserve">
-    <value>zabronione - aplikacja nie zapisuje kafelków</value>
+    <value>zabronione</value>
   </data>
   <data name="MapTerms_CacheNotStated" xml:space="preserve">
-    <value>regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dzień|regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dni|regulamin nie precyzuje zasad - aplikacja przechowuje kafelki przez {0} dni</value>
+    <value>brak informacji</value>
+  </data>
+  <data name="MapTerms_CacheAllowedInfo" xml:space="preserve">
+    <value>Regulamin pozwala przechowywać kafelki na dysku bez ograniczeń czasowych. Aplikacja korzysta z zapisanych kopii zamiast ponownie pobierać te same kafelki.</value>
+  </data>
+  <data name="MapTerms_CacheForbiddenInfo" xml:space="preserve">
+    <value>Regulamin zabrania zapisywania kafelków na dysku. Aplikacja przechowuje je tylko tymczasowo w pamięci, dlatego podgląd mapy i renderowanie wymagają połączenia z internetem.</value>
+  </data>
+  <data name="MapTerms_CacheTemporaryInfo" xml:space="preserve">
+    <value>Regulamin dopuszcza tylko tymczasowe przechowywanie kafelków. Aplikacja korzysta z ich kopii na dysku przez {0} dzień, a potem pobiera je ponownie.|Regulamin dopuszcza tylko tymczasowe przechowywanie kafelków. Aplikacja korzysta z ich kopii na dysku przez {0} dni, a potem pobiera je ponownie.|Regulamin dopuszcza tylko tymczasowe przechowywanie kafelków. Aplikacja korzysta z ich kopii na dysku przez {0} dni, a potem pobiera je ponownie.</value>
+  </data>
+  <data name="MapTerms_CacheNotStatedInfo" xml:space="preserve">
+    <value>Regulamin nie określa zasad przechowywania kafelków na dysku. Aplikacja korzysta z zapisanych kopii przez {0} dzień, a potem pobiera je ponownie.|Regulamin nie określa zasad przechowywania kafelków na dysku. Aplikacja korzysta z zapisanych kopii przez {0} dni, a potem pobiera je ponownie.|Regulamin nie określa zasad przechowywania kafelków na dysku. Aplikacja korzysta z zapisanych kopii przez {0} dni, a potem pobiera je ponownie.</value>
+  </data>
+  <data name="MapTerms_CreditBrieflyInfo" xml:space="preserve">
+    <value>Podpis musi być widoczny na tyle długo, aby można go było przeczytać. Czas jego wyświetlania ustawisz w widżecie „Podpis mapy”.</value>
   </data>
   <data name="MapTerms_CacheTemporary" xml:space="preserve">
-    <value>dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dzień|dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dni|dozwolone tylko tymczasowo - aplikacja przechowuje kafelki przez {0} dni</value>
+    <value>tylko tymczasowo</value>
   </data>
   <data name="MapTerms_Commercial" xml:space="preserve">
-    <value>Ogólny użytek komercyjny map</value>
+    <value>Ogólny użytek komercyjny</value>
   </data>
   <data name="MapTerms_Coverage" xml:space="preserve">
     <value>Zasięg</value>
@@ -1884,19 +1917,16 @@ Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. W
     <value>Podpis na filmie</value>
   </data>
   <data name="MapTerms_CreditBriefly" xml:space="preserve">
-    <value>wystarczy przez chwilę - czas ustawisz w widżecie Podpis mapy</value>
+    <value>wymagany przez chwilę</value>
   </data>
   <data name="MapTerms_CreditWhileVisible" xml:space="preserve">
-    <value>przez cały czas, gdy widać mapę</value>
-  </data>
-  <data name="MapTerms_Custom" xml:space="preserve">
-    <value>Warunki własnego serwera zna tylko jego dostawca - sprawdź je przed publikacją filmu.</value>
+    <value>wymagany, gdy widać mapę</value>
   </data>
   <data name="MapTerms_Disclaimer" xml:space="preserve">
     <value>Stan regulaminów dostawców: 4 października 2026 r. Przed publikacją sprawdź aktualne warunki. Informacje mają charakter pomocniczy i nie stanowią porady prawnej.</value>
   </data>
   <data name="MapTerms_NotStated" xml:space="preserve">
-    <value>regulamin o tym nie mówi</value>
+    <value>brak informacji</value>
   </data>
   <data name="MapTerms_NotAllowed" xml:space="preserve">
     <value>nie</value>

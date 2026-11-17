@@ -28,6 +28,13 @@ public static class MapKeyCheck
 	private static readonly HttpClient Http = CreateHttpClient();
 	private static readonly ConcurrentDictionary<string, Lazy<Task<MapKeyVerdict>>> Checks = new(StringComparer.Ordinal);
 	private static readonly ConcurrentDictionary<string, byte> Rejected = new(StringComparer.Ordinal);
+	private static readonly ConcurrentDictionary<string, byte> Reported = new(StringComparer.Ordinal);
+
+	/// <summary>
+	///     A map is about to be fetched with the public server because Esri rejected the stored key - once per key and run, the first time a
+	///     map really asks for it (not at startup). Raised on whatever thread asked, so a listener hands it over to its own.
+	/// </summary>
+	public static event Action<string>? RejectedKeyUsed;
 
 	private static HttpClient CreateHttpClient()
 	{
@@ -110,12 +117,18 @@ public static class MapKeyCheck
 		}
 	}
 
+	internal static void NoteRejectedKeyUsed(string key)
+	{
+		if (Reported.TryAdd(key, 0)) RejectedKeyUsed?.Invoke(key);
+	}
+
 	internal static void Remember(string key, MapKeyVerdict verdict)
 	{
 		key = key.Trim();
 		Checks[key] = new Lazy<Task<MapKeyVerdict>>(Task.FromResult(verdict));
 		if (verdict == MapKeyVerdict.Rejected) Rejected[key] = 0;
 		else Rejected.TryRemove(key, out _);
+		Reported.TryRemove(key, out _);
 	}
 
 	internal static void Forget(string key)
@@ -123,5 +136,6 @@ public static class MapKeyCheck
 		key = key.Trim();
 		Checks.TryRemove(key, out _);
 		Rejected.TryRemove(key, out _);
+		Reported.TryRemove(key, out _);
 	}
 }

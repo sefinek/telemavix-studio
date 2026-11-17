@@ -1806,13 +1806,13 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
     <value>{0} API key</value>
   </data>
   <data name="MapSource_AutoDescription" xml:space="preserve">
-    <value>Esri World Imagery satellite photos: with your Esri key they may be shown in a film, without one they come from Esri's public server.</value>
+    <value>Esri World Imagery satellite photos.</value>
   </data>
   <data name="MapSource_AutoSatellite" xml:space="preserve">
     <value>Satellite (default: {0})</value>
   </data>
   <data name="MapSource_AutoStreetsDescription" xml:space="preserve">
-    <value>A street map with names, like Google Maps, from Esri: with your Esri key it may be shown in a film, without one it comes from Esri's public server.</value>
+    <value>An Esri map with street and place names, similar to Google Maps.</value>
   </data>
   <data name="MapSource_AutoStreets" xml:space="preserve">
     <value>Streets (default: {0})</value>
@@ -1844,8 +1844,26 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
   <data name="MapKeyNotice_Message" xml:space="preserve">
     <value>The app is now using Esri's public maps. You can use them for previews and testing, but the terms do not allow them to be included in published videos. Enter a valid API key in the map source settings.</value>
   </data>
+  <data name="MapCompare_Button" xml:space="preserve">
+    <value>Compare maps</value>
+  </data>
+  <data name="MapCompare_Title" xml:space="preserve">
+    <value>Map comparison</value>
+  </data>
+  <data name="MapCompare_Intro" xml:space="preserve">
+    <value>All maps show the same area. Drag a map or enter coordinates to change the view. Hold Ctrl and use the mouse wheel to zoom in or out. Click a map to select it.</value>
+  </data>
+  <data name="MapCompare_Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="MapCompare_Place" xml:space="preserve">
+    <value>Coordinates</value>
+  </data>
   <data name="MapSource_ApiKeyRequired" xml:space="preserve">
     <value>This map works only with an API key.</value>
+  </data>
+  <data name="MapSource_CustomUrlRequired" xml:space="preserve">
+    <value>Enter a tile URL to display the map.</value>
   </data>
   <data name="MapSource_PasteYourApiKey" xml:space="preserve">
     <value>Paste your API key</value>
@@ -1860,22 +1878,37 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
     <value>yes</value>
   </data>
   <data name="MapTerms_Cache" xml:space="preserve">
-    <value>Tile storage on disk</value>
+    <value>Saving tiles to disk</value>
   </data>
   <data name="MapTerms_CacheAllowed" xml:space="preserve">
-    <value>no time limit</value>
+    <value>allowed</value>
   </data>
   <data name="MapTerms_CacheForbidden" xml:space="preserve">
-    <value>not allowed - the app does not save tiles</value>
+    <value>forbidden</value>
   </data>
   <data name="MapTerms_CacheNotStated" xml:space="preserve">
-    <value>not specified in the terms - the app stores tiles for {0} day|not specified in the terms - the app stores tiles for {0} days</value>
+    <value>not specified</value>
+  </data>
+  <data name="MapTerms_CacheAllowedInfo" xml:space="preserve">
+    <value>The terms allow tiles to be stored on disk without a time limit. The app reuses saved copies instead of downloading the same tiles again.</value>
+  </data>
+  <data name="MapTerms_CacheForbiddenInfo" xml:space="preserve">
+    <value>The terms prohibit saving tiles to disk. The app stores them only temporarily in memory, so map previews and rendering require an internet connection.</value>
+  </data>
+  <data name="MapTerms_CacheTemporaryInfo" xml:space="preserve">
+    <value>The terms allow only temporary tile storage. The app reuses copies saved on disk for {0} day, then downloads the tiles again when needed.|The terms allow only temporary tile storage. The app reuses copies saved on disk for {0} days, then downloads the tiles again when needed.</value>
+  </data>
+  <data name="MapTerms_CacheNotStatedInfo" xml:space="preserve">
+    <value>The terms do not specify rules for storing tiles on disk. The app reuses saved copies for {0} day, then downloads the tiles again when needed.|The terms do not specify rules for storing tiles on disk. The app reuses saved copies for {0} days, then downloads the tiles again when needed.</value>
+  </data>
+  <data name="MapTerms_CreditBrieflyInfo" xml:space="preserve">
+    <value>The credit must remain visible long enough to be read. Set its display duration in the Map credit widget.</value>
   </data>
   <data name="MapTerms_CacheTemporary" xml:space="preserve">
-    <value>temporary storage only - the app stores tiles for {0} day|temporary storage only - the app stores tiles for {0} days</value>
+    <value>temporary only</value>
   </data>
   <data name="MapTerms_Commercial" xml:space="preserve">
-    <value>General commercial use of maps</value>
+    <value>General commercial use</value>
   </data>
   <data name="MapTerms_Coverage" xml:space="preserve">
     <value>Coverage</value>
@@ -1884,19 +1917,16 @@ Cancel asks again on the next start. "Skip this update" stops the reminders abou
     <value>Credit in the video</value>
   </data>
   <data name="MapTerms_CreditBriefly" xml:space="preserve">
-    <value>a while is enough - set it in the Map credit widget</value>
+    <value>required briefly</value>
   </data>
   <data name="MapTerms_CreditWhileVisible" xml:space="preserve">
-    <value>the whole time the map is shown</value>
-  </data>
-  <data name="MapTerms_Custom" xml:space="preserve">
-    <value>Only its provider knows a custom server's terms - check them before publishing a video.</value>
+    <value>required while the map is shown</value>
   </data>
   <data name="MapTerms_Disclaimer" xml:space="preserve">
     <value>Based on the providers' terms as of 4 October 2026. Check the current terms before publishing. This information is for guidance and is not legal advice.</value>
   </data>
   <data name="MapTerms_NotStated" xml:space="preserve">
-    <value>the terms don't say</value>
+    <value>not specified</value>
   </data>
   <data name="MapTerms_NotAllowed" xml:space="preserve">
     <value>no</value>

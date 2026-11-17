@@ -19,7 +19,7 @@ public sealed class RouteMapMosaic : IDisposable
 	private const int MaxTiles = 300;
 
 	// Room around the route in a view, as a share of its extent.
-	private const double ViewMargin = 1.12;
+	public const double ViewMargin = 1.12;
 
 	// The requested zoom (OverlayElement.MapZoom, edited via the GUI's "Zoom" NumericUpDown) is
 	// clamped to this range before use - public so the GUI can bound the control to the same range

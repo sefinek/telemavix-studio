@@ -81,6 +81,35 @@ public sealed class MapKeyCheckTests
 	}
 
 	[TestMethod]
+	public void ARejectedKey_IsToldOnlyWhenAMapAsksForItsTiles_AndOnce()
+	{
+		const string key = "rejected-key-used-by-a-map";
+		MapKeyCheck.Remember(key, MapKeyVerdict.Rejected);
+		var told = new List<string>();
+		void Listen(string k)
+		{
+			if (k == key) told.Add(k);
+		}
+
+		MapKeyCheck.RejectedKeyUsed += Listen;
+		try
+		{
+			var sources = new MapSources(new Dictionary<string, string> { [MapProviders.EsriKeyGroup] = key });
+			Assert.IsEmpty(told, "nothing is said before a map asks");
+
+			sources.UrlTemplate(MapProviders.AutoSatelliteId);
+			sources.UrlTemplate(MapProviders.StreetsAutoId);
+
+			CollectionAssert.AreEqual(new[] { key }, told);
+		}
+		finally
+		{
+			MapKeyCheck.RejectedKeyUsed -= Listen;
+			MapKeyCheck.Forget(key);
+		}
+	}
+
+	[TestMethod]
 	public void AnUncheckedKey_IsTakenAsGood()
 	{
 		var sources = new MapSources(new Dictionary<string, string> { [MapProviders.EsriKeyGroup] = "never-checked-key" });

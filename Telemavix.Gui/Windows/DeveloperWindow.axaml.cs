@@ -124,6 +124,9 @@ public partial class DeveloperWindow : Window
 			case "map-key-notice":
 				await MapKeyNotice.ShowAsync(this, null);
 				break;
+			case "map-comparison":
+				await new MapComparisonWindow(MapSources.From(OverlaySettingsStore.Load()), MapProviders.DefaultId, _ => { }).ShowDialog(this);
+				break;
 			case "render-done" when _main is not null:
 				await _main.NotifyRenderFinishedAsync(Strings.Render_CompleteTitle, SampleRenderDone(), DialogKind.Success,
 					Path.Combine(Path.GetTempPath(), SampleFile));

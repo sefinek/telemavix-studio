@@ -32,6 +32,18 @@ public sealed class MapSourcesTests
 	}
 
 	[TestMethod]
+	public void SetupProblem_NamesWhatStopsAMapFromBeingFetched()
+	{
+		var empty = new MapSources();
+
+		Assert.IsNotNull(empty.SetupProblem(MapProviders.CustomId), "custom without a URL");
+		Assert.IsNull(new MapSources(CustomUrlTemplate: "https://tiles.example.com/{z}/{x}/{y}.png").SetupProblem(MapProviders.CustomId));
+		Assert.IsNotNull(empty.SetupProblem("thunderforest-cycle"), "a key missing");
+		Assert.IsNull(empty.SetupProblem(MapProviders.AutoSatelliteId));
+		Assert.IsNull(empty.SetupProblem(MapProviders.OpenTopoMapId));
+	}
+
+	[TestMethod]
 	public void MissesApiKey_OnlyForAProviderTakingAKeyWithoutOne()
 	{
 		var sources = new MapSources(new Dictionary<string, string> { [MapProviders.CartoKeyGroup] = "abc" },
@@ -108,7 +120,7 @@ public sealed class MapSourcesTests
 		Assert.IsNull(plain.KeyGroupOf(MapProviders.CustomId));
 		Assert.AreEqual(MapSources.CustomKeyGroup, keyed.KeyGroupOf(MapProviders.CustomId));
 		Assert.AreEqual("https://t.example/{z}/{x}/{y}.png?k=k%201", keyed.UrlTemplate(MapProviders.CustomId));
-		Assert.AreEqual(MapProviders.Get(MapProviders.EsriPublicId).UrlTemplate, new MapSources().UrlTemplate(MapProviders.CustomId));
+		Assert.AreEqual("", new MapSources().UrlTemplate(MapProviders.CustomId), "a custom server without a URL is not another map");
 	}
 
 	[TestMethod]

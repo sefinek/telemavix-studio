@@ -260,6 +260,12 @@ public partial class MainWindow : Window
 		BuildTimeFormatMenu();
 	}
 
+	/// <summary>A map asked for its tiles with a key Esri rejected: said when it matters (a preview or a render fetching), above whatever dialog is open.</summary>
+	private void OnRejectedMapKeyUsed(string key)
+	{
+		Dispatcher.UIThread.Post(() => _ = MapKeyNotice.ShowAsync(OwnedWindows.LastOrDefault(w => w.IsVisible) ?? this, key));
+	}
+
 	private async void OnWindowOpened(object? sender, EventArgs e)
 	{
 		Opened -= OnWindowOpened;
@@ -271,6 +277,9 @@ public partial class MainWindow : Window
 		}
 
 		if (await RemoteAccessFlow.EnforceAsync(this, () => _phase == UiPhase.Rendering)) return;
+
+		MapKeyCheck.RejectedKeyUsed += OnRejectedMapKeyUsed;
+		Closed += (_, _) => MapKeyCheck.RejectedKeyUsed -= OnRejectedMapKeyUsed;
 
 		AppendBanner();
 		_ = Task.Run(FfmpegPipeline.DeleteStaleTempFiles);
@@ -324,7 +333,6 @@ public partial class MainWindow : Window
 			}
 		}
 
-		await MapKeyNotice.CheckStoredAsync(this);
 		await OfferAppUpdateAsync(await UpdateChecks.Latest);
 	}
 

@@ -126,9 +126,9 @@ public sealed partial class OverlayRenderer
 				if (_mapLayers.TryGetValue(item.Key, out MapLayer? held) && held.Mosaic is not null) continue;
 
 				MapWidgetElement element = item.Element;
-				if (MapSources.MissesApiKey(element.MapProviderId))
+				if (MapSources.SetupProblem(element.MapProviderId) is { } problem)
 				{
-					AppLogger.Warn(string.Format(CoreStrings.Map_ApiKeyMissing, MapSources.NameOf(element.MapProviderId)));
+					AppLogger.Warn(problem);
 					continue;
 				}
 

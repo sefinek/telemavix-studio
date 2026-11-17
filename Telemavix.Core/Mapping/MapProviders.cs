@@ -331,6 +331,16 @@ public sealed record MapSources(
 		return KeyGroupOf(providerId) is { } group && ApiKey(group) is null;
 	}
 
+	/// <summary>
+	///     Why a map from this provider can't be fetched at all, as a line for the log, or null when it can: its URL takes a key and none is
+	///     set, or a custom server was picked with no URL. Nothing is fetched then - never another provider's map in its place.
+	/// </summary>
+	public string? SetupProblem(string? providerId)
+	{
+		if (Resolve(providerId) == MapProviders.CustomId && string.IsNullOrWhiteSpace(CustomUrlTemplate)) return CoreStrings.Map_CustomUrlMissing;
+		return MissesApiKey(providerId) ? string.Format(CoreStrings.Map_ApiKeyMissing, NameOf(providerId)) : null;
+	}
+
 	/// <summary>The provider's name as the picker shows it - the custom server's is its URL's host.</summary>
 	public string NameOf(string? providerId)
 	{
@@ -341,13 +351,16 @@ public sealed record MapSources(
 
 	/// <summary>
 	///     The tile URL with "{api_key}" filled in. Baking the key into the string means a key edit alone changes it, so the
-	///     renderer's "already fetched?" comparisons catch it. An empty custom URL falls back to the default provider's.
+	///     renderer's "already fetched?" comparisons catch it. A custom server with no URL has an empty one (SetupProblem).
 	/// </summary>
 	public string UrlTemplate(string? providerId)
 	{
 		string id = Resolve(providerId);
+		if (id is MapProviders.EsriPublicId or MapProviders.EsriStreetsPublicId && StoredApiKey(MapProviders.EsriKeyGroup) is { } stored &&
+		    MapKeyCheck.IsRejected(MapProviders.EsriKeyGroup, stored))
+			MapKeyCheck.NoteRejectedKeyUsed(stored);
 		string template = id == MapProviders.CustomId
-			? string.IsNullOrWhiteSpace(CustomUrlTemplate) ? MapProviders.Get(Resolve(null)).UrlTemplate : CustomUrlTemplate.Trim()
+			? CustomUrlTemplate?.Trim() ?? ""
 			: MapProviders.Get(id).UrlTemplate;
 		return template.Replace("{api_key}", Uri.EscapeDataString(ApiKey(KeyGroupOf(id)) ?? ""));
 	}

@@ -6,13 +6,18 @@
 	<StackPanel Spacing="8">
 		<TextBlock Text="{x:Static local:Strings.MapSource_TileProvider}" Classes="infoLabel" Margin="0" />
 		<ComboBox Name="ProviderCombo" HorizontalAlignment="Stretch" SelectionChanged="OnProviderChanged" />
+		<Button Content="{x:Static local:Strings.MapCompare_Button}" HorizontalAlignment="Center" Click="OnCompareClick" />
 		<TextBlock Name="AutoHint" Classes="hint" TextWrapping="Wrap" IsVisible="False" />
+		<ToggleSwitch Name="EsriLabelsSwitch" IsVisible="False" IsCheckedChanged="OnEsriLabelsChanged"
+		              OnContent="" OffContent="" Content="{x:Static local:Strings.MapSource_ShowEsriLabels}" />
 
 		<StackPanel Name="StatusPanel" />
 
 		<TextBlock Name="CustomUrlLabel" Text="{x:Static local:Strings.MapSource_CustomTileUrlTemplate}" Classes="infoLabel" Margin="0,4,0,0" IsVisible="False" />
 		<TextBox Name="CustomUrlBox" IsVisible="False" PlaceholderText="https://tile.example.com/{z}/{x}/{y}.png"
 		         TextWrapping="Wrap" LostFocus="OnCustomUrlLostFocus" />
+		<TextBlock Name="CustomUrlMissingHint" Classes="hint" Opacity="1" Foreground="{StaticResource DangerBrush}" IsVisible="False"
+		           TextWrapping="Wrap" Text="{x:Static local:Strings.MapSource_CustomUrlRequired}" />
 
 		<Grid Name="ApiKeyHeader" ColumnDefinitions="*,Auto" Margin="0,4,0,0" IsVisible="False">
 			<TextBlock Name="ApiKeyLabel" Classes="infoLabel" Margin="0" VerticalAlignment="Center" />
@@ -41,10 +46,5 @@
 		<CheckBox Name="CustomCreditBrieflyCheck" IsVisible="False" Click="OnCustomCreditBrieflyClick">
 			<TextBlock Text="{x:Static local:Strings.MapSource_CustomCreditBriefly}" TextWrapping="Wrap" />
 		</CheckBox>
-
-		<TextBlock Classes="hint" TextWrapping="Wrap" Margin="0,4,0,0" Text="{x:Static local:Strings.MapTerms_Disclaimer}" />
-
-		<ToggleSwitch Name="EsriLabelsSwitch" IsVisible="False" IsCheckedChanged="OnEsriLabelsChanged"
-		              OnContent="" OffContent="" Content="{x:Static local:Strings.MapSource_ShowEsriLabels}" />
 	</StackPanel>
 </UserControl>

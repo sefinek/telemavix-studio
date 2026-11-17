@@ -100,9 +100,9 @@ public sealed partial class OverlayRenderer
 		_preparedRouteIntroKey = key;
 		_routeIntroMapLoading = true;
 
-		if (MapSources.MissesApiKey(RouteIntro.MapProviderId))
+		if (MapSources.SetupProblem(RouteIntro.MapProviderId) is { } problem)
 		{
-			AppLogger.Warn(string.Format(CoreStrings.Map_ApiKeyMissing, MapSources.NameOf(RouteIntro.MapProviderId)));
+			AppLogger.Warn(problem);
 			return (null, key);
 		}
 

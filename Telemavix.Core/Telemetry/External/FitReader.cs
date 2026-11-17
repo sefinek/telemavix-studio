@@ -297,9 +297,9 @@ public static class FitReader
 		return [];
 	}
 
-	/// <summary>A string field (field_description's name): the bytes up to the first zero, null when the message doesn't have it.</summary>
 	private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
+	/// <summary>A string field (field_description's name): the bytes up to the first zero, null when the message doesn't have it.</summary>
 	private static string? Text(Definition definition, ReadOnlySpan<byte> data, int number)
 	{
 		int at = 0;

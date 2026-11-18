@@ -7,14 +7,18 @@ namespace Telemavix.Core.Telemetry.External;
 ///     `trackTimeAtVideoStartUtc` is the moment on the track's clock of the recording's first frame.
 ///     Timer pauses and gaps leave the frame without a fix or speed, holding the last known position.
 ///     The mapped UTC clock continues across gaps and outside the track; outside it the camera's own GPS is retained.
+///     With <see cref="ExternalTrackMergeMode.Supplement" /> the recording stays the source: a frame where the camera has a fix keeps its own position, altitude, speed, time,
+///     satellites and temperature, and the track only fills what the camera lacks (a position where it lost the fix, the phone's readings, battery, heart rate, cadence).
 /// </summary>
 public static class ExternalTrackMerge
 {
 	public static List<TelemetryFrame> Apply(IReadOnlyList<TelemetryFrame> frames, ExternalTrack track, DateTime trackTimeAtVideoStartUtc)
 		=> Apply(frames, track, new TrackSynchronization(new TrackSyncAnchor(0, trackTimeAtVideoStartUtc)));
 
-	public static List<TelemetryFrame> Apply(IReadOnlyList<TelemetryFrame> frames, ExternalTrack track, TrackSynchronization synchronization)
+	public static List<TelemetryFrame> Apply(IReadOnlyList<TelemetryFrame> frames, ExternalTrack track, TrackSynchronization synchronization,
+		ExternalTrackMergeMode mode = ExternalTrackMergeMode.Replace)
 	{
+		bool supplement = mode == ExternalTrackMergeMode.Supplement;
 		synchronization.Validate();
 		var result = new List<TelemetryFrame>(frames.Count);
 		var fill = new GpsForwardFill();
@@ -28,7 +32,7 @@ public static class ExternalTrackMerge
 			PhoneReading? phone = track.PhoneAt(utc);
 			TelemetryFrame merged = frame with
 			{
-				AmbientTemperatureCelsius = reading?.TemperatureCelsius,
+				AmbientTemperatureCelsius = reading?.TemperatureCelsius ?? (supplement ? frame.AmbientTemperatureCelsius : null),
 				DeviceDistanceMeters = reading?.DistanceMeters,
 				DeviceBatteryPercent = track.BatteryAt(utc),
 				DroneBattery = track.DroneBatteryAt(utc),
@@ -36,10 +40,12 @@ public static class ExternalTrackMerge
 				DroneSticks = track.DroneSticksBetween(utc),
 				DroneAttitude = reading is { State: ExternalTrackState.Fix } attitude ? attitude.Attitude : null,
 				FlightMode = reading is { State: ExternalTrackState.Fix } moded ? moded.FlightMode : null,
-				GpsLevel = reading is { State: ExternalTrackState.Fix } leveled ? leveled.GpsLevel : null,
+				GpsLevel = reading is { State: ExternalTrackState.Fix } leveled ? leveled.GpsLevel : supplement ? frame.GpsLevel : null,
 				HeightAboveHomeMeters = reading is { State: ExternalTrackState.Fix } fix ? fix.HeightMeters : null,
 				VerticalSpeedMs = reading is { State: ExternalTrackState.Fix } climbing ? climbing.VerticalSpeedMs : null,
-				GpsSatellites = phone?.Satellites ?? (reading is { State: ExternalTrackState.Fix } counted ? counted.Satellites : null),
+				GpsSatellites = supplement && frame.HasGpsFix && frame.GpsSatellites is not null
+					? frame.GpsSatellites
+					: phone?.Satellites ?? (reading is { State: ExternalTrackState.Fix } counted ? counted.Satellites : null),
 				HeartRateBpm = reading is { State: ExternalTrackState.Fix } pulse ? pulse.HeartRateBpm : null,
 				Phone = phone,
 				CadencePerMinute = reading is { State: ExternalTrackState.Fix } pedaling ? pedaling.CadencePerMinute : null,
@@ -49,6 +55,13 @@ public static class ExternalTrackMerge
 					? TelemetryMath.HaversineMeters(home.Latitude, home.Longitude, at.Latitude, at.Longitude)
 					: null
 			};
+			if (supplement && frame.HasGpsFix && (frame.Latitude != 0 || frame.Longitude != 0))
+			{
+				fill.Apply(frame.Latitude, frame.Longitude, frame.AltitudeMeters);
+				result.Add(merged with { GpsTimestamp = frame.GpsTimestamp ?? utc });
+				continue;
+			}
+
 			if (reading is not { } sample)
 			{
 				result.Add(HoldWhereThereIsNoPosition(merged, fill) with { GpsTimestamp = utc });

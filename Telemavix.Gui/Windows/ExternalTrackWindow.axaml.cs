@@ -52,6 +52,7 @@ public partial class ExternalTrackWindow : Window
 		InitializeComponent();
 		_summary = summary;
 		Source = source;
+		SupplementToggle.IsChecked = source?.Supplement == true;
 		_pages = [FileStep, SyncStep, SummaryStep];
 		_dots = [.. StepTitles.Select(_ => StepDot())];
 		RemoveButton.IsVisible = source is not null;
@@ -469,7 +470,7 @@ public partial class ExternalTrackWindow : Window
 		if (_sync is null || PathBox.Text is not { Length: > 0 } path) return;
 
 		if (MatchesProposal(_sync) && _proposal is { } used) Log?.Invoke(ProposalText(used), used.NeedsVerification ? LogLevel.Warn : LogLevel.Info);
-		Source = new ExternalTrackSource(path, Synchronization: _sync);
+		Source = new ExternalTrackSource(path, Synchronization: _sync, Supplement: SupplementToggle.IsChecked == true);
 		Accepted = true;
 		Close();
 	}

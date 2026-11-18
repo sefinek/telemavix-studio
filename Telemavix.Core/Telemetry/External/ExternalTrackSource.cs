@@ -6,9 +6,10 @@ namespace Telemavix.Core.Telemetry.External;
 
 /// <summary>
 ///     A track file to put onto a recording's telemetry. `OffsetSeconds` is how far the track's clock is ahead of the camera's
-///     clock. Synchronization anchors work without a camera date and optionally correct clock drift.
+///     clock. Synchronization anchors work without a camera date and optionally correct clock drift. `Supplement` keeps the recording's own
+///     position, speed and time and takes from the track only what the camera lacks (<see cref="ExternalTrackMergeMode.Supplement" />).
 /// </summary>
-public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = null, TrackSynchronization? Synchronization = null)
+public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = null, TrackSynchronization? Synchronization = null, bool Supplement = false)
 {
 	public void Validate()
 	{
@@ -175,6 +176,6 @@ public sealed record ExternalTrackSource(string Path, double? OffsetSeconds = nu
 		if (frames.Count == 0 || synchronization.At(frames[0].SampleTimeSeconds) > track.EndUtc || synchronization.At(frames[^1].SampleTimeSeconds) < track.StartUtc)
 			throw new InvalidOperationException(CoreStrings.ExternalTrack_NoOverlap);
 		AppLogger.Info($"Track {name}: video start {synchronization.At(0):O}, clock rate {synchronization.Rate:0.#########}");
-		return (ExternalTrackMerge.Apply(frames, track, synchronization), track);
+		return (ExternalTrackMerge.Apply(frames, track, synchronization, Supplement ? ExternalTrackMergeMode.Supplement : ExternalTrackMergeMode.Replace), track);
 	}
 }

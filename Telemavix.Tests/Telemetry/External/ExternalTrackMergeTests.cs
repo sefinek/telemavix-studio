@@ -216,6 +216,50 @@ public sealed class ExternalTrackMergeTests
 	}
 
 	[TestMethod]
+	public void Apply_SupplementKeepsTheCamerasGpsAndTakesTheRestFromTheTrack()
+	{
+		var phone = new PhoneReading(PressureHectopascals: 1000, LightLux: 200);
+		var track = new ExternalTrack([new ExternalTrackPoint(T0, 53.1, 18.9, 80, 4, HeartRateBpm: 130, Phone: phone), new ExternalTrackPoint(T0.AddSeconds(3), 53.1003, 18.9, 80, 4, Phone: phone)]);
+		List<TelemetryFrame> camera = [.. Frames(25 * 3, true).Select(f => f with { GpsSpeedMs = 7, GpsTimestamp = T0.AddSeconds(100), GpsSatellites = 9 })];
+
+		List<TelemetryFrame> merged = ExternalTrackMerge.Apply(camera, track, new TrackSynchronization(new TrackSyncAnchor(0, T0)), ExternalTrackMergeMode.Supplement);
+
+		TelemetryFrame frame = merged[25];
+		Assert.AreEqual(10, frame.Latitude, "the camera's position");
+		Assert.AreEqual(20, frame.Longitude);
+		Assert.AreEqual(7, frame.GpsSpeedMs!.Value, 1e-9, "the camera's speed");
+		Assert.AreEqual(T0.AddSeconds(100), frame.GpsTimestamp, "the camera's clock");
+		Assert.AreEqual(9, frame.GpsSatellites, "the camera's own count");
+		Assert.IsTrue(frame.HasGpsFix);
+		Assert.AreEqual(130, frame.HeartRateBpm, "what only the track has comes from it");
+		Assert.AreEqual(phone, frame.Phone);
+	}
+
+	[TestMethod]
+	public void Apply_SupplementFillsThePositionWhereTheCameraHasNoFix()
+	{
+		var track = new ExternalTrack([Point(0, 53.1, 2), Point(1, 53.1001, 4), Point(2, 53.1002, 4), Point(3, 53.1003, 4)]);
+		List<TelemetryFrame> camera = Frames(25 * 3, true);
+		camera[40] = camera[40] with { HasGpsFix = false, Latitude = 0, Longitude = 0 };
+
+		List<TelemetryFrame> merged = ExternalTrackMerge.Apply(camera, track, new TrackSynchronization(new TrackSyncAnchor(0, T0)), ExternalTrackMergeMode.Supplement);
+
+		Assert.AreEqual(10, merged[39].Latitude, "a frame with a fix stays the camera's");
+		Assert.IsTrue(merged[40].HasGpsFix, "the track covers the loss");
+		Assert.AreEqual(53.1 + 1.6 * 0.0001, merged[40].Latitude, 1e-9);
+	}
+
+	[TestMethod]
+	public void Apply_ReplaceIsTheDefaultAndOverwritesTheCamerasGps()
+	{
+		var track = new ExternalTrack([Point(0, 53.1, 2), Point(3, 53.1003, 4)]);
+
+		TelemetryFrame frame = ExternalTrackMerge.Apply(Frames(25 * 3, true), track, new TrackSynchronization(new TrackSyncAnchor(0, T0)))[25];
+
+		Assert.AreNotEqual(10, frame.Latitude);
+	}
+
+	[TestMethod]
 	public void Apply_FramesTheTrackDoesntReachKeepTheCamerasOwnGps()
 	{
 		var track = new ExternalTrack([Point(0, 53.1), Point(1, 53.1001)]);

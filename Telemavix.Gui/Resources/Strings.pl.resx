@@ -5220,6 +5220,12 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   <data name="Track_Method_ManualDrift" xml:space="preserve">
     <value>Ręczne, dwa punkty (z korektą dryfu zegara)</value>
   </data>
+  <data name="Track_Supplement" xml:space="preserve">
+    <value>Zostaw GPS z kamery</value>
+  </data>
+  <data name="Track_SupplementHint" xml:space="preserve">
+    <value>Projekt ma już telemetrię. Po włączeniu tej opcji pozycja, prędkość i czas zostają takie, jakie zapisała kamera. Dostarczona telemetria uzupełni tylko braki: pozycję tam, gdzie kamera straciła fix, oraz inne odczyty (np. telefonu z aplikacji Telemavix GPS).</value>
+  </data>
   <data name="Track_Coverage" xml:space="preserve">
     <value>Trasa obejmuje {0}% czasu nagrania</value>
   </data>

@@ -5220,6 +5220,12 @@ GPS points: {2} · timer pauses: {3}</value>
   <data name="Track_Method_ManualDrift" xml:space="preserve">
     <value>Manual, two points (corrects clock drift)</value>
   </data>
+  <data name="Track_Supplement" xml:space="preserve">
+    <value>Keep the camera's own GPS</value>
+  </data>
+  <data name="Track_SupplementHint" xml:space="preserve">
+    <value>The project already has telemetry. With this option on, position, speed and time stay as the camera recorded them. The supplied telemetry only fills the gaps: a position where the camera lost the fix, and other readings (e.g. the phone's, from the Telemavix GPS app).</value>
+  </data>
   <data name="Track_Coverage" xml:space="preserve">
     <value>The track spans {0}% of the recording&apos;s duration</value>
   </data>

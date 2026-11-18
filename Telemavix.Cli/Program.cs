@@ -34,7 +34,7 @@ string[] options =
 	"-o", "--frames", "--from", "--to", "--cut", "--view", "--encoder", "--track", "--track-offset", "--track-anchor", "--volume", "--music",
 	"--settings-preset", "--layout", "--profile", "--aspect", "--alpha", "--existing", "--export-telemetry", "--telemetry-interval", "--expect-lean"
 ];
-string[] flags = ["--no-level", "--no-audio", "--each"];
+string[] flags = ["--no-level", "--no-audio", "--each", "--track-supplement"];
 const string usage = "Usage: Telemavix.Cli <input1> [input2 ...] [-o <output.mp4>] [--frames N] [--from <time>] [--to <time>] [--cut <time>-<time> ...] [--view <yaw>,<pitch>,<roll>[,<fov>]] [--no-level] [--no-audio] [--encoder <name>] [--track <file.fit|file.gpx|FlightRecord.txt> [--track-offset <seconds> | --track-anchor <video-time>=<UTC> ...]]\n" +
                      "                         [--volume <time>:<dB>,...] [--music <file>[;start=..][;in=..][;len=..][;db=..][;fadein=..][;fadeout=..][;duck=..][;loop] ...]\n" +
                      "                         [--settings-preset <name>] [--layout <name>] [--profile <name>] [--aspect <shape>] [--alpha <prores|vp9>] [--existing <skip|overwrite|number>]\n" +
@@ -57,6 +57,8 @@ const string usage = "Usage: Telemavix.Cli <input1> [input2 ...] [-o <output.mp4
                      "         Anchors use the combined recording before cuts and work without the camera's date. --track-offset <seconds> instead adds to\n" +
                      "         the camera's creation time. Without either, motion is used for an approximate alignment that needs visual verification.\n" +
                      "         Timer pauses and GPS gaps leave position and speed unavailable; they do not shorten the timeline.\n" +
+                     "         --track-supplement keeps the recording's own position, speed and time (a DJI camera fed by Telemavix GPS) and takes from the track\n" +
+                     "         only what the camera lacks: a fix where it lost one, the phone's readings, battery, heart rate, cadence.\n" +
                      "       Telemavix.Cli <project.ovproj> [<project2.ovproj> ...] [<recording> ...] [-o <output>] [--profile <name>] [--alpha <prores|vp9>] [--existing <skip|overwrite|number>]\n" +
                      "  renders saved projects one after another, as the GUI would: recordings, cuts, overlay, sound, music, track and settings preset come from\n" +
                      "  the project. A failed one doesn't stop the rest. Recordings given beside projects are rendered after them, with the options above\n" +
@@ -110,6 +112,7 @@ bool level = true;
 string? encoder = null;
 string? trackPath = null;
 double? trackOffset = null;
+bool trackSupplement = false;
 List<TrackSyncAnchor> trackAnchors = [];
 bool noAudio = false;
 List<VolumePoint>? volume = null;
@@ -151,6 +154,12 @@ for (; i < args.Length; i++)
 	{
 		noAudio = true;
 		recordingOnly.Add("--no-audio");
+		continue;
+	}
+
+	if (args[i] == "--track-supplement")
+	{
+		trackSupplement = true;
 		continue;
 	}
 
@@ -345,16 +354,16 @@ if (report || exportTelemetryPath is not null)
 	return report ? Report(recordingPaths, expectLean) : ExportTelemetry(recordingPaths, exportTelemetryPath!, telemetryInterval);
 }
 
-if ((trackOffset is not null || trackAnchors.Count > 0) && trackPath is null)
+if ((trackOffset is not null || trackAnchors.Count > 0 || trackSupplement) && trackPath is null)
 {
-	Console.Error.WriteLine("Error: --track-offset and --track-anchor need --track");
+	Console.Error.WriteLine("Error: --track-offset, --track-anchor and --track-supplement need --track");
 	return 1;
 }
 
 ExternalTrackSource? trackSource = trackPath is null
 	? null
 	: new ExternalTrackSource(trackPath, trackOffset,
-		trackAnchors.Count > 0 ? new TrackSynchronization(trackAnchors[0], trackAnchors.Count > 1 ? trackAnchors[1] : null) : null);
+		trackAnchors.Count > 0 ? new TrackSynchronization(trackAnchors[0], trackAnchors.Count > 1 ? trackAnchors[1] : null) : null, trackSupplement);
 try
 {
 	trackSource?.Validate();

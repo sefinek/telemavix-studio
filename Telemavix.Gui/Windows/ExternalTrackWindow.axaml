@@ -167,6 +167,15 @@
 							<TextBlock Grid.Row="3" Grid.Column="1" Name="SumCoverage" Classes="summaryValue" />
 						</Grid>
 					</Border>
+					<Border Classes="settingsCard">
+						<Grid Margin="16,13" ColumnDefinitions="*,Auto" ColumnSpacing="24">
+							<StackPanel>
+								<TextBlock Text="{x:Static local:Strings.Track_Supplement}" Classes="rowTitle" />
+								<TextBlock Text="{x:Static local:Strings.Track_SupplementHint}" Classes="rowHint" Margin="0,3,0,0" />
+							</StackPanel>
+							<ToggleSwitch Grid.Column="1" Name="SupplementToggle" />
+						</Grid>
+					</Border>
 					<TextBlock Name="SummaryHint" Classes="rowHint" Margin="4,0" />
 					<TextBlock Text="{x:Static local:Strings.Track_Gaps}" Classes="rowHint" Margin="4,0" />
 				</StackPanel>

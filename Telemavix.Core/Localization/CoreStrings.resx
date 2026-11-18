@@ -615,7 +615,7 @@
     <value>GPS signal lost</value>
   </data>
   <data name="Overlay_GpsLostDetail" xml:space="preserve">
-    <value>Last position held  ·  {time}</value>
+    <value>Last position held: {time}</value>
   </data>
   <data name="Overlay_GpsFound" xml:space="preserve">
     <value>GPS fix acquired</value>

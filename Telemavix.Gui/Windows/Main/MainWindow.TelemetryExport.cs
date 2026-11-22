@@ -19,7 +19,7 @@ public partial class MainWindow
 		IStorageFile? file = await StorageProvider.SaveRememberedAsync("telemetry-export", new FilePickerSaveOptions
 		{
 			Title = Strings.Telemetry_ExportTitle,
-			SuggestedFileName = Path.GetFileNameWithoutExtension(summary.InputPaths[0]),
+			SuggestedFileName = Path.GetFileNameWithoutExtension(summary.InputPaths.Count > 0 ? summary.InputPaths[0] : _trackOnlyPath),
 			DefaultExtension = TelemetryExport.CsvExtension.TrimStart('.'),
 			FileTypeChoices = [CsvFileType, GpxFileType]
 		});

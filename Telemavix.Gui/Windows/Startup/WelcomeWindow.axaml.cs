@@ -328,7 +328,7 @@ public partial class WelcomeWindow : Window
 
 		foreach ((ExternalTool tool, TextBlock status) in found)
 		{
-			if (await InstalledVersionAsync(tool) is { } version) status.Text = version;
+			if (await InstalledVersionAsync(tool) is { } version) status.Text = "v" + version;
 		}
 	}
 

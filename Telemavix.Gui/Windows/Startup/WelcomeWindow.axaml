@@ -248,16 +248,16 @@
 											           Text="{x:Static local:Strings.Welcome_360InsvRecordingsTestedOn}" />
 										</StackPanel>
 									</Grid>
+									<Button Content="{x:Static local:Strings.Welcome_DeviceCompatibility}"
+									        Tag="https://sefinek.net/projects/telemavix#devices"
+									        Click="OnLinkButtonClick" HorizontalAlignment="Left" />
 								</StackPanel>
 							</Border>
 							<Border Classes="card">
 								<StackPanel Spacing="10">
 									<TextBlock Classes="rowText" Text="{x:Static local:Strings.Welcome_UseTheOriginalFilesFrom}" />
-									<Border CornerRadius="8" ClipToBounds="True" HorizontalAlignment="Stretch"
-									        BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
-										<Image Stretch="Uniform" Source="{local:AssetImage Path=Welcome/GpsIndicator.webp}" />
-									</Border>
-									<TextBlock Classes="rowText caption" TextAlignment="Center" Text="{x:Static local:Strings.Welcome_GpsIndicatorCaption}" />
+									<Button Content="Telemavix GPS" Tag="https://sefinek.net/projects/telemavix#apps"
+									        Click="OnLinkButtonClick" HorizontalAlignment="Left" />
 								</StackPanel>
 							</Border>
 						</StackPanel>

@@ -38,12 +38,21 @@ internal static class DependencyStatusRows
 			ToolVersionInfo status = statuses[i];
 
 			AddCell(grid, new TextBlock { Text = status.Tool.DisplayName }, i, 0);
-			AddCell(grid, new TextBlock
+			bool upToDate = status.InstalledVersion is not null && status.InstalledVersion == status.LatestVersion && status.UnsupportedVersion is null;
+			TextBlock installed = new()
 			{
 				Text = status.InstalledVersion is null ? Strings.Deps_NotFound : string.Format(Strings.Deps_Installed, status.InstalledVersion),
 				Opacity = 0.6
-			}, i, 1);
-			AddCell(grid, new TextBlock { Text = LatestText(status), Opacity = 0.6 }, i, 2);
+			};
+			if (upToDate)
+			{
+				AddCell(grid, installed, i, 2);
+			}
+			else
+			{
+				AddCell(grid, installed, i, 1);
+				AddCell(grid, new TextBlock { Text = LatestText(status), Opacity = 0.6 }, i, 2);
+			}
 
 			if (status.InstalledVersion is null && DependencyInstaller.CanAttemptAutoInstall())
 			{

@@ -803,7 +803,7 @@ Zamknąć Telemavix Studio?</value>
     <value>Zamknij i aktualizuj</value>
   </data>
   <data name="Deps_Installed" xml:space="preserve">
-    <value>zainstalowana {0}</value>
+    <value>zainstalowana v{0}</value>
   </data>
   <data name="Deps_InstalledChecking" xml:space="preserve">
     <value>zainstalowana ...</value>
@@ -812,7 +812,7 @@ Zamknąć Telemavix Studio?</value>
     <value>Zainstalowano</value>
   </data>
   <data name="Deps_Latest" xml:space="preserve">
-    <value>najnowsza {0}</value>
+    <value>najnowsza v{0}</value>
   </data>
   <data name="Deps_LatestChecking" xml:space="preserve">
     <value>najnowsza ...</value>
@@ -821,10 +821,10 @@ Zamknąć Telemavix Studio?</value>
     <value>najnowsza nieznana</value>
   </data>
   <data name="Deps_LatestUnsupported" xml:space="preserve">
-    <value>najnowsza {0} (jeszcze nieobsługiwana)</value>
+    <value>najnowsza v{0} (jeszcze nieobsługiwana)</value>
   </data>
   <data name="Deps_LatestWithUnsupported" xml:space="preserve">
-    <value>najnowsza {0} ({1} jeszcze nieobsługiwana)</value>
+    <value>najnowsza v{0} (v{1} jeszcze nieobsługiwana)</value>
   </data>
   <data name="Deps_NotFound" xml:space="preserve">
     <value>nie znaleziono</value>
@@ -2987,7 +2987,9 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
   <data name="Summary_NoGpsMessage" xml:space="preserve">
     <value>To nagranie nie zawiera pozycji GPS. Widżety korzystające z tych danych, m.in. prędkościomierz, mapa, kompas i statystyki trasy, są niedostępne. Nadal możesz używać pozostałych widżetów obsługiwanych przez kamerę.
 
-W przypadku kamer DJI nagrywaj z pilotem DJI GPS Bluetooth Remote Controller lub korzystaj z GPS-u telefonu przez aplikację DJI Mimo. To drugie rozwiązanie bywa mniej wygodne i wydaje się nie zawsze działać prawidłowo. Przed rozpoczęciem nagrywania poczekaj, aż odbiornik GPS ustali pozycję.</value>
+Do zapisu trasy i danych z czujników telefonu rekomenduję aplikację Telemavix GPS. Zapisaną trasę możesz wczytać w Studio jako plik FIT lub GPX. Z obsługiwanymi kamerami DJI Osmo Action aplikacja może też pełnić funkcję pilota GPS.
+
+Przed rozpoczęciem nagrywania poczekaj, aż odbiornik GPS ustali pozycję.</value>
   </data>
   <data name="Summary_NoGpsTitle" xml:space="preserve">
     <value>Brak danych GPS</value>
@@ -3427,7 +3429,7 @@ Szczegóły: {0}</value>
     <value>Napis „Stworzono w Telemavix Studio” z adresem projektu. Tutaj zmienisz jego położenie, wygląd i czas wyświetlania. We wstępie z trasą znak wodny jest umieszczony w prawym dolnym rogu planszy.</value>
   </data>
   <data name="Welcome_360InsvRecordingsTestedOn" xml:space="preserve">
-    <value>Nagrania 360° w formacie .insv są wyświetlane jako standardowy kadr z regulowanym kierunkiem i polem widzenia. Obsługę przetestowano na X4. Aplikacja nie odczytuje jeszcze danych GPS z tych plików.</value>
+    <value>Nagrania 360° z plików INSV możesz oglądać jako zwykły kadr, zmieniając kierunek patrzenia i szerokość pola widzenia. Obsługę sprawdzono na X4. Aplikacja nie odczytuje jeszcze danych GPS z tych plików.</value>
   </data>
   <data name="Welcome_Insta360" xml:space="preserve">
     <value>Insta360 (obsługa eksperymentalna)</value>
@@ -3565,7 +3567,7 @@ Szczegóły: {0}</value>
     <value>Otwieraj pliki projektów .ovproj w Telemavix Studio</value>
   </data>
   <data name="Welcome_Optional" xml:space="preserve">
-    <value>Opcjonalny</value>
+    <value>Opcjonalne</value>
   </data>
   <data name="Welcome_OptionalToolsLater" xml:space="preserve">
     <value>Opcjonalne narzędzia możesz też zainstalować później w Ustawieniach &gt; O programie.</value>
@@ -3576,7 +3578,7 @@ Szczegóły: {0}</value>
 Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od ciebie zapłaty za ten program, najprawdopodobniej próbuje cię oszukać.</value>
   </data>
   <data name="Welcome_TelemavixReadsTheTelemetryYour" xml:space="preserve">
-    <value>Telemavix Studio odczytuje telemetrię zapisaną w plikach obsługiwanych urządzeń. Osobny plik z danymi (dziennik lotu) jest potrzebny tylko w przypadku dronów DJI.</value>
+    <value>Telemavix Studio odczytuje telemetrię z nagrań obsługiwanych urządzeń lub z osobnych plików z danymi, np. dzienników lotu DJI.</value>
   </data>
   <data name="Welcome_TelemavixRendersWithFFmpegExifTool" xml:space="preserve">
     <value>Telemavix Studio używa FFmpeg do renderowania. Opcjonalny ExifTool służy do awaryjnego odczytu telemetrii, gdy wbudowany dekoder nie potrafi odczytać danych z nagrania.</value>
@@ -3671,7 +3673,7 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
     <value>Satelita</value>
   </data>
   <data name="Welcome_Required" xml:space="preserve">
-    <value>Wymagany</value>
+    <value>Wymagane</value>
   </data>
   <data name="Welcome_Retry" xml:space="preserve">
     <value>Ponów</value>
@@ -3718,17 +3720,24 @@ Uwaga: Telemavix Studio jest udostępniany bezpłatnie. Jeśli ktoś żąda od c
   <data name="Welcome_SupportedDevices" xml:space="preserve">
     <value>Obsługiwane urządzenia</value>
   </data>
+  <data name="Welcome_DeviceCompatibility" xml:space="preserve">
+    <value>Szczegóły obsługi sprzętu</value>
+  </data>
   <data name="Welcome_SupportOnKoFi" xml:space="preserve">
     <value>Wesprzyj na Ko-fi</value>
   </data>
   <data name="Welcome_TestedOnTheAction6" xml:space="preserve">
-    <value>Testowane na Action 6 i Action 5 Pro; inne modele (np. Action 4) też powinny działać. Zwykle wystarczy sam plik .MP4.</value>
+    <value>Obsługę sprawdzono na Action 6 i Action 5 Pro. Inne modele (np. Action 4) też powinny działać. Zwykle wystarczy sam plik MP4.</value>
   </data>
   <data name="Welcome_ThisIsWhatWillBe" xml:space="preserve">
     <value>Ustawienia do zapisania:</value>
   </data>
   <data name="Welcome_UseTheOriginalFilesFrom" xml:space="preserve">
-    <value>Wybieraj oryginalne pliki z karty pamięci. Nagrania wyeksportowane z DJI Mimo nie zawierają telemetrii. W przypadku kamer DJI nagrywaj z pilotem DJI GPS Bluetooth Remote Controller lub korzystaj z GPS-u telefonu przez aplikację DJI Mimo. To drugie rozwiązanie bywa mniej wygodne i wydaje się nie zawsze działać prawidłowo. Przed rozpoczęciem nagrywania poczekaj, aż odbiornik GPS ustali pozycję.</value>
+    <value>Wybieraj oryginalne pliki z karty pamięci. Nagrania wyeksportowane z DJI Mimo nie zawierają telemetrii.
+
+Przed rozpoczęciem nagrywania poczekaj, aż odbiornik GPS ustali pozycję.
+
+Do zapisu trasy i danych z czujników telefonu rekomenduję aplikację Telemavix GPS. Zapisaną trasę możesz wczytać w Studio jako plik FIT lub GPX. Z obsługiwanymi kamerami DJI Osmo Action aplikacja może też pełnić funkcję pilota GPS.</value>
   </data>
   <data name="Welcome_Version" xml:space="preserve">
     <value>Wersja {0}</value>
@@ -4743,13 +4752,13 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
     <value>Drony DJI</value>
   </data>
   <data name="Welcome_DjiDronesTested" xml:space="preserve">
-    <value>Dzienniki lotu sprawdzone na Mavic Air 2, Mavic 4 Pro, Flip i Avata 360. Plik MP4 nie zawiera telemetrii, więc dodaj dziennik lotu przyciskiem „Trasa GPS”. Inne modele nie były testowane.</value>
+    <value>DJI Lito X1 Plus zapisuje telemetrię bezpośrednio w pliku MP4, więc nie wymaga osobnego dziennika lotu. W przypadku Mavic Air 2, Mavic 4 Pro, Flip i Avata 360 dodaj dziennik lotu przyciskiem „Trasa GPS”. Obsługę sprawdzono na wymienionych modelach; pozostałe nie były testowane.</value>
   </data>
   <data name="Welcome_GoPro" xml:space="preserve">
     <value>GoPro</value>
   </data>
   <data name="Welcome_GoProTested" xml:space="preserve">
-    <value>Sprawdzone na HERO12 Black (pliki .MP4 i .LRV). HERO12 nie ma GPS, więc widżety GPS wymagają zewnętrznej trasy FIT lub GPX. Inne modele nie były testowane.</value>
+    <value>Obsługę sprawdzono na HERO12 Black (pliki MP4 i LRV). Ten model nie ma odbiornika GPS. Aby korzystać z widżetów opartych na pozycji i prędkości, dodaj trasę z pliku FIT lub GPX. Inne modele nie były testowane.</value>
   </data>
   <data name="Main_AddToQueue" xml:space="preserve">
     <value>Dodaj do kolejki</value>
@@ -5456,9 +5465,6 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   </data>
   <data name="Welcome_MapPreviewFailedKey" xml:space="preserve">
     <value>Nie udało się wczytać podglądu. Sprawdź połączenie, klucz API i limit kafelków w ArcGIS Location Platform.</value>
-  </data>
-  <data name="Welcome_GpsIndicatorCaption" xml:space="preserve">
-    <value>Wskaźnik GPS w prawym górnym rogu podglądu DJI Mimo (zaznaczony na czerwono) - zacznij nagrywać dopiero, gdy pokaże sygnał.</value>
   </data>
   <data name="MapSource_WithoutKey" xml:space="preserve">
     <value>, bez klucza</value>

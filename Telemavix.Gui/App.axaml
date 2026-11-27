@@ -217,9 +217,6 @@
 			<Setter Property="Background" Value="{StaticResource ControlPressedBrush}" />
 			<Setter Property="BorderBrush" Value="{StaticResource ControlBorderBrush}" />
 		</Style>
-		<Style Selector="ButtonSpinner /template/ RepeatButton#PART_DecreaseButton /template/ ContentPresenter#PART_ContentPresenter">
-			<Setter Property="CornerRadius" Value="0,5,5,0" />
-		</Style>
 		<Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner">
 			<Setter Property="Transitions">
 				<Transitions>

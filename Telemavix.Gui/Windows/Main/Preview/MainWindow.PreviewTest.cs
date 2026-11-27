@@ -35,7 +35,9 @@ public partial class MainWindow
 		bool secondScreen = _fullscreenWindow is null && settings.SecondScreenEnabled && SecondScreenTarget(settings) is not null;
 		string source = _summary.InputPaths.SequenceEqual(testRecording.InputPaths)
 			? Strings.Benchmark_TestRecording
-			: string.Join(", ", _summary.InputPaths.Select(Path.GetFileName));
+			: _trackOnly
+				? Path.GetFileName(_trackOnlyPath!)
+				: string.Join(", ", _summary.InputPaths.Select(Path.GetFileName));
 		TimeSpan position = _previewPosition;
 		bool wasPlaying = _previewPlayer.IsPlaying;
 		bool wasFullscreen = _fullscreenWindow is not null;

@@ -595,7 +595,7 @@ public partial class MainWindow : Window
 		IReadOnlyList<OverlayElement> layout = _overlayPresets.Count > 0
 			? OverlayLayers.Drawn(ActiveElements, ActiveLayers)
 			: OverlayPreset.CreateDefault(OverlayPresetStore.DefaultPresetId, Strings.Benchmark_Title).Elements;
-		var request = new BenchmarkRequest(_summary?.InputPaths[0], layout, _openedPreviewMaxWidth > 0 ? _openedPreviewMaxWidth : 1920);
+		var request = new BenchmarkRequest(_summary?.InputPaths.FirstOrDefault(), layout, _openedPreviewMaxWidth > 0 ? _openedPreviewMaxWidth : 1920);
 		await new BenchmarkWindow(request, _summary?.TotalFrameCount ?? 0, () => _phase == UiPhase.Rendering, RunAppPreviewTestAsync).ShowDialog(owner);
 
 		OverlaySettings after = OverlaySettingsStore.Load();

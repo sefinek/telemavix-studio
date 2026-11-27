@@ -7,6 +7,9 @@ Pull requests are welcome too - bug fixes, new widgets, support for other camera
 
 ![](.github/Telemavix_92X0oT9A.jpg)
 
+## Help test Telemavix GPS 📱
+Telemavix GPS is an Android app that records your route and phone sensor readings as FIT or GPX files, which Telemavix Studio can overlay on your footage. It is in closed alpha and needs testers: **[sign up for the tests](https://sefinek.net/projects/telemavix/closed-alpha-testing)** ([po polsku](https://sefinek.net/pl/projects/telemavix/closed-alpha-testing)). Your routes won't be uploaded to any server.
+
 ## Documentation and downloads
 
 User documentation is maintained on the [Telemavix website](https://sefinek.net/projects/telemavix). [Polska wersja](https://sefinek.net/pl/projects/telemavix).

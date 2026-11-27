@@ -312,6 +312,12 @@ public partial class MainWindow : Window
 		if (startup.SecondScreenEnabled) OpenSecondScreen();
 		ApplyAutoSave(startup.AutoSaveMinutes);
 
+		if (!startup.GpsTestInviteShown)
+		{
+			OverlaySettingsStore.Save(OverlaySettingsStore.Load() with { GpsTestInviteShown = true });
+			await GpsTestInvite.ShowAsync(this);
+		}
+
 		if (openRecording)
 		{
 			await AddInputFilesAsync();

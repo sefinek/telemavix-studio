@@ -25,7 +25,7 @@ public sealed class SettingsPresetTests
 		nameof(OverlaySettings.CacheCleanupDays), nameof(OverlaySettings.LoopByDefault), nameof(OverlaySettings.PreviewShadows),
 		nameof(OverlaySettings.ConfirmCloseWhileRendering), nameof(OverlaySettings.DisableShadows), nameof(OverlaySettings.DebugMode),
 		nameof(OverlaySettings.DjiApiKey), nameof(OverlaySettings.DjiApiNoticeShown), nameof(OverlaySettings.WidgetsHintShown), nameof(OverlaySettings.WorkingAnimation), nameof(OverlaySettings.TrackMap),
-		nameof(OverlaySettings.TrackFormat), nameof(OverlaySettings.CrashReports)
+		nameof(OverlaySettings.TrackFormat), nameof(OverlaySettings.CrashReports), nameof(OverlaySettings.GpsTestInviteShown)
 	];
 
 	[TestMethod]

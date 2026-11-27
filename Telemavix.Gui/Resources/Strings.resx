@@ -5808,4 +5808,18 @@ GPS points: {2} · timer pauses: {3}</value>
   <data name="Sensor_MaxHeartRateFromTrack" xml:space="preserve">
     <value>From the track</value>
   </data>
+  <data name="GpsTestInvite_Title" xml:space="preserve">
+    <value>Help test Telemavix GPS</value>
+  </data>
+  <data name="GpsTestInvite_Message" xml:space="preserve">
+    <value>Telemavix GPS is an Android app that records your route and your phone's sensor readings. You can then overlay the saved FIT or GPX file on a recording in Telemavix Studio.
+
+Closed alpha testing is under way and I'm looking for testers. If you have an Android phone, sign up and let me know what doesn't work or what's missing. Your routes won't be uploaded to any server.</value>
+  </data>
+  <data name="GpsTestInvite_Open" xml:space="preserve">
+    <value>Open the sign-up page</value>
+  </data>
+  <data name="GpsTestInvite_Url" xml:space="preserve">
+    <value>https://sefinek.net/projects/telemavix/closed-alpha-testing</value>
+  </data>
 </root>

@@ -5808,4 +5808,18 @@ Punkty GPS: {2} · przerwy w pomiarze czasu: {3}</value>
   <data name="Sensor_MaxHeartRateFromTrack" xml:space="preserve">
     <value>Z trasy</value>
   </data>
+  <data name="GpsTestInvite_Title" xml:space="preserve">
+    <value>Pomóż przetestować Telemavix GPS</value>
+  </data>
+  <data name="GpsTestInvite_Message" xml:space="preserve">
+    <value>Telemavix GPS to aplikacja na Androida, która nagrywa trasę i odczyty z czujników telefonu. Zapisany plik FIT lub GPX możesz potem nałożyć na nagranie w Telemavix Studio.
+
+Trwają zamknięte testy alpha i szukam testerów. Jeśli masz telefon z Androidem, zapisz się i daj znać, co nie działa lub czego brakuje. Twoje trasy nie zostaną przesłane na jakikolwiek serwer.</value>
+  </data>
+  <data name="GpsTestInvite_Open" xml:space="preserve">
+    <value>Otwórz stronę zapisów</value>
+  </data>
+  <data name="GpsTestInvite_Url" xml:space="preserve">
+    <value>https://sefinek.net/pl/projects/telemavix/closed-alpha-testing</value>
+  </data>
 </root>

@@ -177,7 +177,9 @@ public sealed record OverlaySettings(
 	// The map behind a GPS track viewed with no recording (TrackMapSettings); null = its defaults.
 	TrackMapSettings? TrackMap = null,
 	// The resolution and frame rate last chosen for a GPS track viewed with no recording; null = TrackOnlyFormat.Default.
-	TrackOnlyFormat? TrackFormat = null)
+	TrackOnlyFormat? TrackFormat = null,
+	// The invitation to test Telemavix GPS (GpsTestInvite) is shown once, at startup.
+	bool GpsTestInviteShown = false)
 {
 	/// <summary>Whether the preview draws the widgets' shadows: on in the preview and not turned off everywhere.</summary>
 	[JsonIgnore]

@@ -194,12 +194,19 @@ public static class AppUpdates
 
 				byte[] buffer = new byte[81920];
 				long received = 0;
+				long reportedPercent = 0;
 				int read;
 				while ((read = await source.ReadAsync(buffer, ct)) > 0)
 				{
 					await target.WriteAsync(buffer.AsMemory(0, read), ct);
 					received += read;
-					if (total > 0) progress?.Report((double)received / total);
+					if (total <= 0) continue;
+
+					long percent = received * 100 / total;
+					if (percent == reportedPercent) continue;
+
+					reportedPercent = percent;
+					progress?.Report((double)received / total);
 				}
 			}
 

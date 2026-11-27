@@ -1718,17 +1718,14 @@ Each category lists up to three moments with extreme values. You can jump to a m
 
 Open the download page?
 
-Cancel asks again on the next start. "Skip this update" stops the reminders about this version - you can still find it in Settings &gt; About.</value>
-  </data>
-  <data name="Main_SkipUpdate" xml:space="preserve">
-    <value>Skip this update</value>
+Cancel asks again on the next start.</value>
   </data>
   <data name="Main_UpdateAvailableInstall" xml:space="preserve">
     <value>Telemavix Studio {0} is available. You are currently using version {1}.
 
 Install the update now? The app will download the installer, close for installation and then restart.
 
-Cancel asks again on the next start. "Skip this update" stops the reminders about this version - you can still find it in Settings &gt; About.</value>
+Cancel asks again on the next start.</value>
   </data>
   <data name="Main_UpdateAvailableTitle" xml:space="preserve">
     <value>Update available</value>

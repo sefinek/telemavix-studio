@@ -37,7 +37,8 @@ internal static class AppUpdateFlow
 
 		try
 		{
-			onStatus(string.Format(Strings.AppUpdate_Downloading, release.Version));
+			AppLogger.FileOnly(string.Format(Strings.AppUpdate_Downloading, release.Version));
+			onDownload(0);
 			string installer = await AppUpdates.DownloadInstallerAsync(release.Installer!, new Progress<double>(onDownload), CancellationToken.None);
 			onStatus(Strings.AppUpdate_StartingInstaller);
 			AppUpdates.StartInstaller(installer);

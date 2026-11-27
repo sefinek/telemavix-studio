@@ -1718,17 +1718,14 @@ W każdej kategorii znajdziesz do trzech momentów ze skrajnymi wartościami. Mo
 
 Otworzyć stronę pobierania?
 
-Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. Wybierz „Pomiń aktualizację”, jeśli nie chcesz więcej przypomnień o tej wersji - nadal znajdziesz ją w sekcji Ustawienia &gt; O programie.</value>
-  </data>
-  <data name="Main_SkipUpdate" xml:space="preserve">
-    <value>Pomiń aktualizację</value>
+Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu.</value>
   </data>
   <data name="Main_UpdateAvailableInstall" xml:space="preserve">
     <value>Dostępna jest wersja {0} Telemavix Studio. Obecnie używasz wersji {1}.
 
 Zainstalować aktualizację teraz? Aplikacja pobierze instalator, zamknie się na czas instalacji, a następnie uruchomi ponownie.
 
-Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu. Wybierz „Pomiń aktualizację”, jeśli nie chcesz więcej przypomnień o tej wersji - nadal znajdziesz ją w sekcji Ustawienia &gt; O programie.</value>
+Jeśli anulujesz, aplikacja zapyta o to ponownie przy następnym uruchomieniu.</value>
   </data>
   <data name="Main_UpdateAvailableTitle" xml:space="preserve">
     <value>Dostępna aktualizacja</value>

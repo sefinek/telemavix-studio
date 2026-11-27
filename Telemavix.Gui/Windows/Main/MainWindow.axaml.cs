@@ -225,11 +225,7 @@ public partial class MainWindow : Window
 		_previewPlayer.PlaybackStopped += OnPreviewPlaybackStopped;
 		// Map tile progress arrives from thread-pool threads (see OverlayRenderer.BuildMapMosaicAsync).
 		_previewPlayer.Message += message => Dispatcher.UIThread.Post(() => AppendLog(message));
-		_previewPlayer.MapStatus += message => Dispatcher.UIThread.Post(() =>
-		{
-			LogBox.AppendLogLine(LogScroll, message, statusKey: "map");
-			_secondScreen?.AppendLog(message, LogLevel.Info, statusKey: "map");
-		});
+		_previewPlayer.MapStatus += message => Dispatcher.UIThread.Post(() => ShowStatusLine(message, "map"));
 		_previewPlayer.MapDownloadProgress += share => Dispatcher.UIThread.Post(() => ShowMapDownload(share));
 
 		// See AppLogger.Notified. AppendLogLine (not AppendLog) doesn't log again - the raising call already did.
@@ -344,28 +340,30 @@ public partial class MainWindow : Window
 
 	/// <summary>
 	///     After the startup update check (UpdateChecks, which logs every result - dependency updates are left to Settings'
-	///     About tab): asks about a new version of the app, unless this one was declined before.
+	///     About tab): asks about a new version of the app.
 	/// </summary>
 	private async Task OfferAppUpdateAsync(UpdateCheckResult check)
 	{
 		if (!check.AppUpdateAvailable) return;
 
 		AppRelease release = check.App!;
-		OverlaySettings settings = OverlaySettingsStore.Load();
-		if (settings.SkippedAppUpdate == release.Version.ToString()) return;
-
 		bool canInstall = AppUpdates.CanUpdateInPlace(release);
-		DialogChoice choice = await ConfirmDialog.AskOrSkipAsync(this, Strings.Main_UpdateAvailableTitle,
+		bool confirmed = await ConfirmDialog.AskAsync(this, Strings.Main_UpdateAvailableTitle,
 			string.Format(canInstall ? Strings.Main_UpdateAvailableInstall : Strings.Main_UpdateAvailableDownload,
 				release.Version, AppUpdates.CurrentVersionLabel),
-			canInstall ? Strings.Main_Update : Strings.Main_OpenGitHub, Strings.Main_SkipUpdate, DialogKind.Info);
-		if (choice == DialogChoice.Skip) OverlaySettingsStore.Save(settings with { SkippedAppUpdate = release.Version.ToString() });
-		if (choice != DialogChoice.Confirm) return;
+			canInstall ? Strings.Main_Update : Strings.Main_OpenGitHub, DialogKind.Info);
+		if (!confirmed) return;
 
 		TaskbarProgress.SetState(this, TaskbarProgress.State.Normal);
 		bool updating = await AppUpdateFlow.UpdateAsync(this, release, () => _phase == UiPhase.Rendering, status => AppendLog(status),
-			share => TaskbarProgress.SetValue(this, (ulong)(share * 1000), 1000), false);
+			share => ShowUpdateDownload(release, share), false);
 		if (!updating) TaskbarProgress.SetState(this, TaskbarProgress.State.NoProgress);
+	}
+
+	private void ShowUpdateDownload(AppRelease release, double share)
+	{
+		ShowStatusLine(string.Format(Strings.Settings_Downloading, release.Version, share * 100), "app-update");
+		TaskbarProgress.SetValue(this, (ulong)(share * 1000), 1000);
 	}
 
 	private async void OnAddInputFilesClick(object? sender, RoutedEventArgs e)
@@ -746,6 +744,13 @@ public partial class MainWindow : Window
 		LogBox.AppendLogLine(LogScroll, message, level, details, statusKey);
 		_secondScreen?.AppendLog(message, level, details, statusKey);
 		AppLogger.FileOnly(fileMessage ?? message);
+	}
+
+	/// <summary>A line of the LOG panels rewritten in place by every later one with the same key; not written to the file log.</summary>
+	private void ShowStatusLine(string message, string statusKey)
+	{
+		LogBox.AppendLogLine(LogScroll, message, statusKey: statusKey);
+		_secondScreen?.AppendLog(message, LogLevel.Info, statusKey: statusKey);
 	}
 
 	private void AppendLogPath(string format, string path, LogLevel level = LogLevel.Info)

@@ -16,7 +16,7 @@ public sealed class SettingsPresetTests
 		nameof(OverlaySettings.CustomMapCreditBriefly), nameof(OverlaySettings.ShowEsriMapLabels), nameof(OverlaySettings.PreviewSnapToGrid),
 		nameof(OverlaySettings.PreviewTimeFormat), nameof(OverlaySettings.PreviewTimelineExpanded), nameof(OverlaySettings.PreviewAudioMuted),
 		nameof(OverlaySettings.PreviewAudioVolume), nameof(OverlaySettings.PreviewGridMode), nameof(OverlaySettings.HardwareDecoding),
-		nameof(OverlaySettings.RenderFpsHistory), nameof(OverlaySettings.SkippedAppUpdate), nameof(OverlaySettings.InterfaceScale),
+		nameof(OverlaySettings.RenderFpsHistory), nameof(OverlaySettings.InterfaceScale),
 		nameof(OverlaySettings.UiLanguage), nameof(OverlaySettings.AppTheme), nameof(OverlaySettings.RestoreWindowPlacement),
 		nameof(OverlaySettings.MainWindowPlacement), nameof(OverlaySettings.LayerRowsVisible), nameof(OverlaySettings.SourcePanelWidth),
 		nameof(OverlaySettings.OverlayPanelWidth), nameof(OverlaySettings.LogHeight), nameof(OverlaySettings.TimelineHeight),

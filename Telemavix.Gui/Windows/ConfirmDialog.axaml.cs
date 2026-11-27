@@ -111,7 +111,7 @@ public partial class ConfirmDialog : Window
 
 	/// <summary>
 	///     Like AskAsync with a third button that closes the dialog too: Cancel and the window's X are both
-	///     <see cref="DialogChoice.Cancel" />, so a caller can tell "not now" from an explicit "never".
+	///     <see cref="DialogChoice.Cancel" />, so a caller can tell backing out from the third choice.
 	/// </summary>
 	public static async Task<DialogChoice> AskOrSkipAsync(Window owner, string title, string message, string confirmText, string skipText,
 		DialogKind kind = DialogKind.Neutral)

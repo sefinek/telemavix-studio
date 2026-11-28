@@ -37,7 +37,7 @@ Projects in `Telemavix.slnx` (net10.0):
 
 ## Microsoft Store
 
-- `Telemavix.Build` packs the Windows self-contained folders into `Telemavix-<v>-store.msixupload` (x64 + arm64 bundle, unsigned - the Store signs it). It needs the Windows SDK and a version without a prerelease suffix or a fourth number, else it's skipped.
+- `Telemavix.Build` packs the Windows self-contained folders into `Telemavix-<v>-store.msixupload` (x64 + arm64 bundle, unsigned - the Store signs it). It needs the Windows SDK and a version without a prerelease suffix or a fourth number, else it's skipped. It's never a release asset (unsigned, nobody can install it): `release.yml` keeps it as the `store-package` artifact for 30 days (so a release run fails without it), and it's left out of `SHA256SUMS`.
 - `Telemavix.Build/Store/AppxManifest.xml`: `Identity` and `PublisherDisplayName` are Partner Center's Product identity, never change them; the Store ID is in `AppPackage.StorePageUrl`. `resources.pri` indexes `Store/Assets` only.
 - The Store copy is told by `AppPackage.IsPackaged`: no GitHub update check, no `.ovproj` switches (the manifest associates it), the switched-off dialog links to the Store. Anything new that writes to the app's folder or the registry, or updates the app, has to ask it.
 - A `TELEMAVIX_MIN_VERSION` above the version live in the Store locks those users out until certification passes - don't set one.

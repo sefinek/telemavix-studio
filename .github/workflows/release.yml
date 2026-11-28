@@ -91,9 +91,19 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: packages
-          path: artifacts/Telemavix-*
+          path: |
+            artifacts/Telemavix-*
+            !artifacts/Telemavix-*.msixupload
           if-no-files-found: error
           retention-days: 1
+
+      - name: Upload the Microsoft Store package
+        uses: actions/upload-artifact@v7
+        with:
+          name: store-package
+          path: artifacts/Telemavix-*.msixupload
+          if-no-files-found: error
+          retention-days: 30
 
   verify:
     name: Start the package (${{ matrix.os }})

@@ -121,10 +121,11 @@ try
 	foreach (string rid in rids)
 	foreach (Flavor flavor in flavors)
 		produced.AddRange(Package(rid, flavor));
-	if (storePackages.Count > 0) produced.Add(WriteStoreUpload());
 
 	List<string> files = [.. produced.Where(File.Exists)];
 	if (files.Count > 0) WriteChecksums(files);
+	// After the checksums: they list what a release offers for download, and the Store upload only goes to Partner Center.
+	if (storePackages.Count > 0) produced.Add(WriteStoreUpload());
 
 	Console.WriteLine($"\nDone in {stopwatch.Elapsed:mm\\:ss}:");
 	foreach (string path in produced)

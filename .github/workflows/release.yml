@@ -52,6 +52,18 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
+      - name: Read the release notes
+        shell: pwsh
+        run: ./Telemavix.Build/Get-ReleaseNotes.ps1 -Version '${{ steps.version.outputs.version }}' | Set-Content "$env:RUNNER_TEMP\release-notes.md" -Encoding utf8NoBOM
+
+      - name: Upload the release notes
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-notes
+          path: ${{ runner.temp }}/release-notes.md
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
@@ -153,6 +165,11 @@ jobs:
           name: packages
           path: packages
 
+      - name: Download the release notes
+        uses: actions/download-artifact@v8
+        with:
+          name: release-notes
+
       - name: Create draft release
         shell: bash
         env:
@@ -160,4 +177,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.build.outputs.tag }}
           VERSION: ${{ needs.build.outputs.version }}
-        run: gh release create "$TAG" packages/Telemavix-* --draft --target "$GITHUB_SHA" --title "Telemavix Studio $VERSION" --generate-notes
+        run: gh release create "$TAG" packages/Telemavix-* --draft --target "$GITHUB_SHA" --title "Telemavix Studio $VERSION" --notes-file release-notes.md --generate-notes

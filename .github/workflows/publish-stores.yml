@@ -1,0 +1,60 @@
+name: Publish to stores
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, e.g. v1.2.3
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  WINGETCREATE_URL: https://github.com/microsoft/winget-create/releases/download/v1.28.1.0/wingetcreate.exe
+  WINGETCREATE_SHA256: 63d980ba79e97042395bd6eb5992c2db9e01e9e7a8a22958a95c288f27310413
+
+jobs:
+  winget:
+    name: Submit to winget
+    runs-on: windows-latest
+    timeout-minutes: 15
+    if: ${{ !github.event.release.prerelease }}
+    environment: stores
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Write the manifests
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $manifests = Join-Path $env:RUNNER_TEMP 'manifests'
+          ./Telemavix.Build/Winget/New-Manifests.ps1 -Tag $env:TAG -OutputDirectory $manifests
+          Get-ChildItem $manifests | ForEach-Object { "=== $($_.Name)"; Get-Content $_.FullName -Encoding utf8 }
+
+      - name: Submit the pull request
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          $tool = Join-Path $env:RUNNER_TEMP 'wingetcreate.exe'
+          Invoke-WebRequest $env:WINGETCREATE_URL -OutFile $tool
+          if ((Get-FileHash $tool -Algorithm SHA256).Hash -ne $env:WINGETCREATE_SHA256) { throw 'wingetcreate download hash mismatch' }
+          gh api repos/microsoft/winget-pkgs/contents/manifests/s/Sefinek/TelemavixStudio --silent 2>$null
+          $kind = if ($LASTEXITCODE -eq 0) { 'New version' } else { 'New package' }
+          $title = "${kind}: Sefinek.TelemavixStudio version $($env:TAG -replace '^v')"
+          & $tool submit --prtitle $title --no-open (Join-Path $env:RUNNER_TEMP 'manifests')
+          if ($LASTEXITCODE -ne 0) { throw "wingetcreate exited with code $LASTEXITCODE" }

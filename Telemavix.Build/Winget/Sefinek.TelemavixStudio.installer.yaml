@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: Sefinek.TelemavixStudio
+PackageVersion: __VERSION__
+InstallerType: inno
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+UpgradeBehavior: install
+FileExtensions:
+- ovproj
+ProductCode: '{285212C3-78F8-4A92-AE19-52D33596D266}_is1'
+ReleaseDate: __RELEASE_DATE__
+InstallationMetadata:
+  DefaultInstallLocation: '%LocalAppData%\Programs\Telemavix Studio'
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/sefinek/telemavix-studio/releases/download/v__VERSION__/Telemavix-__VERSION__-win-x64-setup.exe
+  InstallerSha256: __SHA256_X64__
+- Architecture: arm64
+  InstallerUrl: https://github.com/sefinek/telemavix-studio/releases/download/v__VERSION__/Telemavix-__VERSION__-win-arm64-setup.exe
+  InstallerSha256: __SHA256_ARM64__
+ManifestType: installer
+ManifestVersion: 1.28.0

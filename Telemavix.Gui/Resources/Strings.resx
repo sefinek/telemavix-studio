@@ -2702,6 +2702,12 @@ Free up space or choose a folder on another drive. Rendering will fail if the dr
   <data name="Settings_Repository" xml:space="preserve">
     <value>Repository</value>
   </data>
+  <data name="Settings_Website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="Settings_WebsiteUrl" xml:space="preserve">
+    <value>https://sefinek.net/projects/telemavix</value>
+  </data>
   <data name="Settings_RouteIntro" xml:space="preserve">
     <value>Route intro</value>
   </data>

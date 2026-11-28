@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2
+
+1. The LOG panel now shows the progress of an app update download.
+2. Removed the "Skip this update" option. The app now offers an available update at every startup.
+3. Added a link to the program's website in Settings > About.
+4. Prepared the app for publishing in the Microsoft Store and winget.
+
 ## 0.6.1
 
 1. Fixed crashes when exporting telemetry or opening the performance test while viewing a GPS track without a recording.

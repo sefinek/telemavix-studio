@@ -931,6 +931,12 @@
 					<Border Classes="settingsCard">
 						<StackPanel>
 							<Grid Classes="settingRow" ColumnDefinitions="Auto,*">
+								<TextBlock Text="{x:Static local:Strings.Settings_Website}" Classes="rowTitle" Width="110" />
+								<TextBlock Grid.Column="1" Text="{x:Static local:Strings.Settings_WebsiteUrl}" Classes="link"
+								           Tag="{x:Static local:Strings.Settings_WebsiteUrl}" PointerPressed="OnLinkClick" />
+							</Grid>
+							<Border Classes="divider" />
+							<Grid Classes="settingRow" ColumnDefinitions="Auto,*">
 								<TextBlock Text="{x:Static local:Strings.Settings_Author}" Classes="rowTitle" Width="110" />
 								<StackPanel Grid.Column="1" Orientation="Horizontal">
 									<TextBlock Text="Sefinek &lt;" />

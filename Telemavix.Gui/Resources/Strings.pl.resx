@@ -2702,6 +2702,12 @@ Zwolnij miejsce lub wybierz folder na innym dysku. Jeśli zabraknie miejsca, ren
   <data name="Settings_Repository" xml:space="preserve">
     <value>Repozytorium</value>
   </data>
+  <data name="Settings_Website" xml:space="preserve">
+    <value>Strona</value>
+  </data>
+  <data name="Settings_WebsiteUrl" xml:space="preserve">
+    <value>https://sefinek.net/pl/projects/telemavix</value>
+  </data>
   <data name="Settings_RouteIntro" xml:space="preserve">
     <value>Wstęp z trasą</value>
   </data>

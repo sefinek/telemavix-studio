@@ -79,6 +79,7 @@ public partial class WelcomeWindow : Window
 		ShowUnits(settings.MeasurementUnits ?? UnitPreferences.ForCurrentRegion());
 		UnitsSuggestionHint.IsVisible = settings.MeasurementUnits is null;
 
+		ProjectAssociationCheck.IsVisible = !AppPackage.IsPackaged;
 		ProjectAssociationCheck.IsEnabled = ProjectFileAssociation.IsSupported;
 		ProjectAssociationCheck.Classes.Set("muted", !ProjectFileAssociation.IsSupported);
 		ProjectAssociationCheck.IsChecked = ProjectFileAssociation.IsSupported && ProjectFileAssociation.IsRegistered();

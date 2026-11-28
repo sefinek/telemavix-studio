@@ -1,11 +1,12 @@
 using System.Text.Json;
+using Telemavix.Core;
 using Telemavix.Core.Dependencies;
 using Telemavix.Core.Logging;
 using Telemavix.Core.Updates;
 
 namespace Telemavix.Gui;
 
-/// <param name="App">The latest release, null when none is published or the check failed (AppCheckFailed).</param>
+/// <param name="App">The latest release, null when none is published, the check failed (AppCheckFailed) or the Store updates this copy.</param>
 /// <param name="Dependencies">Every required tool, installed or not.</param>
 internal sealed record UpdateCheckResult(AppRelease? App, bool AppCheckFailed, IReadOnlyList<ToolVersionInfo> Dependencies)
 {
@@ -41,6 +42,8 @@ internal static class UpdateChecks
 
 	private static async Task<(AppRelease?, bool)> CheckAppAsync()
 	{
+		if (AppPackage.IsPackaged) return (null, false);
+
 		try
 		{
 			return (await AppUpdates.GetLatestAsync(CancellationToken.None), false);

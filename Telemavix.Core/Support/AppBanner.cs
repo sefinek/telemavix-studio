@@ -9,10 +9,12 @@ public static class AppBanner
 {
 	public static IReadOnlyList<string> BuildLines(string appLabel)
 	{
-		return
+		List<string> lines =
 		[
 			string.Format(CoreStrings.AppBanner_Version, AppUpdates.CurrentVersionLabel, appLabel, BuildInfo.Describe()),
 			$"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}, .NET {Environment.Version}"
 		];
+		if (AppPackage.IsPackaged) lines.Add(CoreStrings.AppBanner_Store);
+		return lines;
 	}
 }

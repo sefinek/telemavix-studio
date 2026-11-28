@@ -35,6 +35,13 @@ Projects in `Telemavix.slnx` (net10.0):
 - **Remote switch-off** (`RemoteAccess`, `RemoteAccessFlow`; API: `/api/v2/telemavix/access` in api.sefinek.net, `TELEMAVIX_MIN_VERSION`): a version below the minimum doesn't run. Off while the server sets none. The answer is ECDSA P-256 signed and checked against the key built into `RemoteAccess` (`RemoteAccess.PublicKeys`: the one in use and a spare whose private half is kept offline; rotate by putting the spare's private key in the API's `TELEMAVIX_SIGNING_KEY`. Removing or replacing a built-in key breaks every released copy's check). An answer older than the kept one is refused (replay). The API refuses a minimum above the newest GitHub release. The GUI asks again every 6 h and closes only after a render in progress. Fails open: no answer, a bad signature or no network never blocks; a block seen once is kept in `access.json` and acts offline. GUI at start (`MainWindow`), CLI before any work; the smoke test returns before it. Don't make a failing check block, and don't add a setting or env var to skip it.
 - In-app update (`AppUpdates`) only for a copy installed by the setup (`CanUpdateInPlace`); the installer asset is checked against its SHA-256. A stable copy asks GitHub for `releases/latest`, a prerelease one for the whole list (`latest` never returns a prerelease, so a beta would never see the next beta). `UpdateChecks` is the one check, once at startup. Its dialog has no way to skip a version: Cancel asks again on the next start (don't add one).
 
+## Microsoft Store
+
+- `Telemavix.Build` packs the Windows self-contained folders into `Telemavix-<v>-store.msixupload` (x64 + arm64 bundle, unsigned - the Store signs it). It needs the Windows SDK and a version without a prerelease suffix or a fourth number, else it's skipped.
+- `Telemavix.Build/Store/AppxManifest.xml`: `Identity` and `PublisherDisplayName` are Partner Center's Product identity, never change them; the Store ID is in `AppPackage.StorePageUrl`. `resources.pri` indexes `Store/Assets` only.
+- The Store copy is told by `AppPackage.IsPackaged`: no GitHub update check, no `.ovproj` switches (the manifest associates it), the switched-off dialog links to the Store. Anything new that writes to the app's folder or the registry, or updates the app, has to ask it.
+- A `TELEMAVIX_MIN_VERSION` above the version live in the Store locks those users out until certification passes - don't set one.
+
 ## Dependencies (external)
 
 - FFmpeg is required as `ffmpeg`/`ffprobe` and as shared libraries matching `FFmpeg.AutoGen`'s major (the preview decodes in-process). The executables start from the install the libraries come from (`DependencyChecker.FromFfmpegLibraryFolder`).

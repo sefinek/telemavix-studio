@@ -8,7 +8,8 @@ namespace Telemavix.Gui.Native;
 /// <summary>
 ///     Makes Windows open .ovproj files with this app: the extension and its ProgID under HKCU\Software\Classes, no admin
 ///     rights needed. The installer writes the same keys (ProgId and the command line must match Telemavix.iss). Does
-///     nothing off Windows, or when the app runs through the dotnet muxer (no executable of its own to point at).
+///     nothing off Windows, when the app runs through the dotnet muxer (no executable of its own to point at), or in the
+///     Store copy (AppPackage), whose manifest declares the association.
 /// </summary>
 internal static partial class ProjectFileAssociation
 {
@@ -64,6 +65,8 @@ internal static partial class ProjectFileAssociation
 
 	private static string? CurrentExecutable()
 	{
+		if (AppPackage.IsPackaged) return null;
+
 		(string path, string[] args) = AppCommand.Current();
 		return args.Length == 0 ? path : null;
 	}

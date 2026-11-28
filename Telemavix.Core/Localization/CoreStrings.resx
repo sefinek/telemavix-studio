@@ -18,6 +18,9 @@
   <data name="AppBanner_Version" xml:space="preserve">
     <value>Telemavix Studio {0} ({1}), build {2}</value>
   </data>
+  <data name="AppBanner_Store" xml:space="preserve">
+    <value>The Microsoft Store version comes as an MSIX package. Updates may appear in the Store a few days after release. If you want to get updates sooner, you can download the app directly from its developer. The choice is yours. https://sefinek.net/projects/telemavix</value>
+  </data>
   <data name="Preview_MapReady" xml:space="preserve">
     <value>Map: ready</value>
   </data>

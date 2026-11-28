@@ -54,6 +54,12 @@
   <data name="RemoteAccess_Repository" xml:space="preserve">
     <value>Repository</value>
   </data>
+  <data name="RemoteAccess_Store" xml:space="preserve">
+    <value>Microsoft Store</value>
+  </data>
+  <data name="Settings_UpdatedByStore" xml:space="preserve">
+    <value>The Microsoft Store updates this copy.</value>
+  </data>
   <data name="RemoteAccess_Title" xml:space="preserve">
     <value>This version has been switched off</value>
   </data>

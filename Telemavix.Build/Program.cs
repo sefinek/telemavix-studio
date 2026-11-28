@@ -16,6 +16,7 @@ const string usage = """
                        --no-archive          Keep the published folders instead of zip/tar.gz archives
                        --no-installer        Don't build the Windows installers
                        --iscc <path>         Inno Setup 7 compiler (default: found in Program Files or on PATH)
+                       --no-store            Don't build the Microsoft Store upload (needs the Windows SDK)
                      """;
 
 string[] defaultRids = ["win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64"];
@@ -28,6 +29,7 @@ bool skipTests = false;
 bool archive = true;
 bool installer = true;
 string? isccArg = null;
+bool store = true;
 
 for (int i = 0; i < args.Length; i++)
 {
@@ -69,6 +71,9 @@ for (int i = 0; i < args.Length; i++)
 		case "--iscc":
 			isccArg = Value();
 			break;
+		case "--no-store":
+			store = false;
+			break;
 		case "-h" or "--help":
 			Console.WriteLine(usage);
 			return 0;
@@ -94,7 +99,17 @@ string? iscc = installer && rids.Any(r => InstallerArchitecture(r) is not null) 
 if (installer && iscc is null && rids.Any(r => InstallerArchitecture(r) is not null) && flavors.Contains(Flavor.SelfContained))
 	Console.WriteLine("Inno Setup 7 (ISCC.exe) not found - skipping the Windows installers. Pass --iscc <path> or --no-installer.");
 
-Console.WriteLine($"Telemavix Studio {displayVersion}: {string.Join(", ", rids)} ({string.Join(", ", flavors.Select(Suffix))}) -> {outputDir}");
+string? storeVersion = StoreVersion(version);
+string? sdkTools = null;
+if (store && flavors.Contains(Flavor.SelfContained) && rids.Any(r => StoreArchitecture(r) is not null))
+{
+	if (storeVersion is null) Console.WriteLine($"The Microsoft Store takes no version like {version} - skipping its package.");
+	else if ((sdkTools = FindSdkTools()) is null) Console.WriteLine("Windows SDK (makeappx.exe) not found - skipping the Microsoft Store package.");
+}
+
+List<string> storePackages = [];
+
+Console.WriteLine($"Telemavix Studio {displayVersion}:{string.Join(", ", rids)} ({string.Join(", ", flavors.Select(Suffix))}) -> {outputDir}");
 var stopwatch = Stopwatch.StartNew();
 
 try
@@ -106,6 +121,7 @@ try
 	foreach (string rid in rids)
 	foreach (Flavor flavor in flavors)
 		produced.AddRange(Package(rid, flavor));
+	if (storePackages.Count > 0) produced.Add(WriteStoreUpload());
 
 	List<string> files = [.. produced.Where(File.Exists)];
 	if (files.Count > 0) WriteChecksums(files);
@@ -162,6 +178,9 @@ List<string> Package(string rid, Flavor flavor)
 		produced.Add(installerPath);
 	}
 
+	if (sdkTools is not null && flavor == Flavor.SelfContained && StoreArchitecture(rid) is { } architecture)
+		storePackages.Add(PackStore(architecture, packageDir));
+
 	if (!archive) return [packageDir, .. produced];
 
 	if (isWindows) ZipFile.CreateFromDirectory(packageDir, archivePath, CompressionLevel.SmallestSize, true);
@@ -178,6 +197,90 @@ static string? InstallerArchitecture(string rid)
 		"win-arm64" => "arm64",
 		_ => null
 	};
+}
+
+static string? StoreArchitecture(string rid)
+{
+	return rid switch
+	{
+		"win-x64" => "x64",
+		"win-arm64" => "arm64",
+		_ => null
+	};
+}
+
+// A package's version has four numbers, and the Store keeps the last one for itself.
+static string? StoreVersion(string version)
+{
+	return Version.TryParse(version, out Version? parsed) && parsed is { Build: >= 0, Revision: <= 0 }
+		? $"{parsed.Major}.{parsed.Minor}.{parsed.Build}.0"
+		: null;
+}
+
+static string? FindSdkTools()
+{
+	if (!OperatingSystem.IsWindows()) return null;
+
+	string bin = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Windows Kits", "10", "bin");
+	if (!Directory.Exists(bin)) return null;
+
+	return Directory.GetDirectories(bin)
+		.OrderByDescending(d => Version.TryParse(Path.GetFileName(d), out Version? v) ? v : new Version())
+		.Select(d => Path.Combine(d, "x64"))
+		.FirstOrDefault(d => File.Exists(Path.Combine(d, "makeappx.exe")) && File.Exists(Path.Combine(d, "makepri.exe")));
+}
+
+string PackStore(string architecture, string packageDir)
+{
+	Console.WriteLine($"=== Microsoft Store package ({architecture})");
+
+	string source = Path.Combine(root, "Telemavix.Build", "Store");
+	string workDir = Path.Combine(buildDir, "store", architecture);
+	string layout = Path.Combine(workDir, "layout");
+	string resources = Path.Combine(workDir, "resources");
+	CopyDirectory(packageDir, layout);
+	CopyDirectory(Path.Combine(source, "Assets"), Path.Combine(layout, "Assets"));
+	CopyDirectory(Path.Combine(source, "Assets"), Path.Combine(resources, "Assets"));
+
+	string manifest = Path.Combine(layout, "AppxManifest.xml");
+	File.WriteAllText(manifest, File.ReadAllText(Path.Combine(source, "AppxManifest.xml"))
+		.Replace("__VERSION__", storeVersion)
+		.Replace("__ARCHITECTURE__", architecture));
+
+	// Only the logos are indexed: makepri would read the published .NET language folders as resource qualifiers.
+	string priConfig = Path.Combine(workDir, "priconfig.xml");
+	string makepri = Path.Combine(sdkTools!, "makepri.exe");
+	Run(makepri, "createconfig", "/cf", priConfig, "/dq", "en-US", "/o");
+	XDocument config = XDocument.Load(priConfig);
+	config.Descendants("packaging").Remove();
+	config.Save(priConfig);
+	Run(makepri, "new", "/pr", resources, "/cf", priConfig, "/mn", manifest, "/of", Path.Combine(layout, "resources.pri"), "/o");
+
+	string package = Path.Combine(buildDir, "store", "packages", $"Telemavix-{displayVersion}-{architecture}.msix");
+	Directory.CreateDirectory(Path.GetDirectoryName(package)!);
+	Run(Path.Combine(sdkTools!, "makeappx.exe"), "pack", "/d", layout, "/p", package, "/o");
+	return package;
+}
+
+// Partner Center takes one .msixupload: a zip with the bundle of every architecture's package. The Store signs it.
+string WriteStoreUpload()
+{
+	string bundle = Path.Combine(buildDir, "store", $"Telemavix-{displayVersion}.msixbundle");
+	Run(Path.Combine(sdkTools!, "makeappx.exe"), "bundle", "/d", Path.GetDirectoryName(storePackages[0])!, "/p", bundle, "/bv", storeVersion!, "/o");
+
+	string upload = Path.Combine(outputDir, $"Telemavix-{displayVersion}-store.msixupload");
+	using ZipArchive zip = ZipFile.Open(upload, ZipArchiveMode.Create);
+	zip.CreateEntryFromFile(bundle, Path.GetFileName(bundle), CompressionLevel.NoCompression);
+	return upload;
+}
+
+static void CopyDirectory(string source, string destination)
+{
+	Directory.CreateDirectory(destination);
+	foreach (string file in Directory.GetFiles(source))
+		File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+	foreach (string directory in Directory.GetDirectories(source))
+		CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
 }
 
 string? FindIscc()

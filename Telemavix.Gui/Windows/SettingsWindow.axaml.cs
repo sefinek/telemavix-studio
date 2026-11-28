@@ -255,6 +255,7 @@ public partial class SettingsWindow : Window
 		ConfirmCloseWhileRenderingCheck.IsChecked = settings.ConfirmCloseWhileRendering;
 		DebugModeCheck.IsChecked = settings.DebugMode;
 		DjiApiKeyBox.Text = settings.DjiApiKey;
+		ProjectFilesGroup.IsVisible = !AppPackage.IsPackaged;
 		ProjectFilesGroup.IsEnabled = ProjectFileAssociation.IsSupported;
 		ProjectFilesGroup.Classes.Set("muted", !ProjectFileAssociation.IsSupported);
 		ShowProjectAssociation();
@@ -518,6 +519,12 @@ public partial class SettingsWindow : Window
 		if (result.AppCheckFailed)
 		{
 			AppUpdateText.Text = Strings.Settings_UpdateCheckFailed;
+			return;
+		}
+
+		if (AppPackage.IsPackaged)
+		{
+			AppUpdateText.Text = Strings.Settings_UpdatedByStore;
 			return;
 		}
 

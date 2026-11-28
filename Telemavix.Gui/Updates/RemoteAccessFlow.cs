@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Telemavix.Core;
 using Telemavix.Core.Logging;
 using Telemavix.Core.Updates;
 
@@ -69,7 +70,8 @@ internal static class RemoteAccessFlow
 			kind: DialogKind.Danger,
 			secondaryText: url is null ? null : Strings.RemoteAccess_Open,
 			onSecondary: url is null ? null : () => AppUpdateFlow.OpenInBrowser(url),
-			extraText: Strings.RemoteAccess_Repository, onExtra: () => AppUpdateFlow.OpenInBrowser(AppUpdates.RepositoryUrl));
+			extraText: AppPackage.IsPackaged ? Strings.RemoteAccess_Store : Strings.RemoteAccess_Repository,
+			onExtra: () => AppUpdateFlow.OpenInBrowser(AppPackage.IsPackaged ? AppPackage.StorePageUrl : AppUpdates.RepositoryUrl));
 		(Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
 	}
 }

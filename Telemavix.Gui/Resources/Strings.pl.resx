@@ -54,6 +54,12 @@
   <data name="RemoteAccess_Repository" xml:space="preserve">
     <value>Repozytorium</value>
   </data>
+  <data name="RemoteAccess_Store" xml:space="preserve">
+    <value>Microsoft Store</value>
+  </data>
+  <data name="Settings_UpdatedByStore" xml:space="preserve">
+    <value>Tę kopię aktualizuje Microsoft Store.</value>
+  </data>
   <data name="RemoteAccess_Title" xml:space="preserve">
     <value>Ta wersja została wyłączona</value>
   </data>
